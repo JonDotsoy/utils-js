@@ -1,7 +1,7 @@
 {
   "name": "@jondotsoy/utils-js",
   "description": "Some utilities to js",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "module": "./libs/esm/index.js",
   "type": "module",
   "typesVersions": {
@@ -38,5 +38,9 @@
   },
   "files": [
     "libs"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JonDotsoy/utils-js.git"
+  }
 }
