@@ -1,0 +1,42 @@
+{
+  "name": "@jondotsoy/utils-js",
+  "description": "Some utilities to js",
+  "version": "0.0.3",
+  "module": "./libs/esm/index.js",
+  "type": "module",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./libs/types/*"
+      ]
+    }
+  },
+  "exports": {
+    ".": {
+      "import": "./libs/esm/index.js",
+      "types": "./libs/types/index.d.ts"
+    },
+    "./visit": {
+      "import": "./libs/esm/visit/visit.js",
+      "types": "./libs/types/visit/visit.d.ts"
+    },
+    "./get": {
+      "import": "./libs/esm/get/get.js",
+      "types": "./libs/types/get/get.d.ts"
+    }
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "prettier": "^3.3.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "fmt": "prettier -w .",
+    "prepack": "make build"
+  },
+  "files": [
+    "libs"
+  ]
+}
