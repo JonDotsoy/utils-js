@@ -65,8 +65,8 @@ get(obj, ...paths);
 
 ```ts
 const obj = { key: { key: { a: 1, b: 2 } } };
-get(obj, "key", "key"); // { a: 1, b: 2 }
+get(obj, "key", "key"); // <unknown> { a: 1, b: 2 }
 
 const obj = { key: { key: { a: 1, b: 2 } } };
-get.record(obj, "key", "key"); // { a: 1, b: 2 }
+get.record(obj, "key", "key"); // <Record<unknown, unknown>> { a: 1, b: 2 }
 ```
