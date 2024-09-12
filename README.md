@@ -4,6 +4,7 @@ Some utilities to js
 
 - [visit](#visit)
 - [get](#get)
+- [set](#set)
 
 ## Visit
 
