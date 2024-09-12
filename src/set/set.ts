@@ -1,20 +1,4 @@
-const pick = (
-  obj: unknown,
-  paths: PropertyKey[],
-  parent: unknown,
-  updateParent?: (value: unknown) => void,
-): unknown => {
-  if (paths.length === 0) return parent;
-  const isObj = typeof obj === "object" && obj !== null;
-  if (!isObj) {
-    obj = {};
-    updateParent?.(obj);
-  }
-  const [path, ...nextPaths] = paths;
-  return pick(Reflect.get(obj ?? {}, path), nextPaths, obj, (val) => {
-    Reflect.set(obj ?? {}, path, val);
-  });
-};
+import { get } from "../get/get";
 
 /**
  * Sets a value at a specified path within a nested object structure.
@@ -35,13 +19,15 @@ const pick = (
  * console.log(data); // { a: { b: 2, c: { d: 3 } } }
  */
 export const set = (obj: unknown, paths: PropertyKey[], value: unknown) => {
-  const o = { obj };
-  const lastChild = pick(o.obj, paths, o, (val) => {
-    Reflect.set(o, "obj", val);
-  });
-  const lastPath = paths.at(-1);
-  if (lastPath) {
-    Reflect.set(lastChild ?? {}, lastPath, value);
+  const out = get.record(obj) ?? {};
+  let current = { data: out };
+  for (const index in paths) {
+    const path = paths[index];
+    const isEnd = Number(index) === paths.length - 1;
+    const node = get.record(current.data) ?? {};
+    const child = get.record(node, path) ?? {};
+    Reflect.set(node, path, isEnd ? value : child);
+    current.data = child;
   }
-  return o.obj;
+  return out;
 };
