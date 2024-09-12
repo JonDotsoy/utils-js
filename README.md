@@ -73,7 +73,7 @@ get.record(obj, "key", "key"); // <Record<unknown, unknown>> { a: 1, b: 2 }
 
 ## Set
 
-Set a value into a path from a element.
+Sets a value at a specified path within a nested object structure.
 
 **Syntax**
 
@@ -83,13 +83,23 @@ set(obj, paths, value);
 
 **Arguments**
 
-- `obj` `<unknown>`:
-- `paths` `<Array<string | number | symbol>>`:
-- `value` `<unknown>`: Value to be set on object
+- `obj` `<unknown>`: The object to modify.
+- `paths` `<Array<string | number | symbol>>`: An array of property keys representing the path to the target property.
+- `value` `<unknown>`: The value to set at the specified path.
+
+**Return**
+
+The modified object.
 
 **Example:**
 
 ```ts
 const obj = { a: {} };
-set(obj, ["a", "b", "c"], 1); // { a: { b: { c: 1} } }
+set(obj, ["a", "b", "c"], 1); // => { a: { b: { c: 1} } }
+
+const data = { a: { b: 1 } };
+
+set(data, ["a", "b"], 2); // => { a: { b: 2 } }
+
+set(data, ["a", "c", "d"], 3); //=> { a: { b: 2, c: { d: 3 } } }
 ```
