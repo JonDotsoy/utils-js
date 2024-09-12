@@ -18,3 +18,12 @@ jobs:
         uses: googleapis/release-please-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+  delivery-npm:
+    runs-on: ubuntu-latest
+    needs:
+      - release-please
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+      - run: npm publish
