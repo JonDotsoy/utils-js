@@ -70,3 +70,26 @@ get(obj, "key", "key"); // <unknown> { a: 1, b: 2 }
 const obj = { key: { key: { a: 1, b: 2 } } };
 get.record(obj, "key", "key"); // <Record<unknown, unknown>> { a: 1, b: 2 }
 ```
+
+## Set
+
+Set a value into a path from a element.
+
+**Syntax**
+
+```ts
+set(obj, paths, value);
+```
+
+**Arguments**
+
+- `obj` `<unknown>`:
+- `paths` `<Array<string | number | symbol>>`:
+- `value` `<unknown>`: Value to be set on object
+
+**Example:**
+
+```ts
+const obj = { a: {} };
+set(obj, ["a", "b", "c"], 1); // { a: { b: { c: 1} } }
+```
