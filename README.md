@@ -4,6 +4,7 @@ Some utilities to js
 
 - [visit](#visit)
 - [get](#get)
+- [set](#set)
 
 ## Visit
 
@@ -95,4 +96,37 @@ get(obj, "key", "key"); // <unknown> { a: 1, b: 2 }
 
 const obj = { key: { key: { a: 1, b: 2 } } };
 get.record(obj, "key", "key"); // <Record<unknown, unknown>> { a: 1, b: 2 }
+```
+
+## Set
+
+Sets a value at a specified path within a nested object structure.
+
+**Syntax**
+
+```ts
+set(obj, paths, value);
+```
+
+**Arguments**
+
+- `obj` `<unknown>`: The object to modify.
+- `paths` `<Array<string | number | symbol>>`: An array of property keys representing the path to the target property.
+- `value` `<unknown>`: The value to set at the specified path.
+
+**Return**
+
+The modified object.
+
+**Example:**
+
+```ts
+const obj = { a: {} };
+set(obj, ["a", "b", "c"], 1); // => { a: { b: { c: 1} } }
+
+const data = { a: { b: 1 } };
+
+set(data, ["a", "b"], 2); // => { a: { b: 2 } }
+
+set(data, ["a", "c", "d"], 3); //=> { a: { b: 2, c: { d: 3 } } }
 ```

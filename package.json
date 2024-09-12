@@ -23,6 +23,10 @@
     "./get": {
       "import": "./libs/esm/get/get.js",
       "types": "./libs/types/get/get.d.ts"
+    },
+    "./set": {
+      "import": "./libs/esm/set/set.js",
+      "types": "./libs/types/set/set.d.ts"
     }
   },
   "devDependencies": {
