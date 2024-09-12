@@ -52,14 +52,40 @@ Recursively retrieves a property from an object by following the specified path.
 **Syntax:**
 
 ```ts
-get(obj);
-get(obj, ...paths);
+get(obj); // => unknown | undefined
+get(obj, ...paths); // => unknown | undefined
+
+// Alternative get value only if is of a type
+get.string(obj); // => string | undefined
+get.string(obj, ...paths); // => string | undefined
+get.number(obj); // => number | undefined
+get.number(obj, ...paths); // => number | undefined
+get.boolean(obj); // => boolean | undefined
+get.boolean(obj, ...paths); // => boolean | undefined
+get.function(obj); // => function | undefined
+get.function(obj, ...paths); // => function | undefined
+get.bigint(obj); // => bigint | undefined
+get.bigint(obj, ...paths); // => bigint | undefined
+get.symbol(obj); // => symbol | undefined
+get.symbol(obj, ...paths); // => symbol | undefined
+get.array(obj); // => Array<unknown> | undefined
+get.array(obj, ...paths); // => Array<unknown> | undefined
+get.date(obj); // => Date | string | number | undefined
+get.date(obj, ...paths); // => Date | string | number | undefined
+get.record(obj); // => Record | undefined
+get.record(obj, ...paths); // => Record | undefined
 ```
 
 **Arguments:**
 
 - `obj` `<unknown>`: The object to retrieve the property from.
 - `paths` `<Array<string | number | symbol>>`: The path(s) of properties to follow. If no paths are provided, returns the entire object.
+
+**Return:**
+
+If a value is found on this path, the results will be an `unknown` other side will return a `undefined` value.
+
+The function check returns only the type defined.
 
 **Example:**
 
