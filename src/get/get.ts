@@ -49,9 +49,10 @@ get.array = createValidatorCustomType<Array<unknown>>((value) =>
 );
 
 /** Validates that a value is an Date */
-get.date = createValidatorCustomType<Date>((value) => {
+get.date = createValidatorCustomType<Date | string>((value) => {
   if (value instanceof Date) return true;
   if (typeof value === "string") return !isNaN(Date.parse(value));
+  if (typeof value === "number") return !isNaN(value);
   return false;
 });
 
@@ -59,3 +60,11 @@ get.date = createValidatorCustomType<Date>((value) => {
 get.record = createValidatorCustomType<Record<any, any>>(
   (value) => typeof value === "object" && value !== null,
 );
+
+// Alias
+/** Validates that a value is an object */
+get.object = get.record;
+
+//
+get.is = <T>(test: (value: unknown) => boolean) =>
+  createValidatorCustomType<T>(test);
