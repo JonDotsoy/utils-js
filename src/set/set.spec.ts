@@ -1,19 +1,31 @@
 import { test, expect } from "bun:test";
 import { set } from "./set.js";
 
-test("test", () => {
-  const obj: any = {};
+test("should set a value at a specified path within a nested object", () => {
+  const data: any = {};
 
-  set(obj, ["a", "b", "c"], 1);
+  set(data, ["a", "b", "c"], 1);
 
-  expect(obj.a.b.c).toBe(1);
+  expect(data.a.b.c).toBe(1);
 });
 
-test("test", () => {
-  const obj: any = null;
+test("should create a new object if the original object is null", () => {
+  const data: any = null;
 
-  const e: any = set(obj, ["a", "b", "c"], 1);
+  const e: any = set(data, ["a", "b", "c"], 1);
 
-  expect(obj).not.toEqual(e);
+  expect(data).not.toEqual(e);
   expect(e.a.b.c).toBe(1);
+});
+
+test("should modify an existing value at a specified path", () => {
+  const data: any = { a: { b: 1 } };
+  set(data, ["a", "b"], 2);
+  expect(data).toEqual({ a: { b: 2 } });
+});
+
+test("should create missing objects along the path", () => {
+  const data: any = { a: { b: 1 } };
+  set(data, ["a", "c", "d"], 3);
+  expect(data).toEqual({ a: { b: 1, c: { d: 3 } } });
 });
