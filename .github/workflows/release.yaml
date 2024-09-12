@@ -12,6 +12,8 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release-please.outputs.release_created }}
     steps:
       - name: release
         id: release-please
@@ -20,6 +22,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
   delivery-npm:
     runs-on: ubuntu-latest
+    if: needs.release-please.outputs.release_created
     needs:
       - release-please
     steps:
