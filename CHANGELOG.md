@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.2.0...utils-js-v0.2.1) (2024-09-12)
+
+
+### Performance Improvements
+
+* refactor set.ts to use get module and simplify function ([ceaf9c8](https://github.com/JonDotsoy/utils-js/commit/ceaf9c88a4d1c9d9d6674e7c962f9b7b89ce2237))
+
 ## [0.2.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.1.0...utils-js-v0.2.0) (2024-09-12)
 
 
