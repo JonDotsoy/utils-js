@@ -205,7 +205,7 @@ Capture the result of an expression and return it as a value.
 ```ts
 import { result } from "@jondotsoy/utils-js/result";
 
-const asyncExpression = fetch("https://example.com");
+const asyncExpression = () => fetch("https://example.com");
 
 const [error, response] = await result(asyncExpression);
 
@@ -238,7 +238,7 @@ A tuple containing the error and the value of the expression.
 ```ts
 import { result } from "@jondotsoy/utils-js/result";
 
-const asyncExpression = fetch("https://example.com");
+const asyncExpression = () => fetch("https://example.com");
 
 const [error, response] = await result(asyncExpression);
 

@@ -78,7 +78,7 @@ const makeResolveExpression = () => {
 
 /**
  * @example
- * const asyncExpression = fetch("https://example.com");
+ * const asyncExpression = () => fetch("https://example.com");
  *
  * const [error, response] = await result(asyncExpression);
  *
