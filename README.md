@@ -195,6 +195,60 @@ await pipe(3)
   .value(); // => Promise<6>;
 ```
 
+## result
+
+> Inspiring on [arthurfiorette/proposal-safe-assignment-operator](https://github.com/arthurfiorette/proposal-safe-assignment-operator)
+
+Capture the result of an expression and return it as a value.
+
+```ts
+import { result } from "@jondotsoy/utils-js/result";
+
+const asyncExpression = fetch("https://example.com");
+
+const [error, response] = await result(asyncExpression);
+
+if (error) {
+  console.error(error);
+  return;
+}
+
+console.log(response);
+```
+
+**Syntax**
+
+```ts
+const [error, value] = result(expression);
+const [error, value] = await result(asyncExpression);
+```
+
+**Arguments**
+
+- `expression` `<unknown>`: The expression to evaluate.
+- `asyncExpression` `<Promise<unknown>>`: The async expression to evaluate.
+
+**Return**
+
+A tuple containing the error and the value of the expression.
+
+**Example**
+
+```ts
+import { result } from "@jondotsoy/utils-js/result";
+
+const asyncExpression = fetch("https://example.com");
+
+const [error, response] = await result(asyncExpression);
+
+if (error) {
+  console.error(error);
+  return;
+}
+
+console.log(response);
+```
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details
