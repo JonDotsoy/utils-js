@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.2.1...utils-js-v0.3.0) (2024-09-23)
+
+
+### Features
+
+* add pipe function ([d027648](https://github.com/JonDotsoy/utils-js/commit/d027648c3aa766e6e845e5d2f0d9322b664b39cc))
+
 ## [0.2.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.2.0...utils-js-v0.2.1) (2024-09-12)
 
 
