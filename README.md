@@ -5,6 +5,7 @@ Some utilities to js
 - [visit](#visit)
 - [get](#get)
 - [set](#set)
+- [pipe](#pipe)
 
 ## Visit
 
@@ -129,4 +130,67 @@ const data = { a: { b: 1 } };
 set(data, ["a", "b"], 2); // => { a: { b: 2 } }
 
 set(data, ["a", "c", "d"], 3); //=> { a: { b: 2, c: { d: 3 } } }
+```
+
+## Pipe
+
+> Inspiring on [tc39/proposal-pipeline-operator](https://github.com/tc39/proposal-pipeline-operator).
+
+Simplify the joint operations to be easier to read and reduce complexity. It also supports async operations.
+
+```ts
+import { pipe } from "@jondotsoy/utils-js/pipe";
+
+const sum = (v: number) => (a: number) => a + v;
+
+const res = pipe(3).pipe(sum(1)).value();
+
+res; // => 4
+```
+
+Alternative using to async operations. To this import `"@jondotsoy/utils-js/pipe/async"` module.
+
+```ts
+import { pipe } from "@jondotsoy/utils-js/pipe/async";
+
+const sum = (v: number) => async (a: number) => a + v;
+
+const res = await pipe(3).pipe(sum(1)).value();
+
+res; // => 4
+```
+
+**Syntax:**
+
+```ts
+pipe(initialValue).value();
+pipe(initialValue).pipe(operator).value();
+pipe(initialValue).pipe(operator).pipe(operator).value();
+```
+
+**Arguments**
+
+- `initialValue` `<unknown>`: initial value to pass on the next operator.
+- `operator` `<(prevValue: unknown) => unknown>`: The operator to apply to the previous value.
+
+**Return**
+
+A pipe object that can be used to chain operations. call `.value()` to get the final result.
+
+**Example:**
+
+```ts
+const sum = (v: number) => (a: number) => a + v;
+
+pipe(3).pipe(sum(1)).value(); // => 4;
+
+pipe(3)
+  .pipe((a) => a + 1)
+  .pipe((a) => a + 1)
+  .value(); // => 5;
+
+await pipe(3)
+  .pipe(async (a) => a + 2)
+  .pipe(sum(1))
+  .value(); // => Promise<6>;
 ```

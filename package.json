@@ -27,6 +27,10 @@
     "./set": {
       "import": "./libs/esm/set/set.js",
       "types": "./libs/types/set/set.d.ts"
+    },
+    "./pipe": {
+      "import": "./libs/esm/pipe/pipe.js",
+      "types": "./libs/types/pipe/pipe.d.ts"
     }
   },
   "devDependencies": {
