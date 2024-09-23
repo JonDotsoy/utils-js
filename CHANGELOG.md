@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.4.0...utils-js-v0.4.1) (2024-09-23)
+
+
+### Bug Fixes
+
+* export `result` and `SymbolResult` on main module ([ef9c76c](https://github.com/JonDotsoy/utils-js/commit/ef9c76c8d38ff017b82ade7acfbedcc9892e5f31))
+
 ## [0.4.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.3.1...utils-js-v0.4.0) (2024-09-23)
 
 
