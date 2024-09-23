@@ -6,6 +6,7 @@ Some utilities to js
 - [get](#get)
 - [set](#set)
 - [pipe](#pipe)
+- [result](#result)
 
 ## Visit
 
