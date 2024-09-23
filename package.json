@@ -4,6 +4,7 @@
   "version": "0.3.0",
   "module": "./libs/esm/index.js",
   "type": "module",
+  "license": "MIT",
   "typesVersions": {
     "*": {
       "*": [
@@ -50,5 +51,11 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/JonDotsoy/utils-js.git"
-  }
+  },
+  "keywords": [
+    "get",
+    "set",
+    "visit",
+    "pipe"
+  ]
 }

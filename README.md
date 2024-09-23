@@ -194,3 +194,7 @@ await pipe(3)
   .pipe(sum(1))
   .value(); // => Promise<6>;
 ```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details
