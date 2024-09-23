@@ -1,4 +1,3 @@
-import type { Extension } from "typescript";
 import { SymbolResult } from "../symbol-result/symbol-result.js";
 
 type PairResult<T> = [null, T] | [Error, null];
