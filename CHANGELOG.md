@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.3.0...utils-js-v0.3.1) (2024-09-23)
+
+
+### Miscellaneous Chores
+
+* release 0.3.1 ([467ca73](https://github.com/JonDotsoy/utils-js/commit/467ca73f36f842d8b273feeec88dcaebd43d1083))
+
 ## [0.3.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.2.1...utils-js-v0.3.0) (2024-09-23)
 
 
