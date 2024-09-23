@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.2](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.4.1...utils-js-v0.4.2) (2024-09-23)
+
+
+### Bug Fixes
+
+* **result:** improvement typescript support ([3f70e68](https://github.com/JonDotsoy/utils-js/commit/3f70e689ae48fb4adbf768b291aaf9cdcf746aac))
+
+
+### Performance Improvements
+
+* remove code unused ([00eb1d2](https://github.com/JonDotsoy/utils-js/commit/00eb1d28d0852d6418579f7da5025e0df389e3d3))
+
 ## [0.4.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.4.0...utils-js-v0.4.1) (2024-09-23)
 
 
