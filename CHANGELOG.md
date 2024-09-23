@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.3.1...utils-js-v0.4.0) (2024-09-23)
+
+
+### Features
+
+* add `result` function to wrap error and result expected. Also add the symbol-result as constant value. ([01bca09](https://github.com/JonDotsoy/utils-js/commit/01bca09f7a2ac11dc53dcc813ad32de892a69890))
+
 ## [0.3.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.3.0...utils-js-v0.3.1) (2024-09-23)
 
 
