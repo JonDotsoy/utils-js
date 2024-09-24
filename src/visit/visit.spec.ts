@@ -35,3 +35,29 @@ test("should return only nodes of type span", () => {
   );
   expect([...v]).toMatchSnapshot();
 });
+
+test("should return the parent element", () => {
+  const object = {
+    a: {
+      b: [
+        { c: { name: 1, toVisit: true } },
+        [{}, { name: 4, toVisit: true }],
+        { [Symbol("sd")]: { name: 3, toVisit: true } },
+      ],
+    },
+    e: {
+      name: 2,
+      toVisit: true,
+    },
+  };
+
+  expect(
+    Array.from(
+      visit(object, (object) => get.boolean(object, "toVisit") ?? false),
+      (child) => ({
+        field: visit.getFieldName(child),
+        parent: visit.getParent(child),
+      }),
+    ),
+  ).toMatchSnapshot();
+});

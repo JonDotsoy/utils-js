@@ -22,7 +22,7 @@ const globModules = (cwd: string, pattern: string) => {
       dot: false,
       followSymlinks: false,
     }),
-    async elementPath => {
+    async (elementPath) => {
       const stat = await fs.stat(elementPath);
       const isDirectory = stat.isDirectory();
       const extname = path.extname(elementPath);
@@ -32,54 +32,68 @@ const globModules = (cwd: string, pattern: string) => {
         name,
         isDirectory,
         elementPath,
-      }
-    }
-  )
-}
+      };
+    },
+  );
+};
 
-const pkgExports =
-  await pipe(globModules("../src/", "*"))
-    .pipe(list => Array.fromAsync(list, async ({ name }) => {
+const pkgExports = await pipe(globModules("../src/", "*"))
+  .pipe((list) =>
+    Array.fromAsync(list, async ({ name }) => {
       const findLibs = async (name: string) => {
-        const esmLib = await Array.fromAsync([
-          new URL(`../libs/esm/${name}/${name}.js`, import.meta.url),
-          new URL(`../libs/esm/${name}.js`, import.meta.url),
-        ], async (location) => {
-          const exists = await fs.exists(location);
-          return exists ? location.toString() : null;
-        });
+        const esmLib = await Array.fromAsync(
+          [
+            new URL(`../libs/esm/${name}/${name}.js`, import.meta.url),
+            new URL(`../libs/esm/${name}.js`, import.meta.url),
+          ],
+          async (location) => {
+            const exists = await fs.exists(location);
+            return exists ? location.toString() : null;
+          },
+        );
 
-        const typeLib = await Array.fromAsync([
-          new URL(`../libs/types/${name}/${name}.d.ts`, import.meta.url),
-          new URL(`../libs/types/${name}.d.ts`, import.meta.url),
-        ], async (location) => {
-          const exists = await fs.exists(location);
-          return exists ? location.toString() : null;
-        });
+        const typeLib = await Array.fromAsync(
+          [
+            new URL(`../libs/types/${name}/${name}.d.ts`, import.meta.url),
+            new URL(`../libs/types/${name}.d.ts`, import.meta.url),
+          ],
+          async (location) => {
+            const exists = await fs.exists(location);
+            return exists ? location.toString() : null;
+          },
+        );
 
         return {
           esm: esmLib.find(Boolean),
           type: typeLib.find(Boolean),
-        }
-      }
+        };
+      };
 
-      return ({
+      return {
         name,
         libs: await findLibs(name),
-      });
-    }))
-    .pipe(list => Array.fromAsync(list, async (info) => {
+      };
+    }),
+  )
+  .pipe((list) =>
+    Array.fromAsync(list, async (info) => {
       const relative = (location?: string | null) => {
-        return location ? `./${path.relative(new URL("./", pkgLocation).pathname, new URL(location).pathname)}` : undefined
-      }
-      return [importAliases[info.name] ?? `./${info.name}`, {
-        import: relative(info.libs.esm),
-        types: relative(info.libs.type),
-      }]
-    }))
-    .pipe(list => list.sort(([a], [b]) => a > b ? 1 : -1))
-    .pipe(list => Object.fromEntries(list))
-    .value()
+        return location
+          ? `./${path.relative(new URL("./", pkgLocation).pathname, new URL(location).pathname)}`
+          : undefined;
+      };
+      return [
+        importAliases[info.name] ?? `./${info.name}`,
+        {
+          import: relative(info.libs.esm),
+          types: relative(info.libs.type),
+        },
+      ];
+    }),
+  )
+  .pipe((list) => list.sort(([a], [b]) => (a > b ? 1 : -1)))
+  .pipe((list) => Object.fromEntries(list))
+  .value();
 
 Reflect.set(pkg, "exports", pkgExports);
 
