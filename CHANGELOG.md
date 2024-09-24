@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.4.2...utils-js-v0.5.0) (2024-09-24)
+
+
+### Features
+
+* add `getParent` and `getFieldName` on visit utilities ([920ef85](https://github.com/JonDotsoy/utils-js/commit/920ef85e139d10a022e0bad9d7b3f49aa7a22b66))
+
+
+### Performance Improvements
+
+* upgrade strategy to build export files ([853da5b](https://github.com/JonDotsoy/utils-js/commit/853da5bbd0b561b5a287e10a7ac6158b7e5670ce))
+
 ## [0.4.2](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.4.1...utils-js-v0.4.2) (2024-09-23)
 
 
