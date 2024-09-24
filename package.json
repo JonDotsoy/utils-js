@@ -17,29 +17,29 @@
       "import": "./libs/esm/index.js",
       "types": "./libs/types/index.d.ts"
     },
-    "./visit": {
-      "import": "./libs/esm/visit/visit.js",
-      "types": "./libs/types/visit/visit.d.ts"
-    },
     "./get": {
       "import": "./libs/esm/get/get.js",
       "types": "./libs/types/get/get.d.ts"
-    },
-    "./set": {
-      "import": "./libs/esm/set/set.js",
-      "types": "./libs/types/set/set.d.ts"
     },
     "./pipe": {
       "import": "./libs/esm/pipe/pipe.js",
       "types": "./libs/types/pipe/pipe.d.ts"
     },
+    "./result": {
+      "import": "./libs/esm/result/result.js",
+      "types": "./libs/types/result/result.d.ts"
+    },
+    "./set": {
+      "import": "./libs/esm/set/set.js",
+      "types": "./libs/types/set/set.d.ts"
+    },
     "./symbol-result": {
       "import": "./libs/esm/symbol-result/symbol-result.js",
       "types": "./libs/types/symbol-result/symbol-result.d.ts"
     },
-    "./result": {
-      "import": "./libs/esm/result/result.js",
-      "types": "./libs/types/result/result.d.ts"
+    "./visit": {
+      "import": "./libs/esm/visit/visit.js",
+      "types": "./libs/types/visit/visit.d.ts"
     }
   },
   "devDependencies": {
