@@ -48,6 +48,64 @@ v.next().value; // {type:"span",value:"foo"}
 v.next().value; // {type:"span",value:"var"}
 ```
 
+### Visit.getParent
+
+The Visit.getParent function is a helper method provided by the visit utility. It allows you to retrieve the parent node of a given node during the recursive traversal performed by the visit generator function. This can be useful when you need to access or modify the parent node based on the current node being visited.
+
+**Syntax:**
+
+```ts
+Visit.getParent(node); // => parent
+```
+
+**Arguments:**
+
+- `node` `<unknown>`: The node element for which to find the parent.
+
+**Return:**
+
+Returns the parent node that contains the provided node. If the node is the root node or has no parent, it returns undefined.
+
+**Example:**
+
+```ts
+for (const node of visit(
+  { a: { b: { toVisit: true } } },
+  (node) => node.toVisit,
+)) {
+  visit.getParent(node); // => { b: { toVisit: true } }
+}
+```
+
+### Visit.getFieldName
+
+The Visit.getFieldName function is a utility method provided by the visit library. It allows you to retrieve the field name (or key) under which the current node is stored in its parent object during the traversal process.
+
+**Syntax:**
+
+```ts
+Visit.getFieldName(node); // => string | number | symbol | undefined
+```
+
+**Arguments:**
+
+- `node` `<unknown>`: The node element for which to find the field name.
+
+**Return:**
+
+Returns a string representing the field name of the current node within its parent object. If the node is the root node or the field name cannot be determined, it returns undefined.
+
+**Example:**
+
+```ts
+for (const node of visit(
+  { a: { b: { toVisit: true } } },
+  (node) => node.toVisit,
+)) {
+  visit.getFieldName(node); // => 'b'
+}
+```
+
 ## Get
 
 Recursively retrieves a property from an object by following the specified path.
