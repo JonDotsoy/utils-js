@@ -1,6 +1,6 @@
 # utils-js
 
-Some utilities to js
+Some utilities for JS. Will be util to reduce common logic in your code.
 
 - [visit](#visit)
 - [get](#get)
