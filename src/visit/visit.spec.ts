@@ -61,3 +61,18 @@ test("should return the parent element", () => {
     ),
   ).toMatchSnapshot();
 });
+
+test.only("should visit recursive node once time", () => {
+  const nodeReferenced: Record<string, any> = {
+    name: "foo",
+  };
+
+  nodeReferenced.recursive = nodeReferenced;
+
+  const rootNode = {
+    a: { b: nodeReferenced },
+    b: [{ c: { d: nodeReferenced } }],
+  };
+
+  Array.from(visit(rootNode));
+});
