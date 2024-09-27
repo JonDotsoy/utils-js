@@ -1,7 +1,7 @@
 {
   "name": "@jondotsoy/utils-js",
   "description": "Some utilities to js",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "module": "./libs/esm/index.js",
   "type": "module",
   "license": "MIT",

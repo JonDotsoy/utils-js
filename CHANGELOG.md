@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.5.0...utils-js-v0.5.1) (2024-09-27)
+
+
+### Bug Fixes
+
+* avoid visit the same node 2 times ([0433555](https://github.com/JonDotsoy/utils-js/commit/0433555e2a562ae771be566a175805d59d12e8b5))
+
 ## [0.5.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.4.2...utils-js-v0.5.0) (2024-09-24)
 
 
