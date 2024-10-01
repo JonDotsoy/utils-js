@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.2](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.5.1...utils-js-v0.5.2) (2024-10-01)
+
+
+### Bug Fixes
+
+* update import locations names ([05dd919](https://github.com/JonDotsoy/utils-js/commit/05dd919322a8b8aa25f125d074dca079cdabbb17))
+
 ## [0.5.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.5.0...utils-js-v0.5.1) (2024-09-27)
 
 
