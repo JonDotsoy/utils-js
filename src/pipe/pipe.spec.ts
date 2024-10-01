@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { pipe } from "./pipe";
+import { pipe } from "./pipe.js";
 
 test("should return the final result", () => {
   const a = 1;

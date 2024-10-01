@@ -1,4 +1,4 @@
-import { get } from "../get/get";
+import { get } from "../get/get.js";
 
 /**
  * Sets a value at a specified path within a nested object structure.
