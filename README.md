@@ -7,6 +7,7 @@ Some utilities for JS. Will be util to reduce common logic in your code.
 - [set](#set)
 - [pipe](#pipe)
 - [result](#result)
+- [CleanupTasks](#cleanuptasks)
 
 ## Visit
 
@@ -306,6 +307,29 @@ if (error) {
 }
 
 console.log(response);
+```
+
+## CleanupTasks
+
+**syntax**
+
+```ts
+const cleanupTasks = new CleanupTasks();
+await using cleanupTasks = new CleanupTasks();
+```
+
+**Return**
+
+Instance of `CleanupTasks` class.
+
+**Example**
+
+```ts
+await using cleanupTasks = new CleanupTasks();
+
+cleanupTasks.add(() => myCleanupTask());
+
+await cleanupTasks.cleanup();
 ```
 
 ## License

@@ -17,6 +17,10 @@
       "import": "./libs/esm/index.js",
       "types": "./libs/types/index.d.ts"
     },
+    "./cleanuptasks": {
+      "import": "./libs/esm/cleanuptasks/cleanuptasks.js",
+      "types": "./libs/types/cleanuptasks/cleanuptasks.d.ts"
+    },
     "./get": {
       "import": "./libs/esm/get/get.js",
       "types": "./libs/types/get/get.d.ts"
