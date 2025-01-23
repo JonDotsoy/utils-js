@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.5.2...utils-js-v0.6.0) (2025-01-23)
+
+
+### Features
+
+* add cleanuptasks utilities ([792f18e](https://github.com/JonDotsoy/utils-js/commit/792f18e8e356136fc1c52226f40222ed0705bbc6))
+
 ## [0.5.2](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.5.1...utils-js-v0.5.2) (2024-10-01)
 
 
