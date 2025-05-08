@@ -1,3 +1,5 @@
+const isNaN = Number.isNaN;
+
 /**
  * Represents the basic primitive types in JavaScript.
  * These types are the fundamental building blocks of data in the language.
@@ -129,21 +131,68 @@ const getArray: ValueExtractor<Array<unknown>> = createValidatorCustomType<
   Array<unknown>
 >((value) => Array.isArray(value));
 
+const valueToDate = (value: unknown) => {
+  if (value instanceof Date) return value;
+  return invokeSafely(() => {
+    const isNumber = typeof value === "number" && !isNaN(value);
+    const isString = typeof value === "string";
+    const isNumberOrString = isNumber || isString;
+    if (!isNumberOrString) return undefined;
+    const date = new Date(value);
+    const time = date.getTime();
+    if (isNaN(time)) return undefined;
+    return date;
+  });
+};
+
 /** Validates that a value is an Date */
 /**
- * A custom validator function to check if a value is a valid date or a string
- * that can be parsed into a valid date. It also supports numeric values that
- * represent valid timestamps.
+ * Extracts a value from an object at the specified paths and converts it to a `Date` object.
  *
- * @param value - The value to validate. It can be of type `Date`, `string`, or `number`.
- * @returns `true` if the value is a valid date, a parsable date string, or a valid timestamp; otherwise, `false`.
+ * @param obj - The object from which to extract the value.
+ * @param paths - The path(s) to the desired value within the object.
+ * @returns A `Date` object representing the extracted value.
+ *
+ * @remarks
+ * This function uses a `get` utility to retrieve the value from the object
+ * and then converts the value to a `Date` using the `valueToDate` utility.
+ *
+ * @typeParam ValueExtractor<Date> - A function type that extracts and transforms a value into a `Date`.
  */
-const getDate = createValidatorCustomType<Date | string>((value) => {
-  if (value instanceof Date) return true;
-  if (typeof value === "string") return !isNaN(Date.parse(value));
-  if (typeof value === "number") return !isNaN(value);
-  return false;
-});
+const getDate: ValueExtractor<Date> = (obj, ...paths) => {
+  const value = get(obj, ...paths);
+  return valueToDate(value);
+};
+
+/**
+ * Extracts a numeric value from an object at the specified path(s). If the value
+ * is not a number but can be converted to a date, it returns the timestamp of the date.
+ *
+ * @template T - The type of the object to extract the value from.
+ * @param obj - The object from which to extract the value.
+ * @param paths - The path(s) to the property to extract.
+ * @returns The numeric value if it exists and is a number, or the timestamp of the
+ *          value if it can be converted to a date. Otherwise, returns `undefined`.
+ */
+const getNumberDate: ValueExtractor<number> = (obj, ...paths) => {
+  const value = get(obj, ...paths);
+  if (typeof value === "number") return value;
+  return valueToDate(value)?.getTime();
+};
+
+/**
+ * Retrieves a value from a nested object using the specified property paths,
+ * converts it to a Date object if possible, and returns its ISO string representation.
+ *
+ * @param obj - The object to retrieve the value from.
+ * @param paths - The property keys that define the path to the desired value.
+ * @returns The ISO string representation of the date if the value can be converted to a Date,
+ *          otherwise `undefined`.
+ */
+const getISOStringDate = (obj: unknown, ...paths: PropertyKey[]) => {
+  const value = get(obj, ...paths);
+  return valueToDate(value)?.toISOString();
+};
 
 /** Validates that a value is an object */
 /**
@@ -196,6 +245,8 @@ get.symbol = getSymbol;
 get.array = getArray;
 get.is = getIs;
 get.date = getDate;
+get.numberDate = getNumberDate;
+get.isoStringDate = getISOStringDate;
 get.record = getRecord;
 get.object = getObject;
 
