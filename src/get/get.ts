@@ -120,7 +120,7 @@ const getBigint: ValueExtractor<bigint> = (obj, ...paths) => {
     if (isNaN(Number(v))) return undefined;
     return v;
   });
-}
+};
 /** Validates that a value is an symbol */
 const getSymbol: ValueExtractor<symbol> =
   createValidatorPrimitiveType<symbol>("symbol");
