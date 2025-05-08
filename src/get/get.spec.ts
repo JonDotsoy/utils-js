@@ -76,6 +76,76 @@ test("should return undefined when value is not a date", () => {
   expect(get.date(obj, "key")).toBeUndefined();
 });
 
+test("should return a Date instance when the value is a valid Date object", () => {
+  const obj = { key: new Date("2022-01-01T00:00:00Z") };
+  expect(get.date(obj, "key")).toBeInstanceOf(Date);
+});
+
+test("should return a Date instance when the value is a valid ISO date string", () => {
+  const obj = { key: "2022-01-01T00:00:00Z" };
+  expect(get.date(obj, "key")).toBeInstanceOf(Date);
+});
+
+test("should return a Date instance when the value is a valid timestamp", () => {
+  const obj = { key: 12333553242 };
+  expect(get.date(obj, "key")).toBeInstanceOf(Date);
+});
+
+test("should return undefined when value is an invalid date string", () => {
+  const obj = { key: "invalid-date" };
+  expect(get.date(obj, "key")).toBeUndefined();
+});
+
+test("should return the value as a date when value is a valid timestamp", () => {
+  const obj = { key: 1640995200000 };
+  expect(get.date(obj, "key")?.toISOString()).toBe("2022-01-01T00:00:00.000Z");
+});
+
+test("should return undefined when value is not a valid date for ISO string", () => {
+  const obj = { key: "invalid-date" };
+  expect(get.isoStringDate(obj, "key")).toBeUndefined();
+});
+
+test("should return ISO string when value is a valid Date object", () => {
+  const obj = { key: new Date("2022-01-01T00:00:00Z") };
+  expect(get.isoStringDate(obj, "key")).toBe("2022-01-01T00:00:00.000Z");
+});
+
+test("should return ISO string when value is a valid ISO date string", () => {
+  const obj = { key: "2022-01-01T00:00:00Z" };
+  expect(get.isoStringDate(obj, "key")).toBe("2022-01-01T00:00:00.000Z");
+});
+
+test("should return ISO string when value is a valid timestamp", () => {
+  const obj = { key: 1640995200000 };
+  expect(get.isoStringDate(obj, "key")).toBe("2022-01-01T00:00:00.000Z");
+});
+
+test("should return undefined when value is not a valid date for numberDate", () => {
+  const obj = { key: "invalid-date" };
+  expect(get.numberDate(obj, "key")).toBeUndefined();
+});
+
+test("should return timestamp when value is a valid Date object", () => {
+  const obj = { key: new Date("2022-01-01T00:00:00Z") };
+  expect(get.numberDate(obj, "key")).toBe(1640995200000);
+});
+
+test("should return timestamp when value is a valid ISO date string", () => {
+  const obj = { key: "2022-01-01T00:00:00Z" };
+  expect(get.numberDate(obj, "key")).toBe(1640995200000);
+});
+
+test("should return timestamp when value is a valid timestamp", () => {
+  const obj = { key: 1640995200000 };
+  expect(get.numberDate(obj, "key")).toBe(1640995200000);
+});
+
+test("should return undefined when value is not a number or date for numberDate", () => {
+  const obj = { key: true };
+  expect(get.numberDate(obj, "key")).toBeUndefined();
+});
+
 test("should return the value as a date", () => {
   const obj = { key: "2022-01-01" };
   expect(new Date(get.date(obj, "key")!)?.toUTCString()).toEqual(
