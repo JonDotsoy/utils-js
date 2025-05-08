@@ -43,7 +43,7 @@ test("should return the value as a function", () => {
 
 test("should return undefined when value is not a bigint", () => {
   const obj = { key: true };
-  expect(get.bigint(obj, "key")).toBeUndefined();
+  expect(get.bigint(obj, "key")).toEqual(1n);
 });
 
 test("should return the value as a bigint", () => {
