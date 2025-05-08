@@ -1,10 +1,10 @@
 const isNaN = Number.isNaN;
 
-const tof = (value: unknown): any => typeof value;
+const getType = (value: unknown): any => typeof value;
 const isValidType = <T extends primitiveTypes>(
   value: unknown,
   types: T[],
-): value is T => types.includes(tof(value));
+): value is T => types.includes(getType(value));
 
 /**
  * Represents the basic primitive types in JavaScript.
