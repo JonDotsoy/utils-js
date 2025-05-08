@@ -109,55 +109,62 @@ for (const node of visit(
 
 ## Get
 
-Recursively retrieves a property from an object by following the specified path.
+Safely access deeply nested properties in JavaScript/TypeScript objects by following a sequence of keys. The module also exposes type extractors that validate and convert the value when possible, making dynamic data handling safer and more convenient.
 
-**Syntax:**
+**Basic Syntax:**
 
 ```ts
 get(obj); // => unknown | undefined
 get(obj, ...paths); // => unknown | undefined
-
-// Alternative get value only if is of a type
-get.string(obj); // => string | undefined
-get.string(obj, ...paths); // => string | undefined
-get.number(obj); // => number | undefined
-get.number(obj, ...paths); // => number | undefined
-get.boolean(obj); // => boolean | undefined
-get.boolean(obj, ...paths); // => boolean | undefined
-get.function(obj); // => function | undefined
-get.function(obj, ...paths); // => function | undefined
-get.bigint(obj); // => bigint | undefined
-get.bigint(obj, ...paths); // => bigint | undefined
-get.symbol(obj); // => symbol | undefined
-get.symbol(obj, ...paths); // => symbol | undefined
-get.array(obj); // => Array<unknown> | undefined
-get.array(obj, ...paths); // => Array<unknown> | undefined
-get.date(obj); // => Date | string | number | undefined
-get.date(obj, ...paths); // => Date | string | number | undefined
-get.record(obj); // => Record | undefined
-get.record(obj, ...paths); // => Record | undefined
 ```
 
-**Arguments:**
+**Type Extractors:**
 
-- `obj` `<unknown>`: The object to retrieve the property from.
-- `paths` `<Array<string | number | symbol>>`: The path(s) of properties to follow. If no paths are provided, returns the entire object.
+These methods allow you to obtain and validate values of specific types, attempting to convert the value when possible. They return `undefined` if the conversion or validation fails.
 
-**Return:**
+- `get.string(obj, ...paths)` → string | undefined
+- `get.number(obj, ...paths)` → number | undefined
+- `get.boolean(obj, ...paths)` → boolean | undefined
+- `get.function(obj, ...paths)` → function | undefined
+- `get.bigint(obj, ...paths)` → bigint | undefined
+- `get.symbol(obj, ...paths)` → symbol | undefined
+- `get.array(obj, ...paths)` → Array<unknown> | undefined
+- `get.date(obj, ...paths)` → Date | undefined
+- `get.numberDate(obj, ...paths)` → number | undefined (timestamp)
+- `get.isoStringDate(obj, ...paths)` → string | undefined (ISO)
+- `get.record(obj, ...paths)` / `get.object(obj, ...paths)` → object | undefined
+- `get.is(test)(obj, ...paths)` → custom validation using a predicate function
 
-If a value is found on this path, the results will be an `unknown` other side will return a `undefined` value.
+**Examples:**
 
-The function check returns only the type defined.
-
-**Example:**
+Basic access:
 
 ```ts
-const obj = { key: { key: { a: 1, b: 2 } } };
-get(obj, "key", "key"); // <unknown> { a: 1, b: 2 }
-
-const obj = { key: { key: { a: 1, b: 2 } } };
-get.record(obj, "key", "key"); // <Record<unknown, unknown>> { a: 1, b: 2 }
+const obj = { a: { b: { c: 42 } } };
+get(obj, "a", "b", "c"); // 42
+get(obj, "a", "x"); // undefined
 ```
+
+Type extraction and conversion:
+
+```ts
+const obj = { value: "123", created: "2024-01-01T00:00:00Z" };
+get.number(obj, "value"); // 123
+get.date(obj, "created"); // Date instance
+get.isoStringDate(obj, "created"); // '2024-01-01T00:00:00.000Z'
+```
+
+Custom validation:
+
+```ts
+const isEven = (v: unknown): v is number =>
+  typeof v === "number" && v % 2 === 0;
+const getEven = get.is(isEven);
+const obj = { n: 4 };
+getEven(obj, "n"); // 4
+```
+
+These extractors help you write more robust and safe code, especially when working with dynamic data or complex nested structures.
 
 ## Set
 
