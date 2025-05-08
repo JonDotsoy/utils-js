@@ -1,23 +1,24 @@
 const isNaN = Number.isNaN;
 
+const tof = (value: unknown): any => typeof value;
+const isValidType = <T extends primitiveTypes>(
+  value: unknown,
+  types: T[],
+): value is T => types.includes(tof(value));
+
 /**
  * Represents the basic primitive types in JavaScript.
  * These types are the fundamental building blocks of data in the language.
- *
- * - `"string"`: Represents textual data.
- * - `"number"`: Represents numeric data, including integers and floating-point numbers.
- * - `"boolean"`: Represents a logical value, either `true` or `false`.
- * - `"function"`: Represents a callable function.
- * - `"bigint"`: Represents large integers that are beyond the safe integer limit of `number`.
- * - `"symbol"`: Represents a unique and immutable value often used as object keys.
  */
 type primitiveTypes =
   | "string"
   | "number"
-  | "boolean"
-  | "function"
   | "bigint"
-  | "symbol";
+  | "boolean"
+  | "symbol"
+  | "undefined"
+  | "object"
+  | "function";
 
 /**
  * A utility type for retrieving a deeply nested property value from an object.
@@ -117,10 +118,9 @@ const getBigint: ValueExtractor<bigint> = (obj, ...paths) => {
   const value = get(obj, ...paths);
   if (typeof value === "bigint") return value;
   return invokeSafely(() => {
-    if (typeof value !== "string") return undefined;
-    const v = BigInt(value);
-    if (isNaN(Number(v))) return undefined;
-    return v;
+    if (!isValidType(value, ["bigint", "boolean", "number", "string"]))
+      return undefined;
+    return BigInt(value);
   });
 };
 /** Validates that a value is an symbol */
@@ -134,10 +134,8 @@ const getArray: ValueExtractor<Array<unknown>> = createValidatorCustomType<
 const valueToDate = (value: unknown) => {
   if (value instanceof Date) return value;
   return invokeSafely(() => {
-    const isNumber = typeof value === "number" && !isNaN(value);
-    const isString = typeof value === "string";
-    const isNumberOrString = isNumber || isString;
-    if (!isNumberOrString) return undefined;
+    if (!isValidType(value, ["string", "number"])) return undefined;
+    if (typeof value === "number" && isNaN(value)) return undefined;
     const date = new Date(value);
     const time = date.getTime();
     if (isNaN(time)) return undefined;
