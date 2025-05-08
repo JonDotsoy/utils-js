@@ -1,0 +1,80 @@
+{
+    "id": "1",
+    "title": "Product 1",
+    "description": null,
+    "languageCode": null,
+    "priceInfo": null,
+    "availability": null,
+    "availabilityQuantity": null,
+    "attributes": null,
+    "uri": null,
+    "type": "LP",
+    "images": null,
+    "conditions": null,
+    "brands": null,
+    "fulfillmentInfo": null,
+    "arURL": null,
+    "newArrivalSort": null,
+    "placeIds": [
+        "LP"
+    ],
+    "categories": null,
+    "version": 0
+}
+{
+    "id": "2",
+    "title": null,
+    "description": null,
+    "languageCode": null,
+    "priceInfo": null,
+    "availability": null,
+    "availabilityQuantity": null,
+    "attributes": null,
+    "type": null,
+    "primaryProductId": "1",
+    "gtin": null,
+    "colorInfo": null,
+    "materials": null,
+    "sizes": null,
+    "version": 0
+}
+{
+    "id": "1",
+    "title": "Product 1",
+    "description": null,
+    "languageCode": null,
+    "priceInfo": null,
+    "availability": null,
+    "availabilityQuantity": null,
+    "attributes": null,
+    "uri": null,
+    "type": "LP",
+    "images": null,
+    "conditions": null,
+    "brands": null,
+    "fulfillmentInfo": null,
+    "arURL": null,
+    "newArrivalSort": null,
+    "placeIds": [
+        "LP"
+    ],
+    "categories": null,
+    "version": 0
+}
+{
+    "id": "2",
+    "title": null,
+    "description": null,
+    "languageCode": null,
+    "priceInfo": null,
+    "availability": null,
+    "availabilityQuantity": null,
+    "attributes": null,
+    "type": null,
+    "primaryProductId": "1",
+    "gtin": null,
+    "colorInfo": null,
+    "materials": null,
+    "sizes": null,
+    "version": 0
+}
