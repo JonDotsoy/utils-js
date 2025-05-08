@@ -111,8 +111,16 @@ const getBoolean: ValueExtractor<boolean> =
 const getFunction: ValueExtractor<Function> =
   createValidatorPrimitiveType<Function>("function");
 /** Validates that a value is an BigInt */
-const getBigint: ValueExtractor<bigint> =
-  createValidatorPrimitiveType<bigint>("bigint");
+const getBigint: ValueExtractor<bigint> = (obj, ...paths) => {
+  const value = get(obj, ...paths);
+  if (typeof value === "bigint") return value;
+  return invokeSafely(() => {
+    if (typeof value !== "string") return undefined;
+    const v = BigInt(value);
+    if (isNaN(Number(v))) return undefined;
+    return v;
+  });
+}
 /** Validates that a value is an symbol */
 const getSymbol: ValueExtractor<symbol> =
   createValidatorPrimitiveType<symbol>("symbol");
