@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.7.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.6.0...utils-js-v0.7.0) (2025-05-08)
+
+
+### Features
+
+* add date conversion utilities and enhance value extraction logic ([4fde1c0](https://github.com/JonDotsoy/utils-js/commit/4fde1c05acc821995f2d135b3f826167c4f0c870))
+* add invokeSafely utility and enhance getNumber validation logic ([6f59ad4](https://github.com/JonDotsoy/utils-js/commit/6f59ad49d51705966799506476bea12fd94b563f))
+* add tests for number and bigint parsing from strings ([7f2453d](https://github.com/JonDotsoy/utils-js/commit/7f2453d8b84a13d5143279ce336a7906e71699a0))
+* enhance bigint validation logic in getBigint utility ([89004b6](https://github.com/JonDotsoy/utils-js/commit/89004b632d20282e378d0b18055d72e398c7b9e3))
+* enhance value extraction utilities with custom type validators ([498bee7](https://github.com/JonDotsoy/utils-js/commit/498bee7123f821290321bfe6d83e3a0497cf5aa1))
+* **get:** enhance value extraction utilities with type validation and date handling ([#15](https://github.com/JonDotsoy/utils-js/issues/15)) ([2206e6a](https://github.com/JonDotsoy/utils-js/commit/2206e6a2c17dfb418cd6cdcc6193f3fd799b6e5c))
+
+
+### Bug Fixes
+
+* correct bigint retrieval test to expect a valid bigint value ([d0aadc4](https://github.com/JonDotsoy/utils-js/commit/d0aadc4b112d408c84acb6493f3256d372d44e9c))
+* correct syntax error in getBigint validator function ([6bacb72](https://github.com/JonDotsoy/utils-js/commit/6bacb727bc230885498a111c7fac5567e8302e0c))
+* update bigint retrieval logic to correctly handle invalid types ([d7a4f95](https://github.com/JonDotsoy/utils-js/commit/d7a4f95d6d1589e76185b20acfa9709e106cdb56))
+
 ## [0.6.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.5.2...utils-js-v0.6.0) (2025-01-23)
 
 
