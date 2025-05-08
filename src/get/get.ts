@@ -30,6 +30,14 @@ type ValueExtractor<T = unknown> = (
   ...paths: PropertyKey[]
 ) => undefined | T;
 
+const invokeSafely = <T>(cb: () => T) => {
+  try {
+    return cb();
+  } catch (e) {
+    return undefined;
+  }
+};
+
 /**
  * Recursively retrieves a property from an object by following the specified path.
  *
@@ -87,8 +95,15 @@ const createValidatorCustomType =
 const getString: ValueExtractor<string> =
   createValidatorPrimitiveType<string>("string");
 /** Validates that a value is an number */
-const getNumber: ValueExtractor<number> =
-  createValidatorPrimitiveType<number>("number");
+const getNumber: ValueExtractor<number> = (obj, ...paths) => {
+  const value = get(obj, ...paths);
+  if (typeof value === "number") return value;
+  return invokeSafely(() => {
+    const v = Number(value);
+    if (isNaN(v)) return undefined;
+    return v;
+  });
+};
 /** Validates that a value is an boolean */
 const getBoolean: ValueExtractor<boolean> =
   createValidatorPrimitiveType<boolean>("boolean");
