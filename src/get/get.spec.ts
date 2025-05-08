@@ -97,3 +97,23 @@ test("should return the value as an object", () => {
   const obj = { key: { key: { a: 1, b: 2 } } };
   expect(get.record(obj, "key", "key")).toEqual({ a: 1, b: 2 });
 });
+
+test("should parse a string to a number", () => {
+  const obj = { key: "3" };
+  expect(get.number(obj, "key")).toBe(3);
+});
+
+test("should return the value as a bigint when key is '1234'", () => {
+  const obj = { "1234": 1234n };
+  expect(get.bigint(obj, "1234")).toBe(1234n);
+});
+
+test("should return the value as a number when key is '123.4231'", () => {
+  const obj = { key: "123.4231" };
+  expect(get.number(obj, "key")).toBe(123.4231);
+});
+
+test("should return undefined when value is a malformed float string", () => {
+  const obj = { key: "123.42.31" };
+  expect(get.number(obj, "key")).toBeUndefined();
+});
