@@ -118,8 +118,7 @@ const getBigint: ValueExtractor<bigint> = (obj, ...paths) => {
   const value = get(obj, ...paths);
   if (typeof value === "bigint") return value;
   return invokeSafely(() => {
-    if (!isValidType(value, ["bigint", "boolean", "number", "string"]))
-      return undefined;
+    if (!isValidType(value, ["bigint", "number", "string"])) return undefined;
     return BigInt(value);
   });
 };
