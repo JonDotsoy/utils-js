@@ -5,6 +5,14 @@ class PipeAsync<T> {
     this.#value = value;
   }
 
+  /**
+   * Transforms the current value of the `PipeAsync` instance by applying the provided callback function.
+   * The callback can return either a synchronous or asynchronous result.
+   *
+   * @template R - The type of the result after applying the callback function.
+   * @param cb - A callback function that takes the current value of type `T` and returns a value of type `R` or a `Promise<R>`.
+   * @returns A new `PipeAsync` instance containing the transformed value.
+   */
   pipe<R>(cb: (value: T) => R | Promise<R>): PipeAsync<R> {
     const nextValue = this.#value.then((a) => cb(a));
     return new PipeAsync(nextValue);
@@ -26,6 +34,16 @@ class Pipe<T> {
     this.#value = value;
   }
 
+  /**
+   * Applies a transformation function to the current value in the pipe and returns a new pipe
+   * with the transformed value. Supports both synchronous and asynchronous transformations.
+   *
+   * @template R - The return type of the callback function, which can be a value or a Promise.
+   * @param cb - A callback function that takes the current value of the pipe and returns
+   *             either a transformed value or a Promise resolving to a transformed value.
+   * @returns A new pipe instance containing the transformed value. If the callback returns
+   *          a Promise, the returned pipe will handle asynchronous operations.
+   */
   pipe<R extends unknown | Promise<unknown>>(
     cb: (value: T) => R,
   ): R extends Promise<infer R> ? PipeAsync<R> : Pipe<R> {
@@ -52,6 +70,12 @@ const makePipe = <T extends unknown | Promise<unknown>>(
     : (new Pipe(initial) as any);
 
 /**
+ * Creates a pipeline that allows chaining operations on a given initial value.
+ *
+ * @template T - The type of the initial value, which can be a synchronous value or a Promise.
+ * @param initial - The initial value to start the pipeline with.
+ * @returns A `PipeResult` instance that provides methods for chaining operations.
+ *
  * @example
  * const a = 1;
  *
