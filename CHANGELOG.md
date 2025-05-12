@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.8.0...utils-js-v0.8.1) (2025-05-12)
+
+
+### Bug Fixes
+
+* **bytes:** enhance Bytes class with flexible creation and improved documentation ([#19](https://github.com/JonDotsoy/utils-js/issues/19)) ([2bf6ced](https://github.com/JonDotsoy/utils-js/commit/2bf6ced8ec182e4ed4956a0b67a1a1712688c97e))
+
 ## [0.8.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.7.0...utils-js-v0.8.0) (2025-05-12)
 
 
