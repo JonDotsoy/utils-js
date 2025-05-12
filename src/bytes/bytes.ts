@@ -27,13 +27,19 @@ const bytesByUnit: Record<string, number> = {
   petabyte: petabyte,
 };
 
-const BytesUnit: Record<string, BytesUnitType> = {
+const AliasBytesUnit: Record<string, BytesUnitType> = {
   byte: "byte",
   kilobyte: "kilobyte",
   megabyte: "megabyte",
   gigabyte: "gigabyte",
   terabyte: "terabyte",
   petabyte: "petabyte",
+  bytes: "byte",
+  kilobytes: "kilobyte",
+  megabytes: "megabyte",
+  gigabytes: "gigabyte",
+  terabytes: "terabyte",
+  petabytes: "petabyte",
   b: "byte",
   kb: "kilobyte",
   mb: "megabyte",
@@ -43,14 +49,14 @@ const BytesUnit: Record<string, BytesUnitType> = {
 };
 
 const parseUnit = (unit: string): BytesUnitType => {
-  const unitType = BytesUnit[unit.toLowerCase()];
+  const unitType = AliasBytesUnit[unit.toLowerCase()];
   if (!unitType) {
     throw new Error(`Invalid unit type: ${unit}`);
   }
   return unitType;
 };
 
-const unitToBytes = (unit: keyof typeof BytesUnit): number => {
+const unitToBytes = (unit: keyof typeof AliasBytesUnit): number => {
   const unitType = parseUnit(unit);
   return bytesByUnit[unitType];
 };
@@ -88,8 +94,21 @@ export class Bytes {
     return new BytesFormat(locale).format(this.#bytes);
   }
 
-  from(value: number, unit: keyof typeof BytesUnit): Bytes {
-    return new Bytes(value * unitToBytes(unit));
+  static from(
+    value: number | string,
+    unit?: keyof typeof AliasBytesUnit,
+  ): Bytes {
+    if (typeof value === "string") {
+      const pattern = /(?<value>\d+(\.\d+)?)\s*(?<unit>[a-zA-Z]+)?/g;
+      const match = pattern.exec(value.toLowerCase().trim());
+      if (!match) {
+        throw new Error("Invalid byte format");
+      }
+      return new Bytes(
+        Number(match.groups!.value) * unitToBytes(match.groups!.unit ?? "byte"),
+      );
+    }
+    return new Bytes(value * unitToBytes(unit ?? "byte"));
   }
 
   static byte = byte;
