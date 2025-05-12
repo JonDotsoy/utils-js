@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.7.0...utils-js-v0.8.0) (2025-05-12)
+
+
+### Features
+
+* implement Bytes and BytesFormat classes for byte manipulation and formatting ([#17](https://github.com/JonDotsoy/utils-js/issues/17)) ([8619c6a](https://github.com/JonDotsoy/utils-js/commit/8619c6a9f5de14d1457a2295d4ac1f54c673ec8b))
+
 ## [0.7.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.6.0...utils-js-v0.7.0) (2025-05-08)
 
 
