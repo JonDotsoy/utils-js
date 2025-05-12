@@ -203,66 +203,82 @@ set(data, ["a", "c", "d"], 3); //=> { a: { b: 2, c: { d: 3 } } }
 
 ## Pipe
 
-> Inspiring on [tc39/proposal-pipeline-operator](https://github.com/tc39/proposal-pipeline-operator).
+> Inspired by [tc39/proposal-pipeline-operator](https://github.com/tc39/proposal-pipeline-operator).
 
-Simplify the joint operations to be easier to read and reduce complexity. It also supports async operations.
+Allows you to chain operations in a readable and simple way, supporting both synchronous and asynchronous functions. The pipeline type adapts automatically according to the value returned by each operation.
+
+**Import:**
 
 ```ts
 import { pipe } from "@jondotsoy/utils-js/pipe";
-
-const sum = (v: number) => (a: number) => a + v;
-
-const res = pipe(3).pipe(sum(1)).value();
-
-res; // => 4
 ```
 
-Alternative using to async operations. To this import `"@jondotsoy/utils-js/pipe/async"` module.
-
-```ts
-import { pipe } from "@jondotsoy/utils-js/pipe/async";
-
-const sum = (v: number) => async (a: number) => a + v;
-
-const res = await pipe(3).pipe(sum(1)).value();
-
-res; // => 4
-```
-
-**Syntax:**
+**Syntax**
 
 ```ts
 pipe(initialValue).value();
 pipe(initialValue).pipe(operator).value();
 pipe(initialValue).pipe(operator).pipe(operator).value();
+// ...and so on
+
+// If you use `await` directly, you do not need to call `.value()`:
+await pipe(initialValue);
+await pipe(initialValue).pipe(operator);
+await pipe(initialValue).pipe(operator).pipe(operator);
+// ...and so on
 ```
 
-**Arguments**
-
-- `initialValue` `<unknown>`: initial value to pass on the next operator.
-- `operator` `<(prevValue: unknown) => unknown>`: The operator to apply to the previous value.
-
-**Return**
-
-A pipe object that can be used to chain operations. call `.value()` to get the final result.
-
-**Example:**
+**Basic usage:**
 
 ```ts
 const sum = (v: number) => (a: number) => a + v;
 
-pipe(3).pipe(sum(1)).value(); // => 4;
-
-pipe(3)
-  .pipe((a) => a + 1)
-  .pipe((a) => a + 1)
-  .value(); // => 5;
-
-await pipe(3)
-  .pipe(async (a) => a + 2)
+// Synchronous operations
+const res = pipe(3)
   .pipe(sum(1))
-  .value(); // => Promise<6>;
+  .pipe((a) => a * 2)
+  .value(); // => 8
+
+// Asynchronous or mixed operations
+const asyncSum = (v: number) => async (a: number) => a + v;
+
+const result = await pipe(3)
+  .pipe(asyncSum(2))
+  .pipe((a) => a * 2)
+  .value(); // => 10
 ```
+
+**API:**
+
+- `pipe(initialValue)`
+  - Creates a pipeline with the initial value (can be sync or a promise).
+- `.pipe(fn)`
+  - Chains a function that receives the previous value and returns a new value or a promise.
+  - If any function returns a promise, the pipeline becomes asynchronous automatically.
+- `.value()`
+  - Returns the final value (or a promise if any operation was asynchronous).
+
+**Additional examples:**
+
+```ts
+// Mixed chaining
+const res = await pipe(1)
+  .pipe((a) => a + 1)
+  .pipe(async (a) => a * 3)
+  .pipe((a) => a - 2);
+// => 4
+
+// Only synchronous
+pipe(5)
+  .pipe((a) => a * 2)
+  .pipe((a) => a + 1)
+  .value(); // => 11
+```
+
+**Types:**
+
+- The type returned by `.pipe()` and `.value()` automatically adjusts according to the value type (sync/async).
+- You do not need to import from `pipe/async`, the main `pipe` handles both cases.
 
 ## result
 
