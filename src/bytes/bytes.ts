@@ -99,7 +99,7 @@ export class Bytes {
     unit?: keyof typeof AliasBytesUnit,
   ): Bytes {
     if (typeof value === "string") {
-      const pattern = /(?<value>\d+(\.\d+)?)\s*(?<unit>[a-zA-Z]+)?/g;
+      const pattern = /(?<value>\d+(\.\d+)?)\s*(?<unit>[a-zA-Z]+)?/;
       const match = pattern.exec(value.toLowerCase().trim());
       if (!match) {
         throw new Error("Invalid byte format");
