@@ -17,6 +17,14 @@
       "import": "./libs/esm/index.js",
       "types": "./libs/types/index.d.ts"
     },
+    "./bytes": {
+      "import": "./libs/esm/bytes/bytes.js",
+      "types": "./libs/types/bytes/bytes.d.ts"
+    },
+    "./bytes-format": {
+      "import": "./libs/esm/bytes-format/bytes-format.js",
+      "types": "./libs/types/bytes-format/bytes-format.d.ts"
+    },
     "./cleanuptasks": {
       "import": "./libs/esm/cleanuptasks/cleanuptasks.js",
       "types": "./libs/types/cleanuptasks/cleanuptasks.d.ts"

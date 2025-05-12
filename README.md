@@ -8,6 +8,8 @@ Some utilities for JS. Will be util to reduce common logic in your code.
 - [pipe](#pipe)
 - [result](#result)
 - [CleanupTasks](#cleanuptasks)
+- [Bytes](#bytes)
+- [BytesFormat](#bytesformat)
 
 ## Visit
 
@@ -337,6 +339,141 @@ await using cleanupTasks = new CleanupTasks();
 cleanupTasks.add(() => myCleanupTask());
 
 await cleanupTasks.cleanup();
+```
+
+## Bytes
+
+A utility class for converting and formatting byte values in different units (byte, kilobyte, megabyte, gigabyte, terabyte, petabyte).
+
+**Syntax:**
+
+```ts
+import { Bytes } from "@jondotsoy/utils-js/bytes";
+
+const bytes = new Bytes(1024); // 1024 bytes
+```
+
+### Methods
+
+| Method                    | Description                                         |
+| ------------------------- | --------------------------------------------------- |
+| `toBytes()`               | Returns the value in bytes.                         |
+| `toKilobytes()`           | Returns the value in kilobytes.                     |
+| `toMegabytes()`           | Returns the value in megabytes.                     |
+| `toGigabytes()`           | Returns the value in gigabytes.                     |
+| `toTerabytes()`           | Returns the value in terabytes.                     |
+| `toPetabytes()`           | Returns the value in petabytes.                     |
+| `toLocaleString(locale?)` | Returns a human-readable string (e.g., '1 MB').     |
+| `from(value, unit)`       | Creates a new Bytes instance from a value and unit. |
+
+### Units
+
+Supported units: `byte`, `kilobyte`, `megabyte`, `gigabyte`, `terabyte`, `petabyte` (also accepts abbreviations: `b`, `kb`, `mb`, `gb`, `tb`, `pb`).
+
+### Examples
+
+**Convert between units:**
+
+```ts
+const bytes = new Bytes(1048576); // 1 MB
+bytes.toKilobytes(); // 1024
+bytes.toMegabytes(); // 1
+bytes.toGigabytes(); // 0.0009765625
+```
+
+**Create Bytes from a specific unit:**
+
+```ts
+const kb = new Bytes(0).from(1, "kilobyte");
+kb.toBytes(); // 1024
+
+const mb = new Bytes(0).from(2, "mb");
+mb.toBytes(); // 2097152
+```
+
+**Format as a human-readable string:**
+
+```ts
+const bytes = new Bytes(123456789);
+bytes.toLocaleString("en-US"); // '117.74 MB'
+bytes.toLocaleString("de-DE"); // '117,74 MB'
+```
+
+**Error handling for invalid units:**
+
+```ts
+new Bytes(0).from(1, "invalidUnit"); // Throws: Invalid unit type: invalidUnit
+```
+
+## BytesFormat
+
+A utility class for formatting byte values into human-readable strings with automatic or fixed units, supporting localization and custom formatting options.
+
+**Syntax:**
+
+```ts
+import { BytesFormat } from "@jondotsoy/utils-js/bytes-format";
+
+const formatter = new BytesFormat("en-US");
+formatter.format(1048576); // '1 MB'
+```
+
+### Constructor
+
+```ts
+new BytesFormat(locale?: string, options?: BytesFormatOptions)
+```
+
+- `locale`: Optional. A BCP 47 language tag (e.g., 'en-US', 'de-DE').
+- `options`: Optional. Formatting options:
+  - `unit`: Force a specific unit (e.g., 'megabyte'), or use 'auto' (default).
+  - `unitDisplay`: 'short' | 'long' | 'narrow' (default: 'short').
+  - `maximumFractionDigits`: Number of decimal places (default: 2).
+  - `maximumSignificantDigits`: Number of significant digits.
+
+### Methods
+
+| Method      | Description                                                  |
+| ----------- | ------------------------------------------------------------ |
+| `format(n)` | Formats the number of bytes as a localized string with unit. |
+
+### Examples
+
+**Automatic unit selection:**
+
+```ts
+const f = new BytesFormat("en-US");
+f.format(2048); // '2 kB'
+f.format(1048576); // '1 MB'
+f.format(512); // '512 byte'
+```
+
+**Force a specific unit:**
+
+```ts
+const f = new BytesFormat("en-US", { unit: "megabyte" });
+f.format(1048576); // '1 MB'
+f.format(2048); // '0 MB'
+```
+
+**Custom unit display:**
+
+```ts
+new BytesFormat("en-US", { unitDisplay: "long" }).format(2048); // '2 kilobytes'
+new BytesFormat("en-US", { unitDisplay: "narrow" }).format(2048); // '2kB'
+```
+
+**Custom decimal places:**
+
+```ts
+new BytesFormat("en-US", { maximumFractionDigits: 1 }).format(1536); // '1.5 kB'
+new BytesFormat("en-US", { maximumFractionDigits: 0 }).format(1536); // '2 kB'
+```
+
+**Localization:**
+
+```ts
+new BytesFormat("de-DE").format(123456789); // '117,74 MB'
 ```
 
 ## License
