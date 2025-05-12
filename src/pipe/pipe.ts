@@ -1,4 +1,4 @@
-class PipeAsync<T> {
+export class PipeAsync<T> {
   #value: Promise<T>;
 
   constructor(value: Promise<T>) {
@@ -18,6 +18,31 @@ class PipeAsync<T> {
     return new PipeAsync(nextValue);
   }
 
+  /**
+   * Attaches callbacks for the resolution and/or rejection of the promise.
+   *
+   * @typeParam TResult1 - The type of the value returned by the `onfulfilled` callback, or the type of the resolved value if `onfulfilled` is not provided.
+   * @typeParam TResult2 - The type of the value returned by the `onrejected` callback, or the type of the rejected value if `onrejected` is not provided.
+   *
+   * @param onfulfilled - A callback to execute when the promise is resolved. This callback receives the resolved value as its argument.
+   * @param onrejected - A callback to execute when the promise is rejected. This callback receives the reason for the rejection as its argument.
+   *
+   * @returns A new `Promise` that resolves to the return value of the `onfulfilled` callback if it is provided and the promise is resolved,
+   * or to the return value of the `onrejected` callback if it is provided and the promise is rejected.
+   */
+  then<TResult1 = T, TResult2 = never>(
+    onfulfilled?:
+      | ((value: T) => TResult1 | PromiseLike<TResult1>)
+      | undefined
+      | null,
+    onrejected?:
+      | ((reason: any) => TResult2 | PromiseLike<TResult2>)
+      | undefined
+      | null,
+  ): Promise<TResult1 | TResult2> {
+    return this.#value.then(onfulfilled, onrejected);
+  }
+
   valueOf() {
     return this.#value;
   }
@@ -27,7 +52,7 @@ class PipeAsync<T> {
   }
 }
 
-class Pipe<T> {
+export class Pipe<T> {
   #value: T;
 
   constructor(value: T) {
@@ -49,6 +74,31 @@ class Pipe<T> {
   ): R extends Promise<infer R> ? PipeAsync<R> : Pipe<R> {
     const nextValue = cb(this.#value);
     return makePipe(nextValue) as any;
+  }
+
+  /**
+   * Attaches callbacks for the resolution and/or rejection of the promise.
+   *
+   * @typeParam TResult1 - The type of the value returned by the `onfulfilled` callback, or the type of the resolved value if `onfulfilled` is not provided.
+   * @typeParam TResult2 - The type of the value returned by the `onrejected` callback, or the type of the rejected value if `onrejected` is not provided.
+   *
+   * @param onfulfilled - A callback to execute when the promise is resolved. This callback receives the resolved value as its argument.
+   * @param onrejected - A callback to execute when the promise is rejected. This callback receives the reason for the rejection as its argument.
+   *
+   * @returns A new `Promise` that resolves to the return value of the `onfulfilled` callback if it is provided and the promise is resolved,
+   * or to the return value of the `onrejected` callback if it is provided and the promise is rejected.
+   */
+  then<TResult1 = T, TResult2 = never>(
+    onfulfilled?:
+      | ((value: T) => TResult1 | PromiseLike<TResult1>)
+      | undefined
+      | null,
+    onrejected?:
+      | ((reason: any) => TResult2 | PromiseLike<TResult2>)
+      | undefined
+      | null,
+  ): Promise<TResult1 | TResult2> {
+    return Promise.resolve(this.#value).then(onfulfilled, onrejected);
   }
 
   valueOf() {
