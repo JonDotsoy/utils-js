@@ -220,6 +220,12 @@ pipe(initialValue).value();
 pipe(initialValue).pipe(operator).value();
 pipe(initialValue).pipe(operator).pipe(operator).value();
 // ...and so on
+
+// If you use `await` directly, you do not need to call `.value()`:
+await pipe(initialValue);
+await pipe(initialValue).pipe(operator);
+await pipe(initialValue).pipe(operator).pipe(operator);
+// ...and so on
 ```
 
 **Basic usage:**
@@ -259,8 +265,8 @@ const result = await pipe(3)
 const res = await pipe(1)
   .pipe((a) => a + 1)
   .pipe(async (a) => a * 3)
-  .pipe((a) => a - 2)
-  .value(); // => 4
+  .pipe((a) => a - 2);
+// => 4
 
 // Only synchronous
 pipe(5)
