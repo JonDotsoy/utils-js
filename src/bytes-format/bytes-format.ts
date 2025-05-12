@@ -102,7 +102,8 @@ export class BytesFormat {
   }
   #formatAuto(bytes: number, initUnit?: BytesUnitType): string {
     const unit: BytesUnitType =
-      (initUnit ?? bytes < Bytes.kilobyte)
+      initUnit ??
+      (bytes < Bytes.kilobyte
         ? "byte"
         : bytes < Bytes.megabyte
           ? "kilobyte"
@@ -112,7 +113,7 @@ export class BytesFormat {
               ? "gigabyte"
               : bytes < Bytes.petabyte
                 ? "terabyte"
-                : "petabyte";
+                : "petabyte");
     return this.#getFormatters()[unit](bytes);
   }
 
