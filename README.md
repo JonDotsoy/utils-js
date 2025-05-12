@@ -343,7 +343,7 @@ await cleanupTasks.cleanup();
 
 ## Bytes
 
-A utility class for converting and formatting byte values in different units (byte, kilobyte, megabyte, gigabyte, terabyte, petabyte).
+A utility class for converting and formatting byte values in different units (byte, kilobyte, megabyte, gigabyte, terabyte, petabyte). Supports aliases and plural forms for units, as well as parsing from strings.
 
 **Syntax:**
 
@@ -355,20 +355,22 @@ const bytes = new Bytes(1024); // 1024 bytes
 
 ### Methods
 
-| Method                    | Description                                         |
-| ------------------------- | --------------------------------------------------- |
-| `toBytes()`               | Returns the value in bytes.                         |
-| `toKilobytes()`           | Returns the value in kilobytes.                     |
-| `toMegabytes()`           | Returns the value in megabytes.                     |
-| `toGigabytes()`           | Returns the value in gigabytes.                     |
-| `toTerabytes()`           | Returns the value in terabytes.                     |
-| `toPetabytes()`           | Returns the value in petabytes.                     |
-| `toLocaleString(locale?)` | Returns a human-readable string (e.g., '1 MB').     |
-| `from(value, unit)`       | Creates a new Bytes instance from a value and unit. |
+| Method                              | Description                                                                 |
+| ----------------------------------- | --------------------------------------------------------------------------- |
+| `toBytes()`                         | Returns the value in bytes.                                                 |
+| `toKilobytes()`                     | Returns the value in kilobytes.                                             |
+| `toMegabytes()`                     | Returns the value in megabytes.                                             |
+| `toGigabytes()`                     | Returns the value in gigabytes.                                             |
+| `toTerabytes()`                     | Returns the value in terabytes.                                             |
+| `toPetabytes()`                     | Returns the value in petabytes.                                             |
+| `toLocaleString(locale?, options?)` | Returns a human-readable string (e.g., '1 MB'), accepts formatting options. |
+| `static from(value, unit?)`         | Creates a Bytes instance from a number and unit, or from a string.          |
 
-### Units
+### Supported units
 
-Supported units: `byte`, `kilobyte`, `megabyte`, `gigabyte`, `terabyte`, `petabyte` (also accepts abbreviations: `b`, `kb`, `mb`, `gb`, `tb`, `pb`).
+- `byte`, `kilobyte`, `megabyte`, `gigabyte`, `terabyte`, `petabyte`
+- Aliases: `b`, `kb`, `mb`, `gb`, `tb`, `pb`
+- Plurals: `bytes`, `kilobytes`, etc.
 
 ### Examples
 
@@ -381,14 +383,24 @@ bytes.toMegabytes(); // 1
 bytes.toGigabytes(); // 0.0009765625
 ```
 
-**Create Bytes from a specific unit:**
+**Create Bytes from number and unit:**
 
 ```ts
-const kb = new Bytes(0).from(1, "kilobyte");
+const kb = Bytes.from(1, "kilobyte");
 kb.toBytes(); // 1024
 
-const mb = new Bytes(0).from(2, "mb");
+const mb = Bytes.from(2, "mb");
 mb.toBytes(); // 2097152
+```
+
+**Create Bytes from string:**
+
+```ts
+const b1 = Bytes.from("1kb");
+b1.toBytes(); // 1024
+
+const b2 = Bytes.from("2 MB");
+b2.toBytes(); // 2097152
 ```
 
 **Format as a human-readable string:**
@@ -397,12 +409,15 @@ mb.toBytes(); // 2097152
 const bytes = new Bytes(123456789);
 bytes.toLocaleString("en-US"); // '117.74 MB'
 bytes.toLocaleString("de-DE"); // '117,74 MB'
+// With options:
+bytes.toLocaleString("en-US", { unit: "megabyte", maximumFractionDigits: 1 }); // '117.7 MB'
 ```
 
 **Error handling for invalid units:**
 
 ```ts
-new Bytes(0).from(1, "invalidUnit"); // Throws: Invalid unit type: invalidUnit
+Bytes.from(1, "invalidUnit"); // Throws: Invalid unit type: invalidUnit
+Bytes.from("10zz"); // Throws: Invalid unit type: zz
 ```
 
 ## BytesFormat
