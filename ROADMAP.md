@@ -54,6 +54,7 @@ Esta feature consiste en desarrollar una clase o utilidad llamada `query` que pe
 - Validación de valor: `query().hasProperty('name').equal('jhon')`.
 
 La utilidad debe soportar:
+
 - Composición de condiciones y validación de propiedades y valores de manera encadenada.
 - Consultas expresivas y potentes sobre los nodos recorridos por la librería `visit`.
 - Encadenamiento de múltiples condiciones `hasProperty`.
