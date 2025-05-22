@@ -1,7 +1,34 @@
 import { get } from "../get/get.js";
 
-const nodeParent = new WeakMap<WeakKey, unknown>();
-const nodeFieldName = new WeakMap<WeakKey, string | symbol | number>();
+/**
+ * A WeakMap that associates a node (of type `WeakKey`) with its parent node.
+ * This is typically used to track parent-child relationships in tree-like data structures
+ * without preventing garbage collection of nodes.
+ *
+ * @remarks
+ * The use of `WeakMap` ensures that references to nodes do not prevent their
+ * garbage collection when they are no longer in use elsewhere.
+ *
+ * @privateRemarks
+ * The value type is `unknown` to allow flexibility in the type of parent node stored.
+ */
+const nodeParentWeakMap = new WeakMap<WeakKey, unknown>();
+
+/**
+ * A WeakMap that associates a `WeakKey` object with a property identifier,
+ * which can be a string, symbol, or number. This is useful for storing
+ * metadata or properties related to specific nodes without preventing
+ * garbage collection of the keys.
+ *
+ * @remarks
+ * The use of `WeakMap` ensures that the mapping does not prevent the
+ * garbage collection of the key objects.
+ *
+ * @privateRemarks
+ * Ensure that `WeakKey` is a valid object type suitable for use as a
+ * `WeakMap` key.
+ */
+const nodePropertiesWeakMap = new WeakMap<WeakKey, string | symbol | number>();
 
 /**
  * A type alias for a function that takes an unknown node as input and returns a boolean.
@@ -26,7 +53,9 @@ export function* visit<T, A = T, R = T>(
     seenInstances.add(node);
   }
 
-  if (test?.(node as any) ?? true) yield node as unknown as R;
+  const testEval = test;
+
+  if (testEval?.(node as any) ?? true) yield node as unknown as R;
   const obj = get.record(node);
   if (obj === undefined) return;
   for (const key of [
@@ -35,17 +64,18 @@ export function* visit<T, A = T, R = T>(
   ]) {
     const child = get(obj, key);
     if (typeof child === "object" && child !== null) {
-      nodeParent.set(child, node);
-      nodeFieldName.set(child, key);
+      nodeParentWeakMap.set(child, node);
+      nodePropertiesWeakMap.set(child, key);
     }
-    yield* visit(child, test, seenInstances);
+    yield* visit(child, testEval, seenInstances);
   }
 }
 
 visit.getParent = (child: unknown) => {
-  if (typeof child === "object" && child !== null) return nodeParent.get(child);
+  if (typeof child === "object" && child !== null)
+    return nodeParentWeakMap.get(child);
 };
 visit.getFieldName = (child: unknown) => {
   if (typeof child === "object" && child !== null)
-    return nodeFieldName.get(child);
+    return nodePropertiesWeakMap.get(child);
 };
