@@ -1,8 +1,22 @@
 import { describe, it, expect } from "bun:test";
-import { query } from "./query";
+import Query, { query } from "./query";
 import { visit } from "../visit/visit";
 
 describe("query", () => {
+  it("should return true when value is true", () => {
+    const predicate = Query.createPredicate(query().equal(true));
+    const predicateResult = predicate(true);
+    expect(predicateResult).toBeTrue();
+  });
+
+  it("should return true when nested property 'properties.active' is true", () => {
+    const predicate = Query.createPredicate(
+      query().hasProperty("properties").hasProperty("active").equal(true),
+    );
+    const predicateResult = predicate({ properties: { active: true } });
+    expect(predicateResult).toBeTrue();
+  });
+
   it("should traverse and query a sample tree structure", () => {
     const tree = {
       type: "root",
