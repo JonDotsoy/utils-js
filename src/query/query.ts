@@ -70,6 +70,14 @@ export default class Query<T> {
     return query.#predicates.size;
   }
 
+  static and(queries: Query<any>[]) {
+    const combined = new Query<any>();
+    for (const q of queries) {
+      q.#predicates.forEach((p) => combined.#predicates.add(p));
+    }
+    return combined;
+  }
+
   /**
    * Creates a test function based on the provided `Query<A>`.
    *
@@ -91,3 +99,5 @@ export default class Query<T> {
 export function query<A>(): Query<A> {
   return new Query<A>();
 }
+
+query.and = Query.and;

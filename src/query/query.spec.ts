@@ -328,4 +328,61 @@ describe("query", () => {
 
     expect(nodes.length).toBe(1);
   });
+
+  it("should combine multiple queries with and() and return nodes matching all predicates", () => {
+    const tree = {
+      type: "root",
+      children: [
+        {
+          type: "element",
+          name: "div",
+          attributes: { id: "main" },
+        },
+        {
+          type: "element",
+          name: "span",
+        },
+        {
+          type: "element",
+          name: "div",
+        },
+        {
+          type: "text",
+          value: "Hello",
+        },
+      ],
+    };
+
+    const queryTypeElement = query<any>().where(
+      (node) => node.type === "element",
+    );
+    const queryNameDiv = query<any>().where((node) => node.name === "div");
+
+    const combinedQuery = query.and([queryTypeElement, queryNameDiv]);
+    const nodes = Array.from(visit<any>(tree, combinedQuery));
+
+    expect(nodes.length).toBe(2);
+    expect(nodes.every((n) => n.type === "element" && n.name === "div")).toBe(
+      true,
+    );
+  });
+
+  it("should return all nodes if and() is called with empty array", () => {
+    const tree = {
+      type: "root",
+      children: [
+        { type: "element", name: "div" },
+        { type: "text", value: "Hello" },
+      ],
+    };
+
+    const combinedQuery = query.and([]);
+    const nodes = Array.from(visit<any>(tree, combinedQuery));
+
+    // Should include root and both children
+    expect(nodes.length).toBe(9);
+    expect(nodes.some((n) => n.type === "root")).toBe(true);
+    expect(nodes.some((n) => n.type === "element")).toBe(true);
+    expect(nodes.some((n) => n.type === "text")).toBe(true);
+  });
 });
