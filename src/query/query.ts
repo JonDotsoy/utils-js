@@ -37,7 +37,7 @@ export default class Query<T> {
 
       return predicateResult;
     });
-    query.#selectProps = [...query.#selectProps];
+    query.#selectProps = [...this.#selectProps];
     return query;
   }
 
