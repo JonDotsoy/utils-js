@@ -305,7 +305,10 @@ describe("query", () => {
     const nodes = Array.from(
       visit<any>(
         tree,
-        query().hasProperty("metadata").hasProperty("namespace").match('profile'),
+        query()
+          .hasProperty("metadata")
+          .hasProperty("namespace")
+          .match("profile"),
       ),
     );
 
