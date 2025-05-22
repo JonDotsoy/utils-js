@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import Query, { query } from "./query";
+import { query } from "./query";
 import { visit } from "../visit/visit";
 
 describe("query", () => {
@@ -195,5 +195,120 @@ describe("query", () => {
 
     expect(nodes.length).toBe(1);
     expect(nodes[0] instanceof Custom).toBe(true);
+  });
+
+  it("should find all nodes that are instances of a base class", () => {
+    class CLS_A {}
+    class CLS_B extends CLS_A {}
+
+    const tree = {
+      children: [new CLS_A(), new CLS_B()],
+    };
+
+    const nodes = Array.from(visit<any>(tree, query().instanceOf(CLS_A)));
+
+    expect(nodes.length).toBe(2);
+  });
+
+  it("should find nodes that are instances of both base and derived class", () => {
+    class CLS_A {}
+    class CLS_B extends CLS_A {}
+
+    const tree = {
+      children: [new CLS_A(), new CLS_B()],
+    };
+
+    const nodes = Array.from(
+      visit<any>(tree, query().instanceOf(CLS_A).instanceOf(CLS_B)),
+    );
+
+    expect(nodes.length).toBe(1);
+  });
+
+  it("should find nodes with nested property 'meta.prop1'", () => {
+    const tree = {
+      children: [
+        {
+          type: "element",
+          meta: {
+            prop1: true,
+          },
+        },
+        {
+          type: "element",
+        },
+      ],
+    };
+
+    const nodes = Array.from(
+      visit<any>(tree, query().hasProperty("meta").hasProperty("prop1")),
+    );
+
+    expect(nodes.length).toBe(1);
+  });
+
+  it("should find nodes with nested property 'meta.prop1' equal to true", () => {
+    const tree = {
+      type: "element",
+      meta: {
+        prop1: true,
+      },
+    };
+
+    const nodes = Array.from(
+      visit<any>(
+        tree,
+        query().hasProperty("meta").hasProperty("prop1").equal(true),
+      ),
+    );
+
+    expect(nodes.length).toBe(1);
+  });
+
+  it("should find nodes with nested property 'meta.prop1' equal to true in a root element", () => {
+    const tree = {
+      type: "root",
+      children: [
+        {
+          type: "element",
+          meta: {
+            prop1: true,
+          },
+        },
+      ],
+    };
+
+    const nodes = Array.from(
+      visit<any>(
+        tree,
+        query().hasProperty("meta").hasProperty("prop1").equal(true),
+      ),
+    );
+
+    expect(nodes.length).toBe(1);
+  });
+
+  it("should find nodes with a nested property 'metadata.namespace' matching 'profile'", () => {
+    const tree = {
+      type: "root",
+      children: [
+        {
+          type: "element",
+          metadata: {
+            prop1: true,
+            namespace: "profile:write",
+          },
+        },
+      ],
+    };
+
+    const nodes = Array.from(
+      visit<any>(
+        tree,
+        query().hasProperty("metadata").hasProperty("namespace").match('profile'),
+      ),
+    );
+
+    expect(nodes.length).toBe(1);
   });
 });
