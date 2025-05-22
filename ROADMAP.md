@@ -48,7 +48,8 @@ Esta feature consiste en desarrollar una clase o utilidad llamada `query` que pe
 
 - `query()`: retorna todos los nodos y debe entregar una instancia de la clase `Query`.
 - `query().instanceOf(<CLASS>)`: retorna solo elementos de la clase definida.
-- `query.of([...queries])`: permite unir varias condiciones.
+- `query.and([...queries])`: permite unir varias condiciones con lógica AND.
+- `query.or([...queries])`: permite unir varias condiciones con lógica OR.
 - `query().hasProperty(symbol|string)`: valida que exista la propiedad.
 - Concatenación de propiedades: `query().hasProperty('child').hasProperty('name')`.
 - Validación de valor: `query().hasProperty('name').equal('jhon')`.
@@ -59,7 +60,7 @@ La utilidad debe soportar:
 - Consultas expresivas y potentes sobre los nodos recorridos por la librería `visit`.
 - Encadenamiento de múltiples condiciones `hasProperty`.
 - Validación de valores específicos tras la existencia de la propiedad.
-- Uso de `query.of([...queries])` para combinar condiciones.
+- Uso de `query.and([...queries])` y `query.or([...queries])` para combinar condiciones.
 
 ##### Ejemplos de uso
 
@@ -67,4 +68,5 @@ La utilidad debe soportar:
 - `query().instanceOf(Person)`: retorna nodos que sean instancia de la clase `Person`.
 - `query().hasProperty('child').hasProperty('name')`: retorna nodos que tengan la propiedad `child` y dentro de `child` la propiedad `name`.
 - `query().hasProperty('name').equal('jhon')`: retorna nodos cuya propiedad `name` sea igual a `'jhon'`.
-- `query.of([query().instanceOf(Person), query().hasProperty('active').equal(true)])`: retorna nodos que sean instancia de `Person` y tengan la propiedad `active` igual a `true`.
+- `query.and([query().instanceOf(Person), query().hasProperty('active').equal(true)])`: retorna nodos que sean instancia de `Person` y tengan la propiedad `active` igual a `true`.
+- `query.or([query().hasProperty('admin').equal(true), query().hasProperty('role').equal('superuser')])`: retorna nodos que tengan la propiedad `admin` igual a `true` o la propiedad `role` igual a `'superuser'`.
