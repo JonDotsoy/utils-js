@@ -1,4 +1,5 @@
 import { get } from "../get/get.js";
+import Query from "../query/query.js";
 
 /**
  * A WeakMap that associates a node (of type `WeakKey`) with its parent node.
@@ -33,7 +34,7 @@ const nodePropertiesWeakMap = new WeakMap<WeakKey, string | symbol | number>();
 /**
  * A type alias for a function that takes an unknown node as input and returns a boolean.
  */
-type Test<A> = (node: A) => boolean;
+type Test<A> = ((node: A) => boolean) | Query<A>;
 
 /**
  * A generator function that recursively visits nodes in an object, yielding each node that passes the provided test.
@@ -53,7 +54,7 @@ export function* visit<T, A = T, R = T>(
     seenInstances.add(node);
   }
 
-  const testEval = test;
+  const testEval = test instanceof Query ? Query.createPredicate(test) : test;
 
   if (testEval?.(node as any) ?? true) yield node as unknown as R;
   const obj = get.record(node);
