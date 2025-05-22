@@ -1,4 +1,4 @@
-import get from "../get/get.js";
+import { get } from "../get/get.js";
 
 /**
  * Represents a function that evaluates a condition on a given value of type `T`.
@@ -17,7 +17,7 @@ export default class Query<T> {
   constructor() {}
 
   /**
-   * Filtra los nodos por instancia de clase
+   * Filters nodes by class instance
    */
   instanceOf<T>(cls: new (...args: any[]) => T) {
     return this.where((node) => {
@@ -74,7 +74,7 @@ export default class Query<T> {
    * Creates a test function based on the provided `Query<A>`.
    *
    * @typeParam A - The type of the node to be tested.
-   * @param test - A query object or function used to define the test logic.
+   * @param query - A query object or function used to define the test logic.
    * @returns A predicate function that takes a node of type `A` and returns a boolean indicating if the node passes the test.
    */
   static createPredicate<A>(query: Query<A>): Predicate<A> {
