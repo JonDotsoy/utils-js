@@ -153,12 +153,12 @@ export const hexToByte = (hex: string | number | bigint): Uint8Array => {
 /**
  * Creates a digest function using the specified cryptographic hash algorithm.
  *
- * @param algorithm - The hash algorithm to use ("SHA-256", "SHA-384", "SHA-512", or "SHA - 1").
+ * @param algorithm - The hash algorithm to use ("SHA-256", "SHA-384", "SHA-512", or "SHA-1").
  * @returns An asynchronous function that takes a `BufferSource` and returns a `Promise` resolving to the hash as an `ArrayBuffer`.
  *
  * @example
  * ```typescript
- * const sha256Digest = digest("SHA-256");
+ * const sha256Digest = digest("SHA-256");f
  * const hash = await sha256Digest(new TextEncoder().encode("hello"));
  * ```
  */
