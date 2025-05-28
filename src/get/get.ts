@@ -56,6 +56,14 @@ export const get = (obj: unknown, ...paths: PropertyKey[]): unknown => {
   return get(Reflect.get(obj, path), ...nextPaths);
 };
 
+/**
+ * Creates a validator function that extracts a value from an object at the specified property path
+ * and checks if its type matches the given primitive type.
+ *
+ * @template T - The expected return type of the value extractor.
+ * @param type - The primitive type to validate against (e.g., 'string', 'number', etc.).
+ * @returns A function that takes an object and a property path, returning the value if it matches the specified type, or `undefined` otherwise.
+ */
 const createValidatorPrimitiveType =
   <T>(type: primitiveTypes[number]): ValueExtractor<T> =>
   (obj: unknown, ...paths: PropertyKey[]): undefined | T => {
@@ -94,9 +102,23 @@ const createValidatorCustomType =
     return value as T;
   };
 
-/** Validates that a value is an string */
+/**
+ * Extracts a value from an object at the specified property path and validates that it is a string.
+ *
+ * @param obj - The object from which to extract the value.
+ * @param paths - The property keys that define the path to the desired value.
+ * @returns The string value at the specified path, or `undefined` if the value is not a string.
+ *
+ * @example
+ * ```typescript
+ * const obj = { a: { b: 'hello' } };
+ * const result = getString(obj, 'a', 'b'); // result: 'hello'
+ * const invalid = getString(obj, 'a', 'c'); // invalid: undefined
+ * ```
+ */
 const getString: ValueExtractor<string> =
   createValidatorPrimitiveType<string>("string");
+
 /** Validates that a value is an number */
 const getNumber: ValueExtractor<number> = (obj, ...paths) => {
   const value = get(obj, ...paths);
