@@ -26,11 +26,11 @@ Type extractors are specialized methods that allow you to obtain and validate va
 
 Available extractors:
 
-- `get.string(obj, ...paths)` → Returns a string if the value is or can be converted to string.
-- `get.number(obj, ...paths)` → Returns a number if the value is or can be converted to number.
-- `get.boolean(obj, ...paths)` → Returns a boolean if the value is or can be converted to boolean.
+- `get.string(obj, ...paths)` → Returns a string if the value is or can be converted to a string.
+- `get.number(obj, ...paths)` → Returns a number if the value is or can be converted to a number.
+- `get.boolean(obj, ...paths)` → Returns a boolean if the value is or can be converted to a boolean.
 - `get.function(obj, ...paths)` → Returns a function if the value is a function.
-- `get.bigint(obj, ...paths)` → Returns a bigint if the value is or can be converted to bigint.
+- `get.bigint(obj, ...paths)` → Returns a bigint if the value is or can be converted to a bigint.
 - `get.symbol(obj, ...paths)` → Returns a symbol if the value is a symbol.
 - `get.array(obj, ...paths)` → Returns an array if the value is an array.
 - `get.date(obj, ...paths)` → Returns a Date object if the value is or can be converted to a date.
@@ -88,15 +88,15 @@ Return the value validated and converted to the corresponding type, or `undefine
 
 ### get.parse(parser, obj, ...paths)
 
-Extracts a nested value from the object and validates or transforms it using a parser. El parser puede ser un esquema de Zod, un objeto personalizado con un método `safeParse`, o cualquier validador compatible. Si el valor pasa la validación, se retorna el valor parseado/transformado; de lo contrario, se retorna `undefined`.
+Extracts a nested value from the object and validates or transforms it using a parser. The parser can be a Zod schema, a custom object with a `safeParse` method, or any compatible validator. If the value passes validation, the parsed/transformed value is returned; otherwise, `undefined` is returned.
 
-- **Parámetros:**
-  - `parser`: Un esquema de Zod, o cualquier objeto con un método `safeParse` que retorne `{ success: boolean, data?: any }`.
-  - `obj`: El objeto fuente.
-  - `...paths`: (opcional) Secuencia de claves para acceder al valor anidado (como en `get`).
-- **Retorna:** El valor parseado/transformado si la validación es exitosa, o `undefined` si falla.
+- **Parameters:**
+  - `parser`: A Zod schema, or any object with a `safeParse` method that returns `{ success: boolean, data?: any }`.
+  - `obj`: The source object.
+  - `...paths`: (optional) Sequence of keys to access the nested value (like in `get`).
+- **Returns:** The parsed/transformed value if validation succeeds, or `undefined` if it fails.
 
-#### Ejemplo: Usando Zod
+#### Example: Using Zod
 
 ```typescript
 import { get } from "@jondotsoy/utils-js/get";
@@ -110,7 +110,7 @@ const value = get.parse(
 // value === 32
 ```
 
-#### Ejemplo: Parser personalizado
+#### Example: Custom parser
 
 ```typescript
 const customParser = {
@@ -126,7 +126,7 @@ const result = get.parse(customParser, obj);
 // result === 123
 ```
 
-Si la validación falla, se retorna `undefined`:
+If the validation fails, `undefined` is returned:
 
 ```typescript
 const obj = { val: "not-a-number" };
