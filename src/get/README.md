@@ -28,16 +28,17 @@ Available extractors:
 
 - `get.string(obj, ...paths)` → Returns a string if the value is or can be converted to string.
 - `get.number(obj, ...paths)` → Returns a number if the value is or can be converted to number.
-- `get.boolean(obj, ...paths)` → Returns a boolean if the value is boolean.
-- `get.function(obj, ...paths)` → Returns a function if the value is function.
+- `get.boolean(obj, ...paths)` → Returns a boolean if the value is or can be converted to boolean.
+- `get.function(obj, ...paths)` → Returns a function if the value is a function.
 - `get.bigint(obj, ...paths)` → Returns a bigint if the value is or can be converted to bigint.
-- `get.symbol(obj, ...paths)` → Returns a symbol if the value is symbol.
+- `get.symbol(obj, ...paths)` → Returns a symbol if the value is a symbol.
 - `get.array(obj, ...paths)` → Returns an array if the value is an array.
 - `get.date(obj, ...paths)` → Returns a Date object if the value is or can be converted to a date.
 - `get.numberDate(obj, ...paths)` → Returns a timestamp (number) if the value is a number or a valid date.
 - `get.isoStringDate(obj, ...paths)` → Returns a string in ISO format if the value is or can be converted to a date.
 - `get.record(obj, ...paths)` / `get.object(obj, ...paths)` → Returns an object if the value is a non-null object.
 - `get.is(test)(obj, ...paths)` → Allows you to define a custom extractor using a validation function.
+- `get.parse(parser, obj, ...paths)` → Returns the parsed/transformed value using a parser (Zod schema or custom safeParse object) if validation succeeds.
 
 These methods help you write more robust and safe code, especially when working with dynamic data or complex nested structures.
 
