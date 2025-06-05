@@ -56,6 +56,14 @@ export const get = (obj: unknown, ...paths: PropertyKey[]): unknown => {
   return get(Reflect.get(obj, path), ...nextPaths);
 };
 
+/**
+ * Creates a validator function that extracts a value from an object at the specified property path
+ * and checks if its type matches the given primitive type.
+ *
+ * @template T - The expected return type of the value extractor.
+ * @param type - The primitive type to validate against (e.g., 'string', 'number', etc.).
+ * @returns A function that takes an object and a property path, returning the value if it matches the specified type, or `undefined` otherwise.
+ */
 const createValidatorPrimitiveType =
   <T>(type: primitiveTypes[number]): ValueExtractor<T> =>
   (obj: unknown, ...paths: PropertyKey[]): undefined | T => {
@@ -94,9 +102,23 @@ const createValidatorCustomType =
     return value as T;
   };
 
-/** Validates that a value is an string */
+/**
+ * Extracts a value from an object at the specified property path and validates that it is a string.
+ *
+ * @param obj - The object from which to extract the value.
+ * @param paths - The property keys that define the path to the desired value.
+ * @returns The string value at the specified path, or `undefined` if the value is not a string.
+ *
+ * @example
+ * ```typescript
+ * const obj = { a: { b: 'hello' } };
+ * const result = getString(obj, 'a', 'b'); // result: 'hello'
+ * const invalid = getString(obj, 'a', 'c'); // invalid: undefined
+ * ```
+ */
 const getString: ValueExtractor<string> =
   createValidatorPrimitiveType<string>("string");
+
 /** Validates that a value is an number */
 const getNumber: ValueExtractor<number> = (obj, ...paths) => {
   const value = get(obj, ...paths);
@@ -229,9 +251,33 @@ const getObject = getRecord;
  * whether the value satisfies the desired condition.
  * @returns A `ValueExtractor` for the specified type `T` that uses the provided test function
  * to validate values.
+ * @deprecated
  */
 const getIs = <T>(test: (value: unknown) => boolean): ValueExtractor<T> =>
   createValidatorCustomType<T>(test);
+
+type ParsedResult<T> =
+  | { success: true; data: T }
+  | { success: false; error: unknown };
+
+type SafeParserFn<T> = { safeParse: (v: any) => ParsedResult<T> };
+
+type GenericSafeParser<T> = SafeParserFn<T>;
+
+const getParsedData = <T = unknown>(
+  test: GenericSafeParser<T>,
+  obj: unknown,
+  ...paths: PropertyKey[]
+): T | undefined => {
+  const isSafeParser = (value: any): value is SafeParserFn<any> =>
+    typeof value === "object" && value !== null && "safeParse" in value;
+
+  const parsedResult: ParsedResult<T> | null = isSafeParser(test)
+    ? test.safeParse(get(obj, ...paths))
+    : null;
+
+  return parsedResult?.success ? parsedResult.data : undefined;
+};
 
 get.string = getString;
 get.number = getNumber;
@@ -240,7 +286,9 @@ get.function = getFunction;
 get.bigint = getBigint;
 get.symbol = getSymbol;
 get.array = getArray;
+/** @deprecated */
 get.is = getIs;
+get.parse = getParsedData;
 get.date = getDate;
 get.numberDate = getNumberDate;
 get.isoStringDate = getISOStringDate;

@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import { get } from "./get.js";
+import { z } from "zod/v4";
 
 test("should return undefined when value is not a string", () => {
   const obj = { key: 3 };
@@ -186,4 +187,76 @@ test("should return the value as a number when key is '123.4231'", () => {
 test("should return undefined when value is a malformed float string", () => {
   const obj = { key: "123.42.31" };
   expect(get.number(obj, "key")).toBeUndefined();
+});
+
+test("should extract and return value using get.parse with zod", () => {
+  const obj = { val: 32 };
+  const value = get.parse(
+    z.object({ val: z.number() }).transform((e) => e.val),
+    obj,
+  );
+
+  expect(value).toEqual(32);
+});
+
+test("should return the value when custom predicate returns true (get.is)", () => {
+  const isEven = (v: unknown): v is number =>
+    typeof v === "number" && v % 2 === 0;
+  const getEven = get.is(isEven);
+  const obj = { n: 4, m: 3 };
+  expect(getEven(obj, "n")).toBe(4);
+  expect(getEven(obj, "m")).toBeUndefined();
+});
+
+test("should extract and transform value using get.parse with zod", () => {
+  const obj = { val: 32 };
+  const result = get.parse(
+    z.object({ val: z.number() }).transform((e) => e.val),
+    obj,
+  );
+  expect(result).toBe(32);
+});
+
+test("should return undefined if zod parse fails in get.parse", () => {
+  const obj = { val: "not-a-number" };
+  const result = get.parse(
+    z.object({ val: z.number() }).transform((e) => e.val),
+    obj,
+  );
+  expect(result).toBeUndefined();
+});
+
+test("should extract value using get.parse with a custom safeParse object (success, strict ParseResult)", () => {
+  const obj = { foo: 123 };
+  const customParser = {
+    safeParse(v: any) {
+      if (v && typeof v.foo === "number") {
+        return { success: true as const, data: v.foo };
+      }
+      return { success: false as const, error: "Not a number" };
+    },
+  };
+  const result = get.parse(customParser, obj);
+  expect(result).toBe(123);
+});
+
+test("should return undefined using get.parse with a custom safeParse object (failure, strict ParseResult)", () => {
+  const obj = { foo: "bar" };
+  const customParser = {
+    safeParse(v: any) {
+      if (v && typeof v.foo === "number") {
+        return { success: true as const, data: v.foo };
+      }
+      return { success: false as const, error: "Not a number" };
+    },
+  };
+  const result = get.parse(customParser, obj);
+  expect(result).toBeUndefined();
+});
+
+test("should extract and transform nested value using get.parse with path", () => {
+  const obj = { user: { profile: { age: "25" } } };
+  const schema = z.object({ age: z.preprocess(Number, z.number()) });
+  const result = get.parse(schema, obj, "user", "profile");
+  expect(result).toEqual({ age: 25 });
 });
