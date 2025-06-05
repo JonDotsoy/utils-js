@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.9.0...utils-js-v0.10.0) (2025-06-05)
+
+
+### Features
+
+* **get:** add get.parse method for value extraction and validation using Zod or custom parsers ([#26](https://github.com/JonDotsoy/utils-js/issues/26)) ([1660dc0](https://github.com/JonDotsoy/utils-js/commit/1660dc0d2a46381350b337dc77b1ce2f43c64a36))
+
 ## [0.9.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.8.1...utils-js-v0.9.0) (2025-05-12)
 
 
