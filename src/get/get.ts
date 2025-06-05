@@ -251,9 +251,30 @@ const getObject = getRecord;
  * whether the value satisfies the desired condition.
  * @returns A `ValueExtractor` for the specified type `T` that uses the provided test function
  * to validate values.
+ * @deprecated
  */
 const getIs = <T>(test: (value: unknown) => boolean): ValueExtractor<T> =>
   createValidatorCustomType<T>(test);
+
+type ParseResult<T> =
+  | { success: true; data: T }
+  | { success: false; error: unknown };
+
+type SafeParserFn<T> = { safeParse: (v: any) => ParseResult<T> };
+
+type A<T> = SafeParserFn<T>;
+
+const getParsedData = <T = unknown>(
+  obj: unknown,
+  test: A<T>,
+): T | undefined => {
+  const p = (value: any): value is SafeParserFn<any> =>
+    typeof value === "object" && value !== null && "safeParse" in value;
+
+  const R: ParseResult<T> | null = p(test) ? test.safeParse(obj) : null;
+
+  return R?.success ? R.data : undefined;
+};
 
 get.string = getString;
 get.number = getNumber;
@@ -262,7 +283,9 @@ get.function = getFunction;
 get.bigint = getBigint;
 get.symbol = getSymbol;
 get.array = getArray;
+/** @deprecated */
 get.is = getIs;
+get.parse = getParsedData;
 get.date = getDate;
 get.numberDate = getNumberDate;
 get.isoStringDate = getISOStringDate;

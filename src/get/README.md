@@ -85,6 +85,70 @@ Returns the nested value in the object following the sequence of keys. If any ke
 
 Return the value validated and converted to the corresponding type, or `undefined` if it is not valid.
 
+### get.parse(obj, parser)
+
+Extracts a nested value from the object and validates or transforms it using a parser. The parser can be a Zod schema, a custom object with a `safeParse` method, or any compatible validator. If the value passes validation, the parsed/transformed value is returned; otherwise, `undefined` is returned.
+
+- **Parameters:**
+  - `obj`: The source object.
+  - `parser`: A Zod schema, or any object with a `safeParse` method that returns `{ success: boolean, data?: any }`.
+  - `...paths`: (optional) Sequence of keys to access the nested value (like in `get`).
+- **Returns:** The parsed/transformed value if validation succeeds, or `undefined` if it fails.
+
+#### Example: Using Zod
+
+```typescript
+import { get } from "@jondotsoy/utils-js/get";
+import { z } from "zod";
+
+const obj = { val: 32 };
+const value = get.parse(
+  obj,
+  z.object({ val: z.number() }).transform((e) => e.val),
+);
+// value === 32
+```
+
+#### Example: Custom parser
+
+```typescript
+const customParser = {
+  safeParse(v: any) {
+    if (v && typeof v.foo === "number") {
+      return { success: true as const, data: v.foo };
+    }
+    return { success: false as const, error: "Not a number" };
+  },
+};
+const obj = { foo: 123 };
+const result = get.parse(obj, customParser);
+// result === 123
+```
+
+If the validation fails, `undefined` is returned:
+
+```typescript
+const obj = { val: "not-a-number" };
+const value = get.parse(
+  obj,
+  z.object({ val: z.number() }).transform((e) => e.val),
+);
+// value === undefined
+```
+
 ### get.is(test)
 
-Creates a custom extractor using a validation function.
+> ⚠️ **Deprecated**: This function is deprecated. It is recommended to use custom extractors directly with `get.parse` or equivalent functions.
+
+Allows you to create a custom extractor using a validation function. Returns the validated value if the function returns `true`, or `undefined` otherwise.
+
+```typescript
+// Example usage (still supported for compatibility):
+const isEven = (v: unknown): v is number =>
+  typeof v === "number" && v % 2 === 0;
+const getEven = get.is(isEven);
+const obj = { n: 4 };
+const even = getEven(obj, "n"); // 4
+```
+
+> **Note:** For new code, it is recommended to define custom extractors using `get.parse` or similar approaches instead of `get.is`.
