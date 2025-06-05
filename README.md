@@ -111,7 +111,7 @@ for (const node of visit(
 
 ## Get
 
-Safely access deeply nested properties in JavaScript/TypeScript objects by following a sequence of keys. The module also exposes type extractors that validate and convert the value when possible, making dynamic data handling safer and more convenient.
+Safely access deeply nested properties in JavaScript/TypeScript objects by following a sequence of keys. The module also exposes type extractors and advanced validators that validate and convert the value when possible, making dynamic data handling safer and more convenient.
 
 **Basic Syntax:**
 
@@ -120,7 +120,7 @@ get(obj); // => unknown | undefined
 get(obj, ...paths); // => unknown | undefined
 ```
 
-**Type Extractors:**
+**Type Extractors and Advanced Validators:**
 
 These methods allow you to obtain and validate values of specific types, attempting to convert the value when possible. They return `undefined` if the conversion or validation fails.
 
@@ -136,6 +136,7 @@ These methods allow you to obtain and validate values of specific types, attempt
 - `get.isoStringDate(obj, ...paths)` → string | undefined (ISO)
 - `get.record(obj, ...paths)` / `get.object(obj, ...paths)` → object | undefined
 - `get.is(test)(obj, ...paths)` → custom validation using a predicate function
+- `get.parse(parser, obj, ...paths)` → advanced extraction and validation using a Zod schema or any object with a `safeParse` method
 
 **Examples:**
 
@@ -166,7 +167,27 @@ const obj = { n: 4 };
 getEven(obj, "n"); // 4
 ```
 
-These extractors help you write more robust and safe code, especially when working with dynamic data or complex nested structures.
+Advanced extraction and validation with Zod or custom parser:
+
+```ts
+import { z } from "zod";
+const obj = { user: { profile: { age: "25" } } };
+const schema = z.object({ age: z.preprocess(Number, z.number()) });
+get.parse(schema, obj, "user", "profile"); // { age: 25 }
+
+const customParser = {
+  safeParse(v: any) {
+    if (v && typeof v.foo === "number") {
+      return { success: true as const, data: v.foo };
+    }
+    return { success: false as const, error: "Not a number" };
+  },
+};
+const obj2 = { foo: 123 };
+get.parse(customParser, obj2); // 123
+```
+
+These extractors and validators help you write more robust and safe code, especially when working with dynamic data or complex nested structures.
 
 ## Set
 
