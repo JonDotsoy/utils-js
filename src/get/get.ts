@@ -256,24 +256,27 @@ const getObject = getRecord;
 const getIs = <T>(test: (value: unknown) => boolean): ValueExtractor<T> =>
   createValidatorCustomType<T>(test);
 
-type ParseResult<T> =
+type ParsedResult<T> =
   | { success: true; data: T }
   | { success: false; error: unknown };
 
-type SafeParserFn<T> = { safeParse: (v: any) => ParseResult<T> };
+type SafeParserFn<T> = { safeParse: (v: any) => ParsedResult<T> };
 
-type A<T> = SafeParserFn<T>;
+type GenericSafeParser<T> = SafeParserFn<T>;
 
 const getParsedData = <T = unknown>(
+  test: GenericSafeParser<T>,
   obj: unknown,
-  test: A<T>,
+  ...paths: PropertyKey[]
 ): T | undefined => {
-  const p = (value: any): value is SafeParserFn<any> =>
+  const isSafeParser = (value: any): value is SafeParserFn<any> =>
     typeof value === "object" && value !== null && "safeParse" in value;
 
-  const R: ParseResult<T> | null = p(test) ? test.safeParse(obj) : null;
+  const parsedResult: ParsedResult<T> | null = isSafeParser(test)
+    ? test.safeParse(get(obj, ...paths))
+    : null;
 
-  return R?.success ? R.data : undefined;
+  return parsedResult?.success ? parsedResult.data : undefined;
 };
 
 get.string = getString;

@@ -192,8 +192,8 @@ test("should return undefined when value is a malformed float string", () => {
 test("should extract and return value using get.parse with zod", () => {
   const obj = { val: 32 };
   const value = get.parse(
-    obj,
     z.object({ val: z.number() }).transform((e) => e.val),
+    obj,
   );
 
   expect(value).toEqual(32);
@@ -211,8 +211,8 @@ test("should return the value when custom predicate returns true (get.is)", () =
 test("should extract and transform value using get.parse with zod", () => {
   const obj = { val: 32 };
   const result = get.parse(
-    obj,
     z.object({ val: z.number() }).transform((e) => e.val),
+    obj,
   );
   expect(result).toBe(32);
 });
@@ -220,8 +220,8 @@ test("should extract and transform value using get.parse with zod", () => {
 test("should return undefined if zod parse fails in get.parse", () => {
   const obj = { val: "not-a-number" };
   const result = get.parse(
-    obj,
     z.object({ val: z.number() }).transform((e) => e.val),
+    obj,
   );
   expect(result).toBeUndefined();
 });
@@ -236,7 +236,7 @@ test("should extract value using get.parse with a custom safeParse object (succe
       return { success: false as const, error: "Not a number" };
     },
   };
-  const result = get.parse(obj, customParser);
+  const result = get.parse(customParser, obj);
   expect(result).toBe(123);
 });
 
@@ -250,6 +250,6 @@ test("should return undefined using get.parse with a custom safeParse object (fa
       return { success: false as const, error: "Not a number" };
     },
   };
-  const result = get.parse(obj, customParser);
+  const result = get.parse(customParser, obj);
   expect(result).toBeUndefined();
 });
