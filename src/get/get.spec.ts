@@ -253,3 +253,10 @@ test("should return undefined using get.parse with a custom safeParse object (fa
   const result = get.parse(customParser, obj);
   expect(result).toBeUndefined();
 });
+
+test("should extract and transform nested value using get.parse with path", () => {
+  const obj = { user: { profile: { age: "25" } } };
+  const schema = z.object({ age: z.preprocess(Number, z.number()) });
+  const result = get.parse(schema, obj, "user", "profile");
+  expect(result).toEqual({ age: 25 });
+});
