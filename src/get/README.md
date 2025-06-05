@@ -85,17 +85,17 @@ Returns the nested value in the object following the sequence of keys. If any ke
 
 Return the value validated and converted to the corresponding type, or `undefined` if it is not valid.
 
-### get.parse(obj, parser)
+### get.parse(parser, obj, ...paths)
 
-Extracts a nested value from the object and validates or transforms it using a parser. The parser can be a Zod schema, a custom object with a `safeParse` method, or any compatible validator. If the value passes validation, the parsed/transformed value is returned; otherwise, `undefined` is returned.
+Extracts a nested value from the object and validates or transforms it using a parser. El parser puede ser un esquema de Zod, un objeto personalizado con un método `safeParse`, o cualquier validador compatible. Si el valor pasa la validación, se retorna el valor parseado/transformado; de lo contrario, se retorna `undefined`.
 
-- **Parameters:**
-  - `obj`: The source object.
-  - `parser`: A Zod schema, or any object with a `safeParse` method that returns `{ success: boolean, data?: any }`.
-  - `...paths`: (optional) Sequence of keys to access the nested value (like in `get`).
-- **Returns:** The parsed/transformed value if validation succeeds, or `undefined` if it fails.
+- **Parámetros:**
+  - `parser`: Un esquema de Zod, o cualquier objeto con un método `safeParse` que retorne `{ success: boolean, data?: any }`.
+  - `obj`: El objeto fuente.
+  - `...paths`: (opcional) Secuencia de claves para acceder al valor anidado (como en `get`).
+- **Retorna:** El valor parseado/transformado si la validación es exitosa, o `undefined` si falla.
 
-#### Example: Using Zod
+#### Ejemplo: Usando Zod
 
 ```typescript
 import { get } from "@jondotsoy/utils-js/get";
@@ -103,13 +103,13 @@ import { z } from "zod";
 
 const obj = { val: 32 };
 const value = get.parse(
-  obj,
   z.object({ val: z.number() }).transform((e) => e.val),
+  obj,
 );
 // value === 32
 ```
 
-#### Example: Custom parser
+#### Ejemplo: Parser personalizado
 
 ```typescript
 const customParser = {
@@ -121,17 +121,17 @@ const customParser = {
   },
 };
 const obj = { foo: 123 };
-const result = get.parse(obj, customParser);
+const result = get.parse(customParser, obj);
 // result === 123
 ```
 
-If the validation fails, `undefined` is returned:
+Si la validación falla, se retorna `undefined`:
 
 ```typescript
 const obj = { val: "not-a-number" };
 const value = get.parse(
-  obj,
   z.object({ val: z.number() }).transform((e) => e.val),
+  obj,
 );
 // value === undefined
 ```
