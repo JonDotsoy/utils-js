@@ -1,0 +1,54 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`query should traverse and query a sample tree structure 1`] = `
+[
+  {
+    "children": [
+      {
+        "attributes": {
+          "class": "container",
+          "id": "main",
+        },
+        "name": "div",
+        "type": "element",
+      },
+    ],
+    "type": "root",
+  },
+  "root",
+  [
+    {
+      "attributes": {
+        "class": "container",
+        "id": "main",
+      },
+      "name": "div",
+      "type": "element",
+    },
+  ],
+  {
+    "attributes": {
+      "class": "container",
+      "id": "main",
+    },
+    "name": "div",
+    "type": "element",
+  },
+  "element",
+  "div",
+  {
+    "class": "container",
+    "id": "main",
+  },
+  "main",
+  "container",
+]
+`;
+
+exports[`query should traverse and query instances of a specific class in the tree 1`] = `
+[
+  CLS {
+    "name": "label",
+  },
+]
+`;
