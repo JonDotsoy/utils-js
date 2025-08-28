@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.11.0...utils-js-v0.11.1) (2025-08-28)
+
+
+### Bug Fixes
+
+* **release:** add --provenance flag to npm publish command ([b79f7b9](https://github.com/JonDotsoy/utils-js/commit/b79f7b919dedb4436e50f180a31bb46cc0568ad9))
+
 ## [0.11.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.10.0...utils-js-v0.11.0) (2025-08-28)
 
 
