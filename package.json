@@ -37,6 +37,10 @@
       "import": "./libs/esm/pipe/pipe.js",
       "types": "./libs/types/pipe/pipe.d.ts"
     },
+    "./queue": {
+      "import": "./libs/esm/queue/queue.js",
+      "types": "./libs/types/queue/queue.d.ts"
+    },
     "./result": {
       "import": "./libs/esm/result/result.js",
       "types": "./libs/types/result/result.d.ts"
