@@ -10,6 +10,7 @@ Some utilities for JS. Will be util to reduce common logic in your code.
 - [CleanupTasks](#cleanuptasks)
 - [Bytes](#bytes)
 - [BytesFormat](#bytesformat)
+- [Queue](#queue)
 
 ## Visit
 
@@ -527,6 +528,181 @@ new BytesFormat("en-US", { maximumFractionDigits: 0 }).format(1536); // '2 kB'
 ```ts
 new BytesFormat("de-DE").format(123456789); // '117,74 MB'
 ```
+
+## Queue
+
+A lightweight asynchronous message queue system with support for pluggable storage, keep-alive acknowledgments, and concurrent worker processing. Perfect for background job processing, task coordination, and reliable message distribution.
+
+**Import:**
+
+```ts
+import { Queue } from "@jondotsoy/utils-js/queue";
+```
+
+### Basic Usage
+
+**Simple message processing:**
+
+```ts
+const queue = new Queue();
+
+// Add messages
+await queue.add({ task: "send-email", to: "user@example.com" });
+await queue.add({ task: "process-image", id: 123 });
+
+// Process messages with async iteration
+for await (const message of queue) {
+  console.log("Processing:", message);
+  // Message is automatically acknowledged and deleted
+}
+```
+
+**Concurrent workers:**
+
+```ts
+const queue = new Queue();
+
+const worker1 = async () => {
+  for await (const job of queue) {
+    console.log("Worker 1 processing:", job);
+    await simulateWork(job);
+  }
+};
+
+const worker2 = async () => {
+  for await (const job of queue) {
+    console.log("Worker 2 processing:", job);
+    await simulateWork(job);
+  }
+};
+
+// Both workers process different messages concurrently
+await Promise.all([worker1(), worker2()]);
+```
+
+### Queue Options
+
+```ts
+const queue = new Queue({
+  pollingIntervalMs: 100, // Delay between polls when queue is empty (default: 50)
+  messageTimeoutMs: 5000, // Message timeout for recovery (default: 100)
+  ackIntervalMs: 1000, // Keep-alive acknowledgment interval (default: 100)
+  store: new MemoryStore(), // Custom storage backend (default: MemoryStore)
+});
+```
+
+### Consumption Modes
+
+**Exit when empty (default):**
+
+```ts
+for await (const job of queue.consume()) {
+  // Exits when no more messages
+}
+```
+
+**Continuous polling:**
+
+```ts
+for await (const job of queue.consume(true)) {
+  // Keeps polling for new messages indefinitely
+}
+```
+
+**With AbortSignal:**
+
+```ts
+const controller = new AbortController();
+setTimeout(() => controller.abort(), 10000); // Stop after 10 seconds
+
+for await (const job of queue.consume(controller.signal)) {
+  // Process messages until aborted
+}
+```
+
+**With reactive control:**
+
+```ts
+class ToggleObserver {
+  #enabled = true;
+
+  get value() {
+    return this.#enabled;
+  }
+
+  toggle() {
+    this.#enabled = !this.#enabled;
+  }
+}
+
+const observer = new ToggleObserver();
+
+for await (const job of queue.consume(observer)) {
+  // Processing can be dynamically enabled/disabled
+}
+```
+
+### Manual Message Handling
+
+For advanced use cases where you need manual control over message acknowledgment:
+
+```ts
+const message = await queue.pull();
+if (message) {
+  try {
+    // Process the message
+    await processMessage(message.data);
+
+    // Manually acknowledge and delete
+    await message.ack();
+    await message.delete();
+  } catch (error) {
+    // Message will be automatically reclaimed after timeout
+    console.error("Processing failed:", error);
+  }
+}
+```
+
+### Custom Storage Backend
+
+Implement your own storage by extending the `Store` abstract class:
+
+```ts
+abstract class Store {
+  abstract addMessage(data: unknown): Promise<void>;
+  abstract pullMessage(): Promise<StoredMessage | undefined>;
+  abstract ackMessage(messageId: string): Promise<void>;
+  abstract deleteMessage(messageId: string): Promise<void>;
+  abstract requeueMessage(messageId: string): Promise<void>;
+}
+
+class RedisStore extends Store {
+  // Implement Redis-backed storage
+}
+
+const queue = new Queue({ store: new RedisStore() });
+```
+
+### Features
+
+- **🔄 Async Iterator Support**: Clean `for await...of` consumption pattern
+- **💾 Pluggable Storage**: Abstract `Store` interface with in-memory implementation
+- **⚡ Keep-Alive Acknowledgments**: Prevents message timeout during long processing
+- **🔀 Concurrent Workers**: Multiple consumers safely process different messages
+- **🛡️ Message Recovery**: Automatic reclaim of failed/stalled messages after timeout
+- **🎛️ Flexible Control**: Boolean, reactive observer, or AbortSignal consumption modes
+- **📦 Zero Dependencies**: Pure TypeScript implementation
+- **🔒 Type Safe**: Full TypeScript support with comprehensive type definitions
+
+### Use Cases
+
+- **Background job processing**
+- **Task queue coordination between workers**
+- **Event-driven microservices communication**
+- **Batch processing with failure recovery**
+- **Real-time message distribution systems**
+
+For complete API documentation and advanced usage examples, see [src/queue/README.md](src/queue/README.md).
 
 ## License
 
