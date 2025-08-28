@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.2](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.11.1...utils-js-v0.11.2) (2025-08-28)
+
+
+### Bug Fixes
+
+* **release:** add permissions for id-token in delivery-npm job ([69efb7a](https://github.com/JonDotsoy/utils-js/commit/69efb7ab09dde8a20ac546c826873fdacc338761))
+
 ## [0.11.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.11.0...utils-js-v0.11.1) (2025-08-28)
 
 
