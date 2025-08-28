@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.10.0...utils-js-v0.11.0) (2025-08-28)
+
+
+### Features
+
+* **queue:** add async message queue with acknowledgments and pluggable storage ([#28](https://github.com/JonDotsoy/utils-js/issues/28)) ([94fa5c9](https://github.com/JonDotsoy/utils-js/commit/94fa5c9f0a24aff64e640e3a31a4f26f13bf225a))
+
 ## [0.10.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.9.0...utils-js-v0.10.0) (2025-06-05)
 
 
