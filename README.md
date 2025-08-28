@@ -566,6 +566,7 @@ const worker1 = async () => {
   for await (const job of queue) {
     console.log("Worker 1 processing:", job);
     await simulateWork(job);
+    // Message is automatically acknowledged and deleted
   }
 };
 
@@ -573,6 +574,7 @@ const worker2 = async () => {
   for await (const job of queue) {
     console.log("Worker 2 processing:", job);
     await simulateWork(job);
+    // Message is automatically acknowledged and deleted
   }
 };
 
@@ -620,47 +622,22 @@ for await (const job of queue.consume(controller.signal)) {
 }
 ```
 
-**With reactive control:**
+**With reactive control using ReadOnlyValueObserver:**
 
 ```ts
-class ToggleObserver {
-  #enabled = true;
+import { ValueObserver } from "@jondotsoy/utils-js/queue";
 
-  get value() {
-    return this.#enabled;
+const shouldWait = new ValueObserver(false);
+
+// Start consuming, will exit when empty initially
+const consumePromise = (async () => {
+  for await (const messageData of queue.consume(shouldWait)) {
+    console.log("Processing:", messageData);
   }
+})();
 
-  toggle() {
-    this.#enabled = !this.#enabled;
-  }
-}
-
-const observer = new ToggleObserver();
-
-for await (const job of queue.consume(observer)) {
-  // Processing can be dynamically enabled/disabled
-}
-```
-
-### Manual Message Handling
-
-For advanced use cases where you need manual control over message acknowledgment:
-
-```ts
-const message = await queue.pull();
-if (message) {
-  try {
-    // Process the message
-    await processMessage(message.data);
-
-    // Manually acknowledge and delete
-    await message.ack();
-    await message.delete();
-  } catch (error) {
-    // Message will be automatically reclaimed after timeout
-    console.error("Processing failed:", error);
-  }
-}
+// Later, change to continuous polling
+shouldWait.set(true);
 ```
 
 ### Custom Storage Backend
@@ -668,16 +645,48 @@ if (message) {
 Implement your own storage by extending the `Store` abstract class:
 
 ```ts
+import { Store, Message } from "@jondotsoy/utils-js/queue";
+
 abstract class Store {
-  abstract addMessage(data: unknown): Promise<void>;
-  abstract pullMessage(): Promise<StoredMessage | undefined>;
-  abstract ackMessage(messageId: string): Promise<void>;
+  abstract addMessage(message: Message): Promise<void>;
+  abstract getMessage(messageId: string): Promise<Message | null>;
+  abstract acknowledgeMessage(messageId: string): Promise<void>;
   abstract deleteMessage(messageId: string): Promise<void>;
-  abstract requeueMessage(messageId: string): Promise<void>;
+  abstract claimMessage(
+    acknowledgeTimeoutMs: number,
+    now: number,
+  ): Promise<Message | null>;
+  abstract getSize(): Promise<number>;
 }
 
 class RedisStore extends Store {
   // Implement Redis-backed storage
+  async addMessage(message: Message): Promise<void> {
+    // Your Redis implementation
+  }
+
+  async getMessage(messageId: string): Promise<Message | null> {
+    // Your Redis implementation
+  }
+
+  async acknowledgeMessage(messageId: string): Promise<void> {
+    // Your Redis implementation
+  }
+
+  async deleteMessage(messageId: string): Promise<void> {
+    // Your Redis implementation
+  }
+
+  async claimMessage(
+    acknowledgeTimeoutMs: number,
+    now: number,
+  ): Promise<Message | null> {
+    // Your Redis implementation - should be atomic
+  }
+
+  async getSize(): Promise<number> {
+    // Your Redis implementation
+  }
 }
 
 const queue = new Queue({ store: new RedisStore() });
