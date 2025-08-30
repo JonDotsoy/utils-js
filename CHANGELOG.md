@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.11.2...utils-js-v0.12.0) (2025-08-30)
+
+
+### Features
+
+* **queue:** implement manual message acknowledgment for at-least-once delivery ([#32](https://github.com/JonDotsoy/utils-js/issues/32)) ([b409b56](https://github.com/JonDotsoy/utils-js/commit/b409b56c93d0585bfb5e12e1fb1a7fc7e5f51b0f))
+
 ## [0.11.2](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.11.1...utils-js-v0.11.2) (2025-08-28)
 
 
