@@ -531,7 +531,7 @@ new BytesFormat("de-DE").format(123456789); // '117,74 MB'
 
 ## Queue
 
-A lightweight asynchronous message queue system with support for pluggable storage, keep-alive acknowledgments, and concurrent worker processing. Perfect for background job processing, task coordination, and reliable message distribution.
+A lightweight asynchronous message queue system with support for pluggable storage, keep-alive acknowledgments, and manual message confirmation. Perfect for background job processing, task coordination, and reliable message distribution with at-least-once delivery semantics.
 
 **Import:**
 
@@ -541,7 +541,7 @@ import { Queue } from "@jondotsoy/utils-js/queue";
 
 ### Basic Usage
 
-**Simple message processing:**
+**Simple message processing with manual acknowledgment:**
 
 ```ts
 const queue = new Queue();
@@ -550,10 +550,18 @@ const queue = new Queue();
 await queue.add({ task: "send-email", to: "user@example.com" });
 await queue.add({ task: "process-image", id: 123 });
 
-// Process messages with async iteration
+// Process messages with explicit acknowledgment
 for await (const message of queue) {
-  console.log("Processing:", message);
-  // Message is automatically acknowledged and deleted
+  try {
+    console.log("Processing:", message);
+    await processMessage(message);
+
+    // Acknowledge successful processing - required for deletion
+    queue.ack(message);
+  } catch (error) {
+    // Don't acknowledge - message will be reclaimed
+    console.error("Processing failed:", error);
+  }
 }
 ```
 
@@ -562,83 +570,58 @@ for await (const message of queue) {
 ```ts
 const queue = new Queue();
 
-const worker1 = async () => {
+const worker = (name) => async () => {
   for await (const job of queue) {
-    console.log("Worker 1 processing:", job);
-    await simulateWork(job);
-    // Message is automatically acknowledged and deleted
-  }
-};
-
-const worker2 = async () => {
-  for await (const job of queue) {
-    console.log("Worker 2 processing:", job);
-    await simulateWork(job);
-    // Message is automatically acknowledged and deleted
+    try {
+      console.log(`${name} processing:`, job);
+      await simulateWork(job);
+      queue.ack(job); // Acknowledge successful processing
+    } catch (error) {
+      console.error(`${name} failed:`, error);
+      // Don't acknowledge - message will be reclaimed by another worker
+    }
   }
 };
 
 // Both workers process different messages concurrently
-await Promise.all([worker1(), worker2()]);
+await Promise.all([worker("Worker-1")(), worker("Worker-2")()]);
 ```
 
 ### Queue Options
 
 ```ts
 const queue = new Queue({
-  pollingIntervalMs: 100, // Delay between polls when queue is empty (default: 50)
-  messageTimeoutMs: 5000, // Message timeout for recovery (default: 100)
-  ackIntervalMs: 1000, // Keep-alive acknowledgment interval (default: 100)
-  store: new MemoryStore(), // Custom storage backend (default: MemoryStore)
+  pollingIntervalMs: 50, // Delay between polls when no messages available (default: 50)
+  messageTimeoutMs: 100, // Time before message is considered unacknowledged (default: 100)
+  ackIntervalMs: 100, // Keep-alive acknowledgment interval (default: 100)
+  store: new MemoryStore(), // Custom storage backend (default: new MemoryStore())
 });
 ```
 
-### Consumption Modes
+### Message Lifecycle & Acknowledgment
 
-**Exit when empty (default):**
-
-```ts
-for await (const job of queue.consume()) {
-  // Exits when no more messages
-}
-```
-
-**Continuous polling:**
+Messages require **explicit acknowledgment** to be deleted from the queue:
 
 ```ts
-for await (const job of queue.consume(true)) {
-  // Keeps polling for new messages indefinitely
-}
-```
+for await (const messageData of queue.consume()) {
+  try {
+    await processMessage(messageData);
 
-**With AbortSignal:**
-
-```ts
-const controller = new AbortController();
-setTimeout(() => controller.abort(), 10000); // Stop after 10 seconds
-
-for await (const job of queue.consume(controller.signal)) {
-  // Process messages until aborted
-}
-```
-
-**With reactive control using ReadOnlyValueObserver:**
-
-```ts
-import { ValueObserver } from "@jondotsoy/utils-js/queue";
-
-const shouldWait = new ValueObserver(false);
-
-// Start consuming, will exit when empty initially
-const consumePromise = (async () => {
-  for await (const messageData of queue.consume(shouldWait)) {
-    console.log("Processing:", messageData);
+    // Required: Acknowledge successful processing
+    queue.ack(messageData); // or queue.acknowledgeMessage(messageData)
+  } catch (error) {
+    // Don't acknowledge - message will be reclaimed after timeout
+    console.error("Processing failed:", error);
   }
-})();
-
-// Later, change to continuous polling
-shouldWait.set(true);
+}
 ```
+
+**Key behaviors:**
+
+- Messages are only deleted when explicitly acknowledged with `queue.ack()`
+- Unacknowledged messages are automatically reclaimed after `messageTimeoutMs`
+- Keep-alive prevents timeout during long processing
+- Provides at-least-once delivery semantics
 
 ### Custom Storage Backend
 
@@ -699,9 +682,10 @@ const queue = new Queue({ store: new RedisStore() });
 - **⚡ Keep-Alive Acknowledgments**: Prevents message timeout during long processing
 - **🔀 Concurrent Workers**: Multiple consumers safely process different messages
 - **🛡️ Message Recovery**: Automatic reclaim of failed/stalled messages after timeout
-- **🎛️ Flexible Control**: Boolean, reactive observer, or AbortSignal consumption modes
+- **✋ Manual Acknowledgment**: Explicit `ack()` required for message deletion
 - **📦 Zero Dependencies**: Pure TypeScript implementation
 - **🔒 Type Safe**: Full TypeScript support with comprehensive type definitions
+- **🔁 At-Least-Once Delivery**: Failed messages are automatically retried
 
 ### Use Cases
 
