@@ -224,7 +224,7 @@ class ValueObserver<T> {
  * message.acknowledge(); // Marks message as acknowledged
  * ```
  */
-export class Message {
+export class Message<T extends object = any> {
   /** Unique identifier for the message */
   id: string = crypto.randomUUID();
   /** Timestamp when the message was created */
@@ -236,7 +236,7 @@ export class Message {
    * Creates a new message with the provided data.
    * @param data - The payload data for this message
    */
-  constructor(public data: any) {}
+  constructor(public data: T) {}
 
   /**
    * Marks the message as acknowledged with the current timestamp.
@@ -480,6 +480,10 @@ export class Queue {
   /** Store for persisting messages */
   #store: Store;
 
+  #queueIsActive = new ValueObserver<boolean>(true);
+
+  #messageAcknowledgments = new WeakMap<WeakKey, ValueObserver<boolean>>();
+
   /**
    * Creates a new Queue instance with optional configuration.
    *
@@ -539,6 +543,15 @@ export class Queue {
       }
     });
     return { promise };
+  }
+
+  acknowledgeMessage(messageRef: any) {
+    const consumed = this.#messageAcknowledgments.get(messageRef);
+    consumed?.set(true);
+  }
+
+  ack(messageRef: any) {
+    this.acknowledgeMessage(messageRef);
   }
 
   /**
@@ -617,41 +630,30 @@ export class Queue {
    * setTimeout(() => controller.abort(), 10000);
    * ```
    */
-  async *consume(
-    waitForMessages:
-      | AbortSignal
-      | boolean
-      | ReadOnlyValueObserver<boolean> = false,
-  ) {
-    const waitForMessagesObserver =
-      waitForMessages instanceof AbortSignal
-        ? ValueObserver.readOnlyValueObserverFromAbortSignal(waitForMessages)
-        : ValueObserver.readOnlyValueObserver(waitForMessages);
-
-    while (true) {
+  async *consume(signal?: AbortSignal) {
+    while (this.#queueIsActive.get()) {
       const message = await this.#store.claimMessage(
         this.#messageTimeoutMs,
         Date.now(),
       );
       if (!message) {
-        const exitLoopIfNoMessages = !waitForMessagesObserver.get();
-        if (exitLoopIfNoMessages) {
-          const size = await this.#store.getSize();
-          if (size === 0) break;
-        }
         await new Promise((r) => setTimeout(r, this.#pollingIntervalMs));
       }
       if (message) {
+        const consumed = new ValueObserver(false);
         const activated = new ValueObserver(true);
         const keepAliveProcess = this.createKeepAliveProcess(
           message,
           activated,
         );
+        this.#messageAcknowledgments.set(message.data, consumed);
         try {
           yield message.data;
-          await this.#store.deleteMessage(message.id);
         } finally {
           activated.set(false);
+          if (consumed.get()) {
+            await this.#store.deleteMessage(message.id);
+          }
           await keepAliveProcess.promise;
         }
       }
