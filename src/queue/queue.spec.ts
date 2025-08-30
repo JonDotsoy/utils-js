@@ -138,4 +138,32 @@ describe("Queue", () => {
     // after worker1 failed and the message timeout expired
     expect(push).toHaveBeenCalledWith({ foo: "bar" });
   });
+
+  test("should properly handle AbortSignal to stop queue consumption", async () => {
+    const fn = () => mock((...a: any[]) => {});
+    const workflowOn = fn();
+    const workflowOff = fn();
+    const push = fn();
+
+    const queue = new Queue();
+    const abort = new AbortController();
+
+    const worker = async () => {
+      workflowOn();
+      for await (const message of queue.consume(abort.signal)) {
+        push(message);
+      }
+      workflowOff();
+    };
+
+    const process = worker();
+
+    expect(workflowOn).toHaveBeenCalled();
+    expect(workflowOff).not.toHaveBeenCalled();
+    await new Promise((r) => setTimeout(r, 50));
+    abort.abort();
+    await new Promise((r) => setTimeout(r, 50));
+    expect(workflowOff).toHaveBeenCalled();
+    await process;
+  });
 });
