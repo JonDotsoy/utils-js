@@ -2,7 +2,7 @@
 
 High–level, lightweight asynchronous message queue with periodic acknowledgments, cooperative workers and pluggable storage.
 
-> This module exports: `Queue`, `MemoryStore`, `Store` (abstract base), `Message`, `ValueObserver`, and the interface `ReadOnlyValueObserver<T>`.
+> This module exports: `Queue`, `MemoryStore`, `Store` (abstract base), and `Message`.
 
 ## Features
 
@@ -11,7 +11,6 @@ High–level, lightweight asynchronous message queue with periodic acknowledgmen
 - Automatic deletion after successful processing (in `finally` block safety)
 - Reclaim (re-deliver) messages whose acknowledgement timeout elapsed
 - Pluggable storage through the `Store` abstraction (in‑memory implementation included)
-- Flexible consumption control: boolean flag, reactive `ReadOnlyValueObserver`, or `AbortSignal`
 - Zero external dependencies
 
 ## Installation
@@ -171,49 +170,7 @@ abstract class Store {
 
 ### MemoryStore
 
-Reference implementation for tests & development. **Not durable.** Adds a reactive `queueSize` internal observer (not exported) to track length.
-
-### ValueObserver
-
-```ts
-class ValueObserver<T> {
-  constructor(value: T);
-  get(): T;
-  set(value: T): void;
-  listen(callback: (value: T) => void): () => void;
-  subscribe(callback: (value: T) => void): () => void;
-
-  // Static methods
-  static isReadOnlyValueObserver<T>(
-    value: any,
-  ): value is ReadOnlyValueObserver<T>;
-  static readOnlyValueObserver<T>(
-    value: T | ReadOnlyValueObserver<T>,
-  ): ReadOnlyValueObserver<T>;
-  static readOnlyValueObserverFromAbortSignal(
-    signal: AbortSignal,
-  ): ReadOnlyValueObserver<boolean>;
-}
-```
-
-A reactive observer pattern implementation for watching value changes. Allows monitoring changes to a value and notifying registered callbacks whenever the value is updated.
-
-- `get()` - Gets the current value
-- `set(value)` - Sets a new value and notifies all registered callbacks
-- `listen(callback)` - Registers a callback to be called when the value changes, returns unsubscribe function
-- `subscribe(callback)` - Registers a callback and immediately calls it with current value, returns unsubscribe function
-
-Static helper methods provide utilities for working with `ReadOnlyValueObserver` interfaces, including type guards and conversion utilities.
-
-### ReadOnlyValueObserver<T>
-
-```ts
-interface ReadOnlyValueObserver<T> {
-  get(): T;
-}
-```
-
-Read-only interface for value observers. Provides a contract for objects that can provide a value without allowing direct modification. Useful for creating immutable value references or dependency injection scenarios.
+Reference implementation for tests & development. **Not durable.** Adds a reactive internal observer (not exported) to track queue size.
 
 ### Error & Failure Semantics
 
