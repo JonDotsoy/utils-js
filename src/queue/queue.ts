@@ -2,7 +2,8 @@
  * A reactive observer pattern implementation for watching value changes.
  *
  * The ValueObserver class allows monitoring changes to a value and notifying
- * registered callbacks whenever the value is updated.
+ * registered callbacks whenever the value is updated. In the queue system,
+ * it's used to track queue state and message acknowledgment status.
  *
  * @template T - The type of the observed value
  *
@@ -201,8 +202,9 @@ export abstract class Store {
  * ```
  */
 export class MemoryStore extends Store {
-  /** Array containing all messages in the store */
+  /** Array containing all messages currently stored in memory */
   messages: Message[] = [];
+  /** Observer tracking the current size of the queue */
   queueSize = new ValueObserver(0);
 
   /**
@@ -353,7 +355,7 @@ export class Queue {
   /** Store for persisting messages */
   #store: Store;
 
-  /** */
+  /** Observer that tracks whether the queue is actively processing messages */
   #queueIsActive = new ValueObserver<boolean>(true);
 
   /** WeakMap tracking acknowledgment state for each message being processed */
@@ -397,8 +399,8 @@ export class Queue {
    * This process periodically acknowledges the message while it's being processed
    * to prevent it from being considered unacknowledged and reclaimed by another consumer.
    *
-   * @param message - The message to keep alive
-   * @param activated - Observer to track when the process should stop
+   * @param message - The message to keep alive during processing
+   * @param activated - Observer that controls when the keep-alive process should stop
    * @returns Object with a promise that resolves when the keep-alive process ends
    * @private
    */
@@ -488,7 +490,7 @@ export class Queue {
    * 6. Stop the keep-alive process
    * 7. Repeat while queue is active
    *
-   * @param signal - Optional AbortSignal for cancellation (not yet implemented)
+   * @param signal - Optional AbortSignal for cancellation (currently not implemented)
    * @yields The data payload of each message in the queue
    *
    * @example
