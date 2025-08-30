@@ -1,27 +1,4 @@
 /**
- * Read-only interface for value observers.
- *
- * This interface provides a contract for objects that can provide a value
- * without allowing direct modification. It's useful for creating immutable
- * value references or for dependency injection scenarios.
- *
- * @template T - The type of the observed value
- *
- * @example
- * ```typescript
- * const readOnlyValue: ReadOnlyValueObserver<number> = { get: () => 42 };
- * console.log(readOnlyValue.get()); // 42
- * ```
- */
-export interface ReadOnlyValueObserver<T> {
-  /**
-   * Gets the current value.
-   * @returns The current value
-   */
-  get(): T;
-}
-
-/**
  * A reactive observer pattern implementation for watching value changes.
  *
  * The ValueObserver class allows monitoring changes to a value and notifying
@@ -95,119 +72,6 @@ class ValueObserver<T> {
     const unsub = this.listen(callback);
     callback(this.#value);
     return unsub;
-  }
-
-  /**
-   * Type guard to check if a value implements the ReadOnlyValueObserver interface.
-   *
-   * This method checks if the provided value has the required structure to be
-   * considered a ReadOnlyValueObserver (an object with a 'get' method).
-   *
-   * @template T - The type of the value being observed
-   * @param value - The value to check
-   * @returns True if the value implements ReadOnlyValueObserver, false otherwise
-   *
-   * @example
-   * ```typescript
-   * const maybeObserver = { get: () => 42 };
-   * if (ValueObserver.isReadOnlyValueObserver(maybeObserver)) {
-   *   console.log(maybeObserver.get()); // TypeScript knows this is safe
-   * }
-   * ```
-   */
-  static isReadOnlyValueObserver<T>(
-    value: any,
-  ): value is ReadOnlyValueObserver<T> {
-    return (
-      typeof value === "object" &&
-      value !== null &&
-      "get" in value &&
-      typeof value.get === "function"
-    );
-  }
-
-  /**
-   * Normalizes a value or ReadOnlyValueObserver into a ReadOnlyValueObserver.
-   *
-   * If the input is already a ReadOnlyValueObserver, it returns it unchanged.
-   * If the input is a regular value, it wraps it in a ReadOnlyValueObserver.
-   * This is useful for APIs that can accept either static values or observable values.
-   *
-   * @template T - The type of the value being observed
-   * @param value - Either a direct value or a ReadOnlyValueObserver
-   * @returns A ReadOnlyValueObserver that provides the value
-   *
-   * @example
-   * ```typescript
-   * // With a static value
-   * const staticObserver = ValueObserver.readOnlyValueObserver(42);
-   * console.log(staticObserver.get()); // 42
-   *
-   * // With an existing observer
-   * const existingObserver = { get: () => 100 };
-   * const normalizedObserver = ValueObserver.readOnlyValueObserver(existingObserver);
-   * console.log(normalizedObserver.get()); // 100
-   * console.log(normalizedObserver === existingObserver); // true
-   * ```
-   */
-  static readOnlyValueObserver<T>(
-    value: T | ReadOnlyValueObserver<T>,
-  ): ReadOnlyValueObserver<T> {
-    if (this.isReadOnlyValueObserver(value)) {
-      return value;
-    }
-    return {
-      get: () => value,
-    };
-  }
-
-  /**
-   * Creates a ReadOnlyValueObserver that tracks the aborted state of an AbortSignal.
-   *
-   * The observer initially returns `false` and switches to `true` when the AbortSignal
-   * is aborted. This is useful for creating cancellation-aware operations that can
-   * respond to abort signals in a reactive way.
-   *
-   * @param signal - The AbortSignal to observe
-   * @returns A ReadOnlyValueObserver that reflects the signal's aborted state
-   *
-   * @example
-   * ```typescript
-   * const controller = new AbortController();
-   * const abortObserver = ValueObserver.readOnlyValueObserverFromAbortSignal(controller.signal);
-   *
-   * console.log(abortObserver.get()); // false
-   *
-   * controller.abort();
-   * console.log(abortObserver.get()); // true
-   * ```
-   *
-   * @example
-   * Using with queue consumption:
-   * ```typescript
-   * const controller = new AbortController();
-   *
-   * // Start consuming with abort signal
-   * const consumePromise = (async () => {
-   *   for await (const message of queue.consume(controller.signal)) {
-   *     console.log("Processing:", message);
-   *   }
-   * })();
-   *
-   * // Later, abort the operation
-   * setTimeout(() => controller.abort(), 5000);
-   * ```
-   */
-  static readOnlyValueObserverFromAbortSignal(
-    signal: AbortSignal,
-  ): ReadOnlyValueObserver<boolean> {
-    const valueObserver = new ValueObserver(false);
-    const abortSignalCallback = () => {
-      valueObserver.set(true);
-      signal.removeEventListener("abort", abortSignalCallback);
-    };
-    signal.addEventListener("abort", abortSignalCallback);
-    return valueObserver;
   }
 }
 
@@ -427,14 +291,15 @@ type QueueOptions = {
 
 /**
  * Represents a persistent, asynchronous message queue with support for message acknowledgment,
- * polling, and blocking behavior when empty.
+ * polling, and manual message confirmation.
  *
  * The `Queue` class provides a robust message queue implementation with features like:
  * - Asynchronous message consumption using async iterators
- * - Automatic message acknowledgment to prevent message loss
+ * - Manual message acknowledgment to prevent message loss
  * - Configurable polling and timeout behavior
  * - Pluggable storage backends via the Store interface
  * - Keep-alive mechanism to prevent message timeout during processing
+ * - At-least-once delivery semantics
  *
  * @example
  * Basic usage:
@@ -445,11 +310,19 @@ type QueueOptions = {
  * await queue.add({ task: "process-data", userId: 123 });
  * await queue.add({ task: "send-email", to: "user@example.com" });
  *
- * // Consume messages
+ * // Consume messages with manual acknowledgment
  * for await (const message of queue) {
- *   console.log("Processing:", message);
- *   // Process the message...
- *   // Message is automatically acknowledged and deleted
+ *   try {
+ *     console.log("Processing:", message);
+ *     // Process the message...
+ *     await processMessage(message);
+ *
+ *     // Acknowledge successful processing
+ *     queue.ack(message);
+ *   } catch (error) {
+ *     // Don't acknowledge - message will be reclaimed
+ *     console.error("Processing failed:", error);
+ *   }
  * }
  * ```
  *
@@ -467,8 +340,8 @@ type QueueOptions = {
  * @remarks
  * - Messages are acknowledged periodically while being processed to prevent re-delivery
  * - The keep-alive mechanism ensures long-running message processing doesn't timeout
- * - Messages are automatically deleted after successful processing
- * - Use the waitForMessages parameter in consume() to control exit behavior when queue is empty
+ * - Messages are **only deleted** when explicitly acknowledged with ack() or acknowledgeMessage()
+ * - Failed or unacknowledged messages are automatically reclaimed after timeout
  */
 export class Queue {
   /** Time to wait between polling attempts */
@@ -480,8 +353,10 @@ export class Queue {
   /** Store for persisting messages */
   #store: Store;
 
+  /** */
   #queueIsActive = new ValueObserver<boolean>(true);
 
+  /** WeakMap tracking acknowledgment state for each message being processed */
   #messageAcknowledgments = new WeakMap<WeakKey, ValueObserver<boolean>>();
 
   /**
@@ -511,7 +386,7 @@ export class Queue {
    * await queue.add({ complex: { nested: "object" } });
    * ```
    */
-  async add(data: any) {
+  async add<T extends object>(data: T) {
     const message = new Message(data);
     await this.#store.addMessage(message);
   }
@@ -545,11 +420,54 @@ export class Queue {
     return { promise };
   }
 
+  /**
+   * Marks a message as successfully processed for deletion from the queue.
+   *
+   * This method signals that the message has been successfully processed and should
+   * be deleted from the store. Only acknowledged messages are deleted; unacknowledged
+   * messages will be reclaimed by other workers after the timeout period.
+   *
+   * @param messageRef - The message data (payload) that was yielded by consume()
+   *
+   * @example
+   * ```typescript
+   * for await (const messageData of queue.consume()) {
+   *   try {
+   *     await processMessage(messageData);
+   *     queue.acknowledgeMessage(messageData); // Mark as processed
+   *   } catch (error) {
+   *     // Don't acknowledge - message will be reclaimed
+   *     console.error("Processing failed:", error);
+   *   }
+   * }
+   * ```
+   */
   acknowledgeMessage(messageRef: any) {
     const consumed = this.#messageAcknowledgments.get(messageRef);
     consumed?.set(true);
   }
 
+  /**
+   * Marks a message as successfully processed for deletion from the queue.
+   *
+   * This is a convenience method that calls `acknowledgeMessage()`. Use this method
+   * to signal that a message has been successfully processed and should be deleted.
+   *
+   * @param messageRef - The message data (payload) that was yielded by consume()
+   *
+   * @example
+   * ```typescript
+   * for await (const messageData of queue.consume()) {
+   *   try {
+   *     await processMessage(messageData);
+   *     queue.ack(messageData); // Mark as processed
+   *   } catch (error) {
+   *     // Don't acknowledge - message will be reclaimed
+   *     console.error("Processing failed:", error);
+   *   }
+   * }
+   * ```
+   */
   ack(messageRef: any) {
     this.acknowledgeMessage(messageRef);
   }
@@ -559,67 +477,49 @@ export class Queue {
    *
    * This method continuously polls the store for unacknowledged messages,
    * processes them with keep-alive acknowledgments, yields the message data,
-   * and then deletes the message upon completion.
+   * and then deletes the message **only if** it has been explicitly acknowledged.
    *
    * The consumer will:
    * 1. Claim an unacknowledged message from the store
    * 2. Start a keep-alive process to prevent timeout
    * 3. Yield the message data for processing
-   * 4. Delete the message from the store
-   * 5. Stop the keep-alive process
-   * 6. Repeat until no more messages or waitForMessages condition is met
+   * 4. Check if message was acknowledged with ack() or acknowledgeMessage()
+   * 5. Delete the message from the store only if acknowledged
+   * 6. Stop the keep-alive process
+   * 7. Repeat while queue is active
    *
-   * @param waitForMessages - Controls whether to continue polling when no messages are available.
-   *                         If false (default), exits when queue is empty.
-   *                         If true, continues polling indefinitely.
-   *                         Can also accept a ReadOnlyValueObserver<boolean> for dynamic control.
-   *                         Can also accept an AbortSignal to stop polling when aborted.
+   * @param signal - Optional AbortSignal for cancellation (not yet implemented)
    * @yields The data payload of each message in the queue
    *
    * @example
-   * Basic usage (exit when empty):
+   * Basic usage with manual acknowledgment:
    * ```typescript
    * for await (const messageData of queue.consume()) {
-   *   console.log("Processing message:", messageData);
-   *   // Your message processing logic here
-   * }
-   * ```
+   *   try {
+   *     console.log("Processing message:", messageData);
+   *     // Your message processing logic here
+   *     await processMessage(messageData);
    *
-   * @example
-   * Continuous polling:
-   * ```typescript
-   * for await (const messageData of queue.consume(true)) {
-   *   console.log("Processing message:", messageData);
-   *   // Will keep polling even when queue is empty
-   * }
-   * ```
-   *
-   * @example
-   * Dynamic control with observer:
-   * ```typescript
-   * const shouldWait = new ValueObserver(false);
-   * // Start consuming, will exit when empty initially
-   * const consumePromise = (async () => {
-   *   for await (const messageData of queue.consume(shouldWait)) {
-   *     console.log("Processing:", messageData);
+   *     // Acknowledge successful processing
+   *     queue.ack(messageData);
+   *   } catch (error) {
+   *     // Don't acknowledge - message will be reclaimed
+   *     console.error("Processing failed:", error);
    *   }
-   * })();
-   *
-   * // Later, change to continuous polling
-   * shouldWait.set(true);
+   * }
    * ```
    *
    * @example
-   * Using AbortSignal for cancellation:
+   * Using with AbortSignal (when implemented):
    * ```typescript
    * const controller = new AbortController();
    *
-   * // Start consuming with abort signal
    * const consumePromise = (async () => {
    *   try {
    *     for await (const messageData of queue.consume(controller.signal)) {
    *       console.log("Processing:", messageData);
-   *       // Long-running processing...
+   *       await processMessage(messageData);
+   *       queue.ack(messageData);
    *     }
    *   } catch (error) {
    *     console.log("Queue consumption stopped");
@@ -666,13 +566,23 @@ export class Queue {
    * This allows using the queue directly in `for await...of` loops,
    * providing a clean and intuitive API for message consumption.
    *
+   * **Important:** Messages must be manually acknowledged with `ack()` or
+   * `acknowledgeMessage()` to be deleted from the queue.
+   *
    * @returns An async iterator that yields message data
    *
    * @example
    * ```typescript
    * // These are equivalent:
-   * for await (const message of queue) { ... }
-   * for await (const message of queue.consume()) { ... }
+   * for await (const message of queue) {
+   *   await processMessage(message);
+   *   queue.ack(message); // Required for message deletion
+   * }
+   *
+   * for await (const message of queue.consume()) {
+   *   await processMessage(message);
+   *   queue.ack(message); // Required for message deletion
+   * }
    * ```
    */
   get [Symbol.asyncIterator]() {
