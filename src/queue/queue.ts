@@ -779,7 +779,12 @@ export class Queue {
    * ```
    */
   async *consume(signal?: AbortSignal) {
-    while (this.#queueIsActive.get()) {
+    using consumeIsActive = new AbortableValueObserver(
+      true,
+      () => false,
+      signal ? [signal] : [],
+    );
+    while (consumeIsActive.get()) {
       const message = await this.#store.claimMessage(
         this.#messageTimeoutMs,
         Date.now(),
