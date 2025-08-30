@@ -40,8 +40,11 @@ class ValueObserver<T> {
    * @param value - The new value to set
    */
   set(value: T) {
+    const diff = this.#value !== value;
     this.#value = value;
-    this.propagateChange();
+    if (diff) {
+      this.propagateChange();
+    }
   }
 
   /**
