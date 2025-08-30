@@ -2,7 +2,7 @@
 
 High–level, lightweight asynchronous message queue with periodic acknowledgments, cooperative workers and pluggable storage.
 
-> This module exports: `Queue`, `MemoryStore`, `Store` (abstract base), `Message`, and the interface `ReadOnlyValueObserver<T>`.
+> This module exports: `Queue`, `MemoryStore`, `Store` (abstract base), `Message`, `ValueObserver`, and the interface `ReadOnlyValueObserver<T>`.
 
 ## Features
 
@@ -34,8 +34,11 @@ const queue = new Queue({ store: new MemoryStore() });
 await queue.add({ task: "send-email", to: "user@example.com" });
 
 for await (const job of queue) {
-  // Process and exit when queue becomes empty.
+  // Process the job
   console.log("Processing", job);
+
+  // Acknowledge successful processing
+  queue.ack(job);
 }
 ```
 
@@ -45,10 +48,10 @@ for await (const job of queue) {
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | Message                | Wrapper carrying `data`, `id`, timestamps `createdAt`, `acknowledgedAt`.                                                     |
 | Acknowledge keep‑alive | Timer re‑acknowledging the message every `ackIntervalMs` until processing finishes.                                          |
+| Manual acknowledgment  | Messages must be explicitly acknowledged with `ack()` or `acknowledgeMessage()` to be deleted from the queue.                |
 | Reclaim                | If a message's last `acknowledgedAt` is older than `now - messageTimeoutMs`, it is eligible to be claimed by another worker. |
 | Store                  | Abstraction for persistence; must implement methods to add / get / acknowledge / delete / claim / count.                     |
 | MemoryStore            | Simple array based store (dev / tests). Not durable.                                                                         |
-| Consumption control    | `consume(waitForMessages)` parameter decides loop exit: boolean, `ReadOnlyValueObserver<boolean>`, or `AbortSignal`.         |
 
 ## Message Lifecycle
 
@@ -56,8 +59,9 @@ for await (const job of queue) {
 2. Worker claims an unacknowledged / expired message (sets `acknowledgedAt = now`).
 3. Keep‑alive acknowledges again every `ackIntervalMs` while processing.
 4. Worker yields `message.data` to caller code.
-5. After processing, message is deleted and keep‑alive stops.
-6. If worker crashes / stalls, another worker can reclaim after `messageTimeoutMs`.
+5. **Manual step**: Caller must call `ack(data)` or `acknowledgeMessage(data)` to mark message as processed.
+6. Message is deleted from the queue **only if** it was explicitly acknowledged.
+7. If worker crashes / stalls or doesn't acknowledge, another worker can reclaim after `messageTimeoutMs`.
 
 ## API Reference
 
@@ -67,9 +71,9 @@ for await (const job of queue) {
 class Queue {
   constructor(options?: QueueOptions);
   add(data: any): Promise<void>;
-  consume(
-    waitForMessages?: boolean | ReadOnlyValueObserver<boolean> | AbortSignal,
-  ): AsyncGenerator<any>;
+  ack(messageRef: any): void;
+  acknowledgeMessage(messageRef: any): void;
+  consume(signal?: AbortSignal): AsyncGenerator<any>;
   [Symbol.asyncIterator](): AsyncGenerator<any>;
 }
 ```
@@ -87,56 +91,52 @@ class Queue {
 
 Enqueues a new message wrapping the provided payload.
 
-#### `consume(waitForMessages?)`
+#### `ack(messageRef: any)`
 
-Returns an async generator that yields message `data` values.
+Marks a message as successfully processed, allowing it to be deleted from the queue. This is an alias for `acknowledgeMessage()`.
 
-| Argument form                    | Behavior                                                                                       |
-| -------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Omitted / `false`                | Stops when queue becomes empty (after finishing current message).                              |
-| `true`                           | Polls forever (use external cancellation).                                                     |
-| `ReadOnlyValueObserver<boolean>` | Dynamically controls looping. When observer `.get()` returns `false` and queue empty -> exits. |
-| `AbortSignal`                    | Exits when signal is aborted (also subject to empty queue behavior if signal still false).     |
+#### `acknowledgeMessage(messageRef: any)`
 
-> Keep‑alive continues until message deletion even if an exception occurs; deletion only happens after the `yield` and user code finishes.
+Marks a message as successfully processed, allowing it to be deleted from the queue. The message reference should be the data yielded by the consume generator.
+
+#### `consume(signal?: AbortSignal)`
+
+Returns an async generator that yields message `data` values. **Important**: Messages are only deleted from the queue if they are explicitly acknowledged using `ack()` or `acknowledgeMessage()`.
+
+| Argument form | Behavior                                            |
+| ------------- | --------------------------------------------------- |
+| Omitted       | Polls continuously until queue is inactive.         |
+| `AbortSignal` | Exits when signal is aborted (not yet implemented). |
+
+> Keep‑alive continues until message processing finishes. Messages are **only deleted** if explicitly acknowledged with `ack()` or `acknowledgeMessage()`.
 
 ##### Consumption Patterns
 
-Basic exit when empty:
+Basic consumption with manual acknowledgment:
 
 ```ts
 for await (const data of queue.consume()) {
-  await handle(data);
+  try {
+    await handle(data);
+    queue.ack(data); // Acknowledge successful processing
+  } catch (error) {
+    // Don't acknowledge - message will be reclaimed
+    console.error("Processing failed:", error);
+  }
 }
 ```
 
-Continuous (daemon style) with abort:
+With AbortSignal (when implemented):
 
 ```ts
 const controller = new AbortController();
 (async () => {
-  for await (const data of queue.consume(true)) {
+  for await (const data of queue.consume(controller.signal)) {
     await handle(data);
+    queue.ack(data);
   }
 })();
 setTimeout(() => controller.abort(), 10_000);
-```
-
-Reactive control:
-
-```ts
-// Implement the ReadOnlyValueObserver interface.
-let flag = false;
-const control: ReadOnlyValueObserver<boolean> = { get: () => flag };
-
-const loop = (async () => {
-  for await (const data of queue.consume(control)) {
-    await handle(data);
-  }
-})();
-
-// Later promote to continuous
-flag = true;
 ```
 
 ### Message
@@ -173,6 +173,38 @@ abstract class Store {
 
 Reference implementation for tests & development. **Not durable.** Adds a reactive `queueSize` internal observer (not exported) to track length.
 
+### ValueObserver
+
+```ts
+class ValueObserver<T> {
+  constructor(value: T);
+  get(): T;
+  set(value: T): void;
+  listen(callback: (value: T) => void): () => void;
+  subscribe(callback: (value: T) => void): () => void;
+
+  // Static methods
+  static isReadOnlyValueObserver<T>(
+    value: any,
+  ): value is ReadOnlyValueObserver<T>;
+  static readOnlyValueObserver<T>(
+    value: T | ReadOnlyValueObserver<T>,
+  ): ReadOnlyValueObserver<T>;
+  static readOnlyValueObserverFromAbortSignal(
+    signal: AbortSignal,
+  ): ReadOnlyValueObserver<boolean>;
+}
+```
+
+A reactive observer pattern implementation for watching value changes. Allows monitoring changes to a value and notifying registered callbacks whenever the value is updated.
+
+- `get()` - Gets the current value
+- `set(value)` - Sets a new value and notifies all registered callbacks
+- `listen(callback)` - Registers a callback to be called when the value changes, returns unsubscribe function
+- `subscribe(callback)` - Registers a callback and immediately calls it with current value, returns unsubscribe function
+
+Static helper methods provide utilities for working with `ReadOnlyValueObserver` interfaces, including type guards and conversion utilities.
+
 ### ReadOnlyValueObserver<T>
 
 ```ts
@@ -181,11 +213,14 @@ interface ReadOnlyValueObserver<T> {
 }
 ```
 
-Provide an object adhering to this interface for dynamic control of `consume()`.
+Read-only interface for value observers. Provides a contract for objects that can provide a value without allowing direct modification. Useful for creating immutable value references or dependency injection scenarios.
 
 ### Error & Failure Semantics
 
-- If user processing throws, the `finally` block stops keep‑alive; the message was already deleted after your handler finishes (deletion occurs only if the `yield` resumed and delete succeeded inside try block). If you want _at least once_ semantics with requeue-on-failure you would need to customize deletion logic.
+- Messages are **only deleted** if explicitly acknowledged with `ack()` or `acknowledgeMessage()`.
+- If user processing throws and the message is **not acknowledged**, it will be reclaimed by another worker after `messageTimeoutMs`.
+- The keep‑alive mechanism prevents message timeout during processing, but acknowledgment is required for deletion.
+- This provides _at least once_ delivery semantics by default - failed messages are automatically retried.
 - Long running tasks require `ackIntervalMs < messageTimeoutMs` to avoid premature reclamation.
 
 ### Selecting Interval Values
@@ -229,6 +264,7 @@ const worker = (name: string) =>
     for await (const job of queue) {
       console.log(name, "got", job);
       await new Promise((r) => setTimeout(r, 150)); // simulate work
+      queue.ack(job); // Acknowledge successful processing
     }
   })();
 
