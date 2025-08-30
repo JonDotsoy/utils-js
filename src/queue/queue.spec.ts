@@ -25,6 +25,8 @@ describe("Queue", () => {
     // Consume the message using async iterator
     for await (const message of queue) {
       push(message);
+      queue.ack(message); // Acknowledge the message
+      break;
     }
 
     // Verify message was processed and automatically deleted
@@ -47,6 +49,8 @@ describe("Queue", () => {
       for await (const message of queue) {
         push(["worker1", message]);
         await new Promise((r) => setTimeout(r, 5));
+        queue.ack(message); // Acknowledge the message
+        break;
       }
     };
     const worker2 = async () => {
@@ -54,6 +58,8 @@ describe("Queue", () => {
         push(["worker2", message]);
         push(message);
         await new Promise((r) => setTimeout(r, 5));
+        queue.ack(message); // Acknowledge the message
+        break;
       }
     };
 
@@ -67,7 +73,8 @@ describe("Queue", () => {
   });
 
   test("should not consume messages immediately when waitForMessages is true", async () => {
-    const push = mock((message: any) => {});
+    const m = [];
+    const push = mock((message: any) => m.push(message));
     const store = new MemoryStore();
     const queue = new Queue({ store });
 
@@ -77,8 +84,11 @@ describe("Queue", () => {
 
     // Start worker with waitForMessages=true (continuous polling mode)
     const worker = async () => {
-      for await (const message of queue.consume(true)) {
-        push(message);
+      for await (const message of queue.consume()) {
+        queue.ack(message); // Acknowledge the message
+        if (push(message) >= 2) {
+          break;
+        }
       }
     };
 
@@ -92,7 +102,10 @@ describe("Queue", () => {
   });
 
   test("should allow message recovery when worker fails", async () => {
-    const push = mock((message: any) => {});
+    let n = 0;
+    const push = mock((message: any) => {
+      return n++;
+    });
     const store = new MemoryStore();
     const queue = new Queue({ store });
 
@@ -112,6 +125,8 @@ describe("Queue", () => {
     const worker2 = async () => {
       for await (const message of queue.consume()) {
         push(message);
+        queue.ack(message); // Acknowledge the message
+        break;
       }
     };
     const pending2 = worker2();
