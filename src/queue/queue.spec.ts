@@ -140,10 +140,9 @@ describe("Queue", () => {
   });
 
   test("should properly handle AbortSignal to stop queue consumption", async () => {
-    const fn = () => mock((...a: any[]) => {});
-    const workflowOn = fn();
-    const workflowOff = fn();
-    const push = fn();
+    const workflowOn = mock();
+    const workflowOff = mock();
+    const push = mock();
 
     const queue = new Queue();
     const abort = new AbortController();
