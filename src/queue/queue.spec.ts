@@ -1,5 +1,5 @@
 import { describe, test, expect, mock } from "bun:test";
-import { Queue, MemoryStore } from "./queue.js";
+import { Queue, MemoryStore, Message } from "./queue.js";
 
 describe("Queue", () => {
   test("should add messages to the store", async () => {
@@ -164,5 +164,42 @@ describe("Queue", () => {
     await new Promise((r) => setTimeout(r, 50));
     expect(workflowOff).toHaveBeenCalled();
     await process;
+  });
+});
+
+describe("MemoryStore", () => {
+  test("test", async () => {
+    const memory = new MemoryStore();
+
+    const done = mock();
+
+    const worker = async () => {
+      await memory.claimMessage(10, 10);
+      done();
+    };
+
+    const process = worker();
+
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(done).not.toHaveBeenCalled();
+
+    memory.addMessage(new Message({ foo: "bar" }));
+
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(done).toHaveBeenCalled();
+
+    await process;
+  });
+
+  test("test", async () => {
+    const memory = new MemoryStore();
+
+    memory.addMessage(new Message({ foo: "bar" }));
+
+    const message = await memory.claimMessage(10, 10);
+
+    expect(message).toBeDefined();
   });
 });
