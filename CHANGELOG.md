@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.12.0...utils-js-v0.13.0) (2025-08-31)
+
+
+### Features
+
+* **queue:** Add AbortSignal support and improve polling behavior ([#35](https://github.com/JonDotsoy/utils-js/issues/35)) ([03ca1a8](https://github.com/JonDotsoy/utils-js/commit/03ca1a86c19ea270c04f0812361e3205a9d0901b))
+
 ## [0.12.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.11.2...utils-js-v0.12.0) (2025-08-30)
 
 
