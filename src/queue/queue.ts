@@ -40,8 +40,11 @@ class ValueObserver<T> {
    * @param value - The new value to set
    */
   set(value: T) {
+    const diff = this.#value !== value;
     this.#value = value;
-    this.propagateChange();
+    if (diff) {
+      this.propagateChange();
+    }
   }
 
   /**
@@ -77,6 +80,249 @@ class ValueObserver<T> {
 }
 
 /**
+ * A disposable ValueObserver that automatically updates its value when AbortSignals are triggered.
+ *
+ * This class extends ValueObserver to provide automatic value updates based on abort signals,
+ * making it ideal for tracking cancellation states in async operations. It supports monitoring
+ * multiple abort signals simultaneously and implements the Disposable pattern for automatic
+ * cleanup when used with the `using` declaration.
+ *
+ * Key features:
+ * - Monitors multiple AbortSignals simultaneously
+ * - Automatically updates value when any monitored signal is aborted
+ * - Supports dynamic addition of new signals via `addSignal()`
+ * - Implements Symbol.dispose for automatic resource cleanup
+ * - Inherits all ValueObserver functionality (subscribe, listen, etc.)
+ *
+ * @template T - The type of the observed value (can be any type, not limited to boolean)
+ *
+ * @example
+ * Basic usage with single abort signal:
+ * ```typescript
+ * const controller = new AbortController();
+ *
+ * using activeState = new AbortableValueObserver(
+ *   true,                    // Initial value: active
+ *   () => false,            // Value when aborted: inactive
+ *   [controller.signal]     // Signals to monitor
+ * );
+ *
+ * console.log(activeState.get()); // true
+ * controller.abort();
+ * console.log(activeState.get()); // false
+ * // Cleanup happens automatically when leaving scope
+ * ```
+ *
+ * @example
+ * Multiple abort signals with dynamic addition:
+ * ```typescript
+ * const controller1 = new AbortController();
+ * const controller2 = new AbortController();
+ *
+ * using observer = new AbortableValueObserver(
+ *   "active",
+ *   () => "cancelled",
+ *   [controller1.signal]
+ * );
+ *
+ * // Add another signal dynamically
+ * observer.addSignal(controller2.signal);
+ *
+ * // Value becomes "cancelled" when ANY signal is aborted
+ * controller2.abort(); // observer.get() === "cancelled"
+ * ```
+ *
+ * @example
+ * Using with subscriptions:
+ * ```typescript
+ * const controller = new AbortController();
+ *
+ * using statusObserver = new AbortableValueObserver(
+ *   { status: "running", progress: 0 },
+ *   () => ({ status: "cancelled", progress: 0 }),
+ *   [controller.signal]
+ * );
+ *
+ * const unsubscribe = statusObserver.subscribe(value => {
+ *   console.log("Status changed:", value.status);
+ * });
+ *
+ * controller.abort(); // Logs: "Status changed: cancelled"
+ * ```
+ */
+class AbortableValueObserver<T> extends ValueObserver<T> {
+  /** Array of AbortSignals being monitored for abort events */
+  #signals: AbortSignal[];
+  /** Function that returns the new value when any signal is aborted */
+  #abortValueFactory: () => T;
+
+  /**
+   * Creates a new AbortableValueObserver that monitors the provided abort signals.
+   *
+   * The observer will automatically call the `abortValueFactory` function and update
+   * its value whenever any of the monitored signals is aborted. The signals array
+   * is copied internally to prevent external modifications.
+   *
+   * @param initialValue - The initial value for the observer
+   * @param abortValueFactory - Function that returns the value to set when any signal is aborted.
+   *                           This function is called each time an abort occurs, allowing for
+   *                           dynamic values based on the current state.
+   * @param signals - Optional array of AbortSignals to monitor for abort events.
+   *                 Can be empty or undefined, and new signals can be added later via `addSignal()`.
+   *
+   * @example
+   * ```typescript
+   * // With immediate signals
+   * const observer = new AbortableValueObserver(
+   *   "processing",
+   *   () => "aborted",
+   *   [signal1, signal2]
+   * );
+   *
+   * // Without initial signals (add them later)
+   * const observer = new AbortableValueObserver(
+   *   { active: true },
+   *   () => ({ active: false, reason: "aborted" })
+   * );
+   * observer.addSignal(mySignal);
+   * ```
+   */
+  constructor(
+    initialValue: T,
+    abortValueFactory: () => T,
+    signals?: AbortSignal[],
+  ) {
+    super(initialValue);
+    this.#signals = [...(signals || [])]; // Create a copy to avoid external modifications
+    this.#abortValueFactory = abortValueFactory;
+
+    // Register abort listeners for all provided signals
+    for (const signal of this.#signals) {
+      this.#addSignalListener(signal);
+    }
+  }
+
+  /**
+   * Adds a new AbortSignal to be monitored and immediately registers its abort event listener.
+   *
+   * Once added, the signal will trigger the abort value factory function if it becomes aborted.
+   * This method is useful for dynamically adding signals after the observer has been created,
+   * such as when new operations are started that should cancel the current state.
+   *
+   * @param signal - The AbortSignal to add to the monitoring list. If the signal is already
+   *                aborted when added, the abort handler will not be triggered immediately.
+   *
+   * @example
+   * Dynamic signal management:
+   * ```typescript
+   * const observer = new AbortableValueObserver(
+   *   { tasks: [], status: "idle" },
+   *   () => ({ tasks: [], status: "cancelled" }),
+   *   []
+   * );
+   *
+   * // Start a new task
+   * const taskController = new AbortController();
+   * observer.addSignal(taskController.signal);
+   *
+   * // Start another task
+   * const anotherController = new AbortController();
+   * observer.addSignal(anotherController.signal);
+   *
+   * // Either controller aborting will trigger the observer update
+   * ```
+   *
+   * @example
+   * Adding timeout signals:
+   * ```typescript
+   * const observer = new AbortableValueObserver(
+   *   true,
+   *   () => false,
+   *   [userController.signal]
+   * );
+   *
+   * // Add a timeout signal
+   * const timeoutController = new AbortController();
+   * setTimeout(() => timeoutController.abort(), 5000);
+   * observer.addSignal(timeoutController.signal);
+   * ```
+   */
+  addSignal(signal: AbortSignal) {
+    this.#signals.push(signal);
+    this.#addSignalListener(signal);
+  }
+
+  /**
+   * Adds an abort event listener to the specified signal.
+   *
+   * This method registers the internal abort handler to be called when the signal
+   * is aborted. The handler is bound to maintain the correct `this` context.
+   *
+   * @param signal - The AbortSignal to attach the event listener to
+   * @private
+   */
+  #addSignalListener(signal: AbortSignal) {
+    signal.addEventListener("abort", this.#handleAbort);
+  }
+
+  /**
+   * Handles the abort event by updating the observed value using the abort value factory.
+   *
+   * This method is automatically called when any monitored AbortSignal is aborted.
+   * It calls the `abortValueFactory` function provided in the constructor to get the
+   * new value and updates the observer, which will notify all subscribers.
+   *
+   * This method is implemented as an arrow function to maintain the correct `this` context
+   * when used as an event listener callback.
+   *
+   * @private
+   */
+  #handleAbort = () => {
+    this.set(this.#abortValueFactory());
+  };
+
+  /**
+   * Disposes of the observer by removing all abort event listeners.
+   *
+   * This method implements the Disposable pattern and is automatically called when using
+   * the `using` declaration. It ensures that all event listeners are properly cleaned up
+   * to prevent memory leaks, especially important when working with long-lived AbortSignals.
+   *
+   * @remarks
+   * After disposal, the observer will no longer respond to abort signals, but it will
+   * continue to function as a regular ValueObserver for manual value updates via `set()`.
+   * The observer's current value is preserved after disposal.
+   *
+   * @example
+   * Manual disposal:
+   * ```typescript
+   * const observer = new AbortableValueObserver(true, () => false, [signal]);
+   *
+   * // Manual cleanup
+   * observer[Symbol.dispose]();
+   *
+   * // Observer still works for manual updates
+   * observer.set(false); // Still works
+   * // But signal abort won't trigger updates anymore
+   * ```
+   *
+   * @example
+   * Automatic disposal with `using`:
+   * ```typescript
+   * {
+   *   using observer = new AbortableValueObserver(true, () => false, [signal]);
+   *   // Use observer...
+   * } // Automatic cleanup happens here
+   * ```
+   */
+  [Symbol.dispose]() {
+    for (const signal of this.#signals) {
+      signal.removeEventListener("abort", this.#handleAbort);
+    }
+  }
+}
+
+/**
  * Represents a message in the queue system.
  *
  * Each message contains data, a unique identifier, timestamps for creation
@@ -93,7 +339,7 @@ export class Message<T extends object = any> {
   /** Unique identifier for the message */
   id: string = crypto.randomUUID();
   /** Timestamp when the message was created */
-  createdAt: number = Date.now();
+  createdAt: number;
   /** Timestamp when the message was last acknowledged, null if never acknowledged */
   acknowledgedAt: null | number = null;
 
@@ -101,7 +347,12 @@ export class Message<T extends object = any> {
    * Creates a new message with the provided data.
    * @param data - The payload data for this message
    */
-  constructor(public data: T) {}
+  constructor(
+    public data: T,
+    createdAt?: number,
+  ) {
+    this.createdAt = createdAt ?? Date.now();
+  }
 
   /**
    * Marks the message as acknowledged with the current timestamp.
@@ -167,13 +418,18 @@ export abstract class Store {
    * - It has never been acknowledged (acknowledgedAt is null), OR
    * - Its last acknowledgment was older than the timeout period
    *
+   * This operation should be implemented atomically to handle concurrent access safely,
+   * ensuring that multiple workers don't claim the same message simultaneously.
+   *
    * @param acknowledgeTimeoutMs - Timeout in milliseconds for considering messages unacknowledged
    * @param now - Current timestamp to compare against
+   * @param abort - Optional AbortSignal to cancel the claim operation
    * @returns The claimed message if found, null if no unacknowledged messages exist
    */
   abstract claimMessage(
     acknowledgeTimeoutMs: number,
     now: number,
+    abort?: AbortSignal,
   ): Promise<Message | null>;
 
   /**
@@ -206,6 +462,7 @@ export class MemoryStore extends Store {
   messages: Message[] = [];
   /** Observer tracking the current size of the queue */
   queueSize = new ValueObserver(0);
+  lastMessageId = new ValueObserver<string | null>(null);
 
   /**
    * Adds a message to the in-memory array.
@@ -214,6 +471,7 @@ export class MemoryStore extends Store {
   async addMessage(message: Message) {
     this.messages.push(message);
     this.queueSize.set(this.messages.length);
+    this.lastMessageId.set(message.id);
   }
 
   /**
@@ -246,26 +504,43 @@ export class MemoryStore extends Store {
   /**
    * Finds the first unacknowledged message and claims it by acknowledging it.
    *
-   * This implementation is not truly atomic in a concurrent environment,
-   * but is sufficient for single-threaded applications.
+   * This implementation includes polling behavior and supports abortion via AbortSignal.
+   * It continuously searches for unacknowledged messages until one is found or the operation
+   * is aborted. The method is not truly atomic in a concurrent environment, but is sufficient
+   * for single-threaded applications.
    *
    * @param acknowledgeTimeoutMs - Timeout for considering messages unacknowledged
    * @param now - Current timestamp
-   * @returns The claimed message if found, null otherwise
+   * @param signal - Optional AbortSignal to cancel the claiming operation
+   * @returns The claimed message if found, null if no unacknowledged messages exist or operation was aborted
    */
   async claimMessage(
     acknowledgeTimeoutMs: number,
     now: number,
+    signal?: AbortSignal,
   ): Promise<Message | null> {
-    const message =
-      this.messages.find((message) => {
-        const acknowledgedAt = message.acknowledgedAt;
-        return (
-          acknowledgedAt === null || acknowledgedAt < now - acknowledgeTimeoutMs
-        );
-      }) ?? null;
-    message?.acknowledge();
-    return message;
+    const timeStart = Date.now();
+    const claimActive = new AbortableValueObserver(true, () => false);
+    if (signal) claimActive.addSignal(signal);
+
+    while (claimActive.get()) {
+      const message =
+        this.messages.find((message) => {
+          const acknowledgedAt = message.acknowledgedAt;
+          const a = Date.now() - timeStart + now;
+          return (
+            acknowledgedAt === null || acknowledgedAt < a - acknowledgeTimeoutMs
+          );
+        }) ?? null;
+      if (!message) {
+        await new Promise((r) => setTimeout(r, 50));
+        continue;
+      }
+      message?.acknowledge();
+      return message;
+    }
+
+    return null;
   }
 
   /**
@@ -279,15 +554,41 @@ export class MemoryStore extends Store {
 
 /**
  * Configuration options for creating a Queue instance.
+ *
+ * These options control the behavior of message processing, timeouts, and storage.
+ * All options are optional and have sensible defaults for most use cases.
+ *
+ * @example
+ * ```typescript
+ * // Use defaults (suitable for development/testing)
+ * const queue = new Queue();
+ *
+ * // Custom configuration for production
+ * const queue = new Queue({
+ *   messageTimeoutMs: 30000,    // 30 seconds before reclaim
+ *   ackIntervalMs: 5000,        // Keep-alive every 5 seconds
+ *   store: new DatabaseStore()  // Persistent storage
+ * });
+ * ```
  */
 type QueueOptions = {
-  /** Time in milliseconds to wait between polling attempts when no messages are available. Default: 50ms */
-  pollingIntervalMs?: number;
-  /** Time in milliseconds before a message is considered unacknowledged and can be reclaimed. Default: 100ms */
+  /**
+   * Time in milliseconds before a message is considered unacknowledged and can be reclaimed.
+   * This prevents messages from being lost if a worker crashes during processing.
+   * @default 100
+   */
   messageTimeoutMs?: number;
-  /** Interval in milliseconds for sending keep-alive acknowledgments while processing a message. Default: 100ms */
+  /**
+   * Interval in milliseconds for sending keep-alive acknowledgments while processing a message.
+   * This ensures long-running message processing doesn't timeout and get reclaimed.
+   * @default 100
+   */
   ackIntervalMs?: number;
-  /** Custom store implementation for message persistence. Default: new MemoryStore() */
+  /**
+   * Custom store implementation for message persistence.
+   * Use MemoryStore for development/testing or implement a custom Store for production persistence.
+   * @default new MemoryStore()
+   */
   store?: Store;
 };
 
@@ -346,8 +647,6 @@ type QueueOptions = {
  * - Failed or unacknowledged messages are automatically reclaimed after timeout
  */
 export class Queue {
-  /** Time to wait between polling attempts */
-  #pollingIntervalMs: number;
   /** Timeout for considering messages as unacknowledged (ms) */
   #messageTimeoutMs: number;
   /** Interval for acknowledgment process */
@@ -367,7 +666,6 @@ export class Queue {
    * @param options - Configuration options for the queue behavior and storage
    */
   constructor(options?: QueueOptions) {
-    this.#pollingIntervalMs = options?.pollingIntervalMs ?? 50;
     this.#messageTimeoutMs = options?.messageTimeoutMs ?? 100;
     this.#ackIntervalMs = options?.ackIntervalMs ?? 100;
     this.#store = options?.store ?? new MemoryStore();
@@ -533,14 +831,17 @@ export class Queue {
    * ```
    */
   async *consume(signal?: AbortSignal) {
-    while (this.#queueIsActive.get()) {
+    using consumeIsActive = new AbortableValueObserver(
+      true,
+      () => false,
+      signal ? [signal] : [],
+    );
+    while (consumeIsActive.get()) {
       const message = await this.#store.claimMessage(
         this.#messageTimeoutMs,
         Date.now(),
+        signal,
       );
-      if (!message) {
-        await new Promise((r) => setTimeout(r, this.#pollingIntervalMs));
-      }
       if (message) {
         const consumed = new ValueObserver(false);
         const activated = new ValueObserver(true);

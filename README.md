@@ -587,11 +587,27 @@ const worker = (name) => async () => {
 await Promise.all([worker("Worker-1")(), worker("Worker-2")()]);
 ```
 
+**With AbortSignal support:**
+
+```ts
+const controller = new AbortController();
+
+// Consume with cancellation support
+(async () => {
+  for await (const job of queue.consume(controller.signal)) {
+    await processJob(job);
+    queue.ack(job);
+  }
+})();
+
+// Stop processing after 10 seconds
+setTimeout(() => controller.abort(), 10_000);
+```
+
 ### Queue Options
 
 ```ts
 const queue = new Queue({
-  pollingIntervalMs: 50, // Delay between polls when no messages available (default: 50)
   messageTimeoutMs: 100, // Time before message is considered unacknowledged (default: 100)
   ackIntervalMs: 100, // Keep-alive acknowledgment interval (default: 100)
   store: new MemoryStore(), // Custom storage backend (default: new MemoryStore())
@@ -638,6 +654,7 @@ abstract class Store {
   abstract claimMessage(
     acknowledgeTimeoutMs: number,
     now: number,
+    abort?: AbortSignal,
   ): Promise<Message | null>;
   abstract getSize(): Promise<number>;
 }

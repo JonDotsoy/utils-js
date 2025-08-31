@@ -1,5 +1,5 @@
 import { describe, test, expect, mock } from "bun:test";
-import { Queue, MemoryStore } from "./queue.js";
+import { Queue, MemoryStore, Message } from "./queue.js";
 
 describe("Queue", () => {
   test("should add messages to the store", async () => {
@@ -137,5 +137,69 @@ describe("Queue", () => {
     // Verify the message was eventually processed by worker2
     // after worker1 failed and the message timeout expired
     expect(push).toHaveBeenCalledWith({ foo: "bar" });
+  });
+
+  test("should properly handle AbortSignal to stop queue consumption", async () => {
+    const workflowOn = mock();
+    const workflowOff = mock();
+    const push = mock();
+
+    const queue = new Queue();
+    const abort = new AbortController();
+
+    const worker = async () => {
+      workflowOn();
+      for await (const message of queue.consume(abort.signal)) {
+        push(message);
+      }
+      workflowOff();
+    };
+
+    const process = worker();
+
+    expect(workflowOn).toHaveBeenCalled();
+    expect(workflowOff).not.toHaveBeenCalled();
+    await new Promise((r) => setTimeout(r, 50));
+    abort.abort();
+    await new Promise((r) => setTimeout(r, 50));
+    expect(workflowOff).toHaveBeenCalled();
+    await process;
+  });
+});
+
+describe("MemoryStore", () => {
+  test("test", async () => {
+    const memory = new MemoryStore();
+
+    const done = mock();
+
+    const worker = async () => {
+      await memory.claimMessage(10, 10);
+      done();
+    };
+
+    const process = worker();
+
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(done).not.toHaveBeenCalled();
+
+    memory.addMessage(new Message({ foo: "bar" }));
+
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(done).toHaveBeenCalled();
+
+    await process;
+  });
+
+  test("test", async () => {
+    const memory = new MemoryStore();
+
+    memory.addMessage(new Message({ foo: "bar" }));
+
+    const message = await memory.claimMessage(10, 10);
+
+    expect(message).toBeDefined();
   });
 });

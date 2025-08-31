@@ -79,12 +79,11 @@ class Queue {
 
 #### Options (`QueueOptions`)
 
-| Option              | Type    | Default             | Description                                                             |
-| ------------------- | ------- | ------------------- | ----------------------------------------------------------------------- |
-| `pollingIntervalMs` | number  | 50                  | Delay between polls when no message claimed.                            |
-| `messageTimeoutMs`  | number  | 100                 | Time without acknowledgement after which a message becomes reclaimable. |
-| `ackIntervalMs`     | number  | 100                 | Periodic acknowledgement keep‑alive while processing.                   |
-| `store`             | `Store` | `new MemoryStore()` | Storage backend instance.                                               |
+| Option             | Type    | Default             | Description                                                             |
+| ------------------ | ------- | ------------------- | ----------------------------------------------------------------------- |
+| `messageTimeoutMs` | number  | 100                 | Time without acknowledgement after which a message becomes reclaimable. |
+| `ackIntervalMs`    | number  | 100                 | Periodic acknowledgement keep‑alive while processing.                   |
+| `store`            | `Store` | `new MemoryStore()` | Storage backend instance.                                               |
 
 #### `add(data: any)`
 
@@ -102,10 +101,10 @@ Marks a message as successfully processed, allowing it to be deleted from the qu
 
 Returns an async generator that yields message `data` values. **Important**: Messages are only deleted from the queue if they are explicitly acknowledged using `ack()` or `acknowledgeMessage()`.
 
-| Argument form | Behavior                                            |
-| ------------- | --------------------------------------------------- |
-| Omitted       | Polls continuously until queue is inactive.         |
-| `AbortSignal` | Exits when signal is aborted (not yet implemented). |
+| Argument form | Behavior                                        |
+| ------------- | ----------------------------------------------- |
+| Omitted       | Polls continuously until queue is inactive.     |
+| `AbortSignal` | Exits when signal is aborted (fully supported). |
 
 > Keep‑alive continues until message processing finishes. Messages are **only deleted** if explicitly acknowledged with `ack()` or `acknowledgeMessage()`.
 
@@ -125,7 +124,7 @@ for await (const data of queue.consume()) {
 }
 ```
 
-With AbortSignal (when implemented):
+With AbortSignal:
 
 ```ts
 const controller = new AbortController();
@@ -161,6 +160,7 @@ abstract class Store {
   abstract claimMessage(
     timeoutMs: number,
     now: number,
+    abort?: AbortSignal,
   ): Promise<Message | null>;
   abstract getSize(): Promise<number>;
 }
@@ -235,7 +235,6 @@ For deterministic tests, tune small values:
 ```ts
 const queue = new Queue({
   store: new MemoryStore(),
-  pollingIntervalMs: 5,
   ackIntervalMs: 20,
   messageTimeoutMs: 100,
 });
