@@ -339,7 +339,7 @@ export class Message<T extends object = any> {
   /** Unique identifier for the message */
   id: string = crypto.randomUUID();
   /** Timestamp when the message was created */
-  createdAt: number = Date.now();
+  createdAt: number;
   /** Timestamp when the message was last acknowledged, null if never acknowledged */
   acknowledgedAt: null | number = null;
 
@@ -347,7 +347,12 @@ export class Message<T extends object = any> {
    * Creates a new message with the provided data.
    * @param data - The payload data for this message
    */
-  constructor(public data: T) {}
+  constructor(
+    public data: T,
+    createdAt?: number,
+  ) {
+    this.createdAt = createdAt ?? Date.now();
+  }
 
   /**
    * Marks the message as acknowledged with the current timestamp.
@@ -420,6 +425,7 @@ export abstract class Store {
   abstract claimMessage(
     acknowledgeTimeoutMs: number,
     now: number,
+    abort?: AbortSignal,
   ): Promise<Message | null>;
 
   /**
@@ -452,6 +458,7 @@ export class MemoryStore extends Store {
   messages: Message[] = [];
   /** Observer tracking the current size of the queue */
   queueSize = new ValueObserver(0);
+  lastMessageId = new ValueObserver<string | null>(null);
 
   /**
    * Adds a message to the in-memory array.
@@ -460,6 +467,7 @@ export class MemoryStore extends Store {
   async addMessage(message: Message) {
     this.messages.push(message);
     this.queueSize.set(this.messages.length);
+    this.lastMessageId.set(message.id);
   }
 
   /**
@@ -502,16 +510,30 @@ export class MemoryStore extends Store {
   async claimMessage(
     acknowledgeTimeoutMs: number,
     now: number,
+    signal?: AbortSignal,
   ): Promise<Message | null> {
-    const message =
-      this.messages.find((message) => {
-        const acknowledgedAt = message.acknowledgedAt;
-        return (
-          acknowledgedAt === null || acknowledgedAt < now - acknowledgeTimeoutMs
-        );
-      }) ?? null;
-    message?.acknowledge();
-    return message;
+    const timeStart = Date.now();
+    const claimActive = new AbortableValueObserver(true, () => false);
+    if (signal) claimActive.addSignal(signal);
+
+    while (claimActive.get()) {
+      const message =
+        this.messages.find((message) => {
+          const acknowledgedAt = message.acknowledgedAt;
+          const a = Date.now() - timeStart + now;
+          return (
+            acknowledgedAt === null || acknowledgedAt < a - acknowledgeTimeoutMs
+          );
+        }) ?? null;
+      if (!message) {
+        await new Promise((r) => setTimeout(r, 50));
+        continue;
+      }
+      message?.acknowledge();
+      return message;
+    }
+
+    return null;
   }
 
   /**
@@ -527,8 +549,6 @@ export class MemoryStore extends Store {
  * Configuration options for creating a Queue instance.
  */
 type QueueOptions = {
-  /** Time in milliseconds to wait between polling attempts when no messages are available. Default: 50ms */
-  pollingIntervalMs?: number;
   /** Time in milliseconds before a message is considered unacknowledged and can be reclaimed. Default: 100ms */
   messageTimeoutMs?: number;
   /** Interval in milliseconds for sending keep-alive acknowledgments while processing a message. Default: 100ms */
@@ -592,8 +612,6 @@ type QueueOptions = {
  * - Failed or unacknowledged messages are automatically reclaimed after timeout
  */
 export class Queue {
-  /** Time to wait between polling attempts */
-  #pollingIntervalMs: number;
   /** Timeout for considering messages as unacknowledged (ms) */
   #messageTimeoutMs: number;
   /** Interval for acknowledgment process */
@@ -613,7 +631,6 @@ export class Queue {
    * @param options - Configuration options for the queue behavior and storage
    */
   constructor(options?: QueueOptions) {
-    this.#pollingIntervalMs = options?.pollingIntervalMs ?? 50;
     this.#messageTimeoutMs = options?.messageTimeoutMs ?? 100;
     this.#ackIntervalMs = options?.ackIntervalMs ?? 100;
     this.#store = options?.store ?? new MemoryStore();
@@ -788,10 +805,8 @@ export class Queue {
       const message = await this.#store.claimMessage(
         this.#messageTimeoutMs,
         Date.now(),
+        signal,
       );
-      if (!message) {
-        await new Promise((r) => setTimeout(r, this.#pollingIntervalMs));
-      }
       if (message) {
         const consumed = new ValueObserver(false);
         const activated = new ValueObserver(true);
