@@ -418,8 +418,12 @@ export abstract class Store {
    * - It has never been acknowledged (acknowledgedAt is null), OR
    * - Its last acknowledgment was older than the timeout period
    *
+   * This operation should be implemented atomically to handle concurrent access safely,
+   * ensuring that multiple workers don't claim the same message simultaneously.
+   *
    * @param acknowledgeTimeoutMs - Timeout in milliseconds for considering messages unacknowledged
    * @param now - Current timestamp to compare against
+   * @param abort - Optional AbortSignal to cancel the claim operation
    * @returns The claimed message if found, null if no unacknowledged messages exist
    */
   abstract claimMessage(
@@ -500,12 +504,15 @@ export class MemoryStore extends Store {
   /**
    * Finds the first unacknowledged message and claims it by acknowledging it.
    *
-   * This implementation is not truly atomic in a concurrent environment,
-   * but is sufficient for single-threaded applications.
+   * This implementation includes polling behavior and supports abortion via AbortSignal.
+   * It continuously searches for unacknowledged messages until one is found or the operation
+   * is aborted. The method is not truly atomic in a concurrent environment, but is sufficient
+   * for single-threaded applications.
    *
    * @param acknowledgeTimeoutMs - Timeout for considering messages unacknowledged
    * @param now - Current timestamp
-   * @returns The claimed message if found, null otherwise
+   * @param signal - Optional AbortSignal to cancel the claiming operation
+   * @returns The claimed message if found, null if no unacknowledged messages exist or operation was aborted
    */
   async claimMessage(
     acknowledgeTimeoutMs: number,
@@ -547,13 +554,41 @@ export class MemoryStore extends Store {
 
 /**
  * Configuration options for creating a Queue instance.
+ *
+ * These options control the behavior of message processing, timeouts, and storage.
+ * All options are optional and have sensible defaults for most use cases.
+ *
+ * @example
+ * ```typescript
+ * // Use defaults (suitable for development/testing)
+ * const queue = new Queue();
+ *
+ * // Custom configuration for production
+ * const queue = new Queue({
+ *   messageTimeoutMs: 30000,    // 30 seconds before reclaim
+ *   ackIntervalMs: 5000,        // Keep-alive every 5 seconds
+ *   store: new DatabaseStore()  // Persistent storage
+ * });
+ * ```
  */
 type QueueOptions = {
-  /** Time in milliseconds before a message is considered unacknowledged and can be reclaimed. Default: 100ms */
+  /**
+   * Time in milliseconds before a message is considered unacknowledged and can be reclaimed.
+   * This prevents messages from being lost if a worker crashes during processing.
+   * @default 100
+   */
   messageTimeoutMs?: number;
-  /** Interval in milliseconds for sending keep-alive acknowledgments while processing a message. Default: 100ms */
+  /**
+   * Interval in milliseconds for sending keep-alive acknowledgments while processing a message.
+   * This ensures long-running message processing doesn't timeout and get reclaimed.
+   * @default 100
+   */
   ackIntervalMs?: number;
-  /** Custom store implementation for message persistence. Default: new MemoryStore() */
+  /**
+   * Custom store implementation for message persistence.
+   * Use MemoryStore for development/testing or implement a custom Store for production persistence.
+   * @default new MemoryStore()
+   */
   store?: Store;
 };
 
