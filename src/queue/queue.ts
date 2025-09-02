@@ -245,6 +245,10 @@ export class Queue {
     this.#store.close();
   }
 
+  [Symbol.dispose]() {
+    this.close();
+  }
+
   /**
    * Adds a new message to the queue.
    *
