@@ -79,14 +79,33 @@ export class ValueObserver<T> {
   }
 
   /**
-   * Creates an {@link AbortSignal} that is aborted when the value retrieved by `get()` becomes falsy.
+   * Creates an {@link AbortSignal} that is automatically aborted when the observed value becomes falsy.
    *
-   * If the current value is already falsy, the signal is aborted immediately.
-   * Otherwise, the signal will be aborted when the value changes to a falsy value.
+   * If the current value is already falsy, the signal is immediately aborted.
+   * If the current value is truthy, the method subscribes to value changes and aborts
+   * the signal when the value transitions to a falsy state.
    *
-   * @returns {AbortSignal} An {@link AbortSignal} that is aborted based on the value returned by `get()`.
+   * @returns An object containing:
+   *   - `signal`: An {@link AbortSignal} that will be aborted when the value becomes falsy
+   *   - `[Symbol.dispose]`: A cleanup function that unsubscribes from value changes
+   *
+   * @example
+   * ```typescript
+   * const observer = new ValueObserver(true);
+   * const { signal, [Symbol.dispose]: dispose } = observer.createAbortSignal();
+   *
+   * // Signal is not aborted initially since value is truthy
+   * console.log(signal.aborted); // false
+   *
+   * // Change value to falsy - signal will be aborted
+   * observer.set(false);
+   * console.log(signal.aborted); // true
+   *
+   * // Clean up subscription
+   * dispose();
+   * ```
    */
-  createAbortSignal(): AbortSignal {
+  createAbortSignal(): { [Symbol.dispose]: () => void; signal: AbortSignal } {
     /**
      * Determines whether the current value retrieved by `get()` is falsy.
      *
@@ -95,20 +114,26 @@ export class ValueObserver<T> {
     const isFalsy = (): boolean => !this.get();
     const controller = new AbortController();
     const falsy = isFalsy();
+    let unsubscribe: (() => void) | null = null;
 
     if (falsy) {
       controller.abort();
     }
 
     if (!falsy) {
-      const unsubscribe = this.listen(() => {
+      unsubscribe = this.subscribe(() => {
         if (isFalsy()) {
           controller.abort();
-          unsubscribe();
+          unsubscribe?.();
         }
       });
     }
 
-    return controller.signal;
+    return {
+      [Symbol.dispose]: () => {
+        unsubscribe?.();
+      },
+      signal: controller.signal,
+    };
   }
 }

@@ -296,19 +296,19 @@ describe("MemoryStore", () => {
 describe("ValueObserver.createAbortSignal", () => {
   test("should immediately abort if initial value is falsy", () => {
     const observer = new ValueObserver(false);
-    const signal = observer.createAbortSignal();
+    const signal = observer.createAbortSignal().signal;
     expect(signal.aborted).toBe(true);
   });
 
   test("should not abort if initial value is truthy", () => {
     const observer = new ValueObserver(true);
-    const signal = observer.createAbortSignal();
+    const signal = observer.createAbortSignal().signal;
     expect(signal.aborted).toBe(false);
   });
 
   test("should abort when value changes to falsy", () => {
     const observer = new ValueObserver(true);
-    const signal = observer.createAbortSignal();
+    const signal = observer.createAbortSignal().signal;
     expect(signal.aborted).toBe(false);
     observer.set(false);
     expect(signal.aborted).toBe(true);
@@ -316,7 +316,7 @@ describe("ValueObserver.createAbortSignal", () => {
 
   test("should not abort when value changes to another truthy value", () => {
     const observer = new ValueObserver(1);
-    const signal = observer.createAbortSignal();
+    const signal = observer.createAbortSignal().signal;
     expect(signal.aborted).toBe(false);
     observer.set(2);
     expect(signal.aborted).toBe(false);
@@ -324,7 +324,7 @@ describe("ValueObserver.createAbortSignal", () => {
 
   test("should abort when value changes to falsy and remain aborted", () => {
     const observer = new ValueObserver("hello");
-    const signal = observer.createAbortSignal();
+    const signal = observer.createAbortSignal().signal;
     expect(signal.aborted).toBe(false);
     observer.set(""); // falsy
     expect(signal.aborted).toBe(true);

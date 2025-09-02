@@ -89,8 +89,9 @@ export class MemoryStore extends Store {
     const timeStart = Date.now();
     const claimActive = new AbortableValueObserver(true, () => false);
 
+    using abortSignalInstance = this.#storeIsActive.createAbortSignal();
     // Add the store's active state to the abort observer
-    claimActive.addSignal(this.#storeIsActive.createAbortSignal());
+    claimActive.addSignal(abortSignalInstance.signal);
 
     if (signal) claimActive.addSignal(signal);
 

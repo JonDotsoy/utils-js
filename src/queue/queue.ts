@@ -578,7 +578,8 @@ export class Queue {
   async *consume(signal?: AbortSignal) {
     using consumeIsActive = new AbortableValueObserver(true, () => false);
     if (signal) consumeIsActive.addSignal(signal);
-    consumeIsActive.addSignal(this.#queueIsActive.createAbortSignal());
+    using abortSignalInstance = this.#queueIsActive.createAbortSignal();
+    consumeIsActive.addSignal(abortSignalInstance.signal);
     while (consumeIsActive.get()) {
       const message = await this.#store.claimMessage(
         this.#messageTimeoutMs,
