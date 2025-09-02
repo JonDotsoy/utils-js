@@ -1,556 +1,8 @@
-/**
- * A reactive observer pattern implementation for watching value changes.
- *
- * The ValueObserver class allows monitoring changes to a value and notifying
- * registered callbacks whenever the value is updated. In the queue system,
- * it's used to track queue state and message acknowledgment status.
- *
- * @template T - The type of the observed value
- *
- * @example
- * ```typescript
- * const observer = new ValueObserver(42);
- * const unsubscribe = observer.subscribe(value => console.log(value));
- * observer.set(100); // Logs: 100
- * unsubscribe();
- * ```
- */
-class ValueObserver<T> {
-  #value: T;
-  #callbacks = new Set<(value: T) => void>();
-
-  /**
-   * Creates a new ValueObserver with an initial value.
-   * @param value - The initial value to observe
-   */
-  constructor(value: T) {
-    this.#value = value;
-  }
-
-  /**
-   * Gets the current value.
-   * @returns The current observed value
-   */
-  get(): T {
-    return this.#value;
-  }
-
-  /**
-   * Sets a new value and notifies all registered callbacks.
-   * @param value - The new value to set
-   */
-  set(value: T) {
-    const diff = this.#value !== value;
-    this.#value = value;
-    if (diff) {
-      this.propagateChange();
-    }
-  }
-
-  /**
-   * Notifies all registered callbacks of the current value.
-   * @private
-   */
-  private propagateChange() {
-    for (const callback of this.#callbacks) {
-      callback(this.#value);
-    }
-  }
-
-  /**
-   * Registers a callback to be called when the value changes.
-   * @param callback - Function to call when the value changes
-   * @returns Function to unregister the callback
-   */
-  listen(callback: (value: T) => void) {
-    this.#callbacks.add(callback);
-    return () => this.#callbacks.delete(callback);
-  }
-
-  /**
-   * Registers a callback and immediately calls it with the current value.
-   * @param callback - Function to call when the value changes
-   * @returns Function to unregister the callback
-   */
-  subscribe(callback: (value: T) => void) {
-    const unsub = this.listen(callback);
-    callback(this.#value);
-    return unsub;
-  }
-}
-
-/**
- * A disposable ValueObserver that automatically updates its value when AbortSignals are triggered.
- *
- * This class extends ValueObserver to provide automatic value updates based on abort signals,
- * making it ideal for tracking cancellation states in async operations. It supports monitoring
- * multiple abort signals simultaneously and implements the Disposable pattern for automatic
- * cleanup when used with the `using` declaration.
- *
- * Key features:
- * - Monitors multiple AbortSignals simultaneously
- * - Automatically updates value when any monitored signal is aborted
- * - Supports dynamic addition of new signals via `addSignal()`
- * - Implements Symbol.dispose for automatic resource cleanup
- * - Inherits all ValueObserver functionality (subscribe, listen, etc.)
- *
- * @template T - The type of the observed value (can be any type, not limited to boolean)
- *
- * @example
- * Basic usage with single abort signal:
- * ```typescript
- * const controller = new AbortController();
- *
- * using activeState = new AbortableValueObserver(
- *   true,                    // Initial value: active
- *   () => false,            // Value when aborted: inactive
- *   [controller.signal]     // Signals to monitor
- * );
- *
- * console.log(activeState.get()); // true
- * controller.abort();
- * console.log(activeState.get()); // false
- * // Cleanup happens automatically when leaving scope
- * ```
- *
- * @example
- * Multiple abort signals with dynamic addition:
- * ```typescript
- * const controller1 = new AbortController();
- * const controller2 = new AbortController();
- *
- * using observer = new AbortableValueObserver(
- *   "active",
- *   () => "cancelled",
- *   [controller1.signal]
- * );
- *
- * // Add another signal dynamically
- * observer.addSignal(controller2.signal);
- *
- * // Value becomes "cancelled" when ANY signal is aborted
- * controller2.abort(); // observer.get() === "cancelled"
- * ```
- *
- * @example
- * Using with subscriptions:
- * ```typescript
- * const controller = new AbortController();
- *
- * using statusObserver = new AbortableValueObserver(
- *   { status: "running", progress: 0 },
- *   () => ({ status: "cancelled", progress: 0 }),
- *   [controller.signal]
- * );
- *
- * const unsubscribe = statusObserver.subscribe(value => {
- *   console.log("Status changed:", value.status);
- * });
- *
- * controller.abort(); // Logs: "Status changed: cancelled"
- * ```
- */
-class AbortableValueObserver<T> extends ValueObserver<T> {
-  /** Array of AbortSignals being monitored for abort events */
-  #signals: AbortSignal[];
-  /** Function that returns the new value when any signal is aborted */
-  #abortValueFactory: () => T;
-
-  /**
-   * Creates a new AbortableValueObserver that monitors the provided abort signals.
-   *
-   * The observer will automatically call the `abortValueFactory` function and update
-   * its value whenever any of the monitored signals is aborted. The signals array
-   * is copied internally to prevent external modifications.
-   *
-   * @param initialValue - The initial value for the observer
-   * @param abortValueFactory - Function that returns the value to set when any signal is aborted.
-   *                           This function is called each time an abort occurs, allowing for
-   *                           dynamic values based on the current state.
-   * @param signals - Optional array of AbortSignals to monitor for abort events.
-   *                 Can be empty or undefined, and new signals can be added later via `addSignal()`.
-   *
-   * @example
-   * ```typescript
-   * // With immediate signals
-   * const observer = new AbortableValueObserver(
-   *   "processing",
-   *   () => "aborted",
-   *   [signal1, signal2]
-   * );
-   *
-   * // Without initial signals (add them later)
-   * const observer = new AbortableValueObserver(
-   *   { active: true },
-   *   () => ({ active: false, reason: "aborted" })
-   * );
-   * observer.addSignal(mySignal);
-   * ```
-   */
-  constructor(
-    initialValue: T,
-    abortValueFactory: () => T,
-    signals?: AbortSignal[],
-  ) {
-    super(initialValue);
-    this.#signals = [...(signals || [])]; // Create a copy to avoid external modifications
-    this.#abortValueFactory = abortValueFactory;
-
-    // Register abort listeners for all provided signals
-    for (const signal of this.#signals) {
-      this.#addSignalListener(signal);
-    }
-  }
-
-  /**
-   * Adds a new AbortSignal to be monitored and immediately registers its abort event listener.
-   *
-   * Once added, the signal will trigger the abort value factory function if it becomes aborted.
-   * This method is useful for dynamically adding signals after the observer has been created,
-   * such as when new operations are started that should cancel the current state.
-   *
-   * @param signal - The AbortSignal to add to the monitoring list. If the signal is already
-   *                aborted when added, the abort handler will not be triggered immediately.
-   *
-   * @example
-   * Dynamic signal management:
-   * ```typescript
-   * const observer = new AbortableValueObserver(
-   *   { tasks: [], status: "idle" },
-   *   () => ({ tasks: [], status: "cancelled" }),
-   *   []
-   * );
-   *
-   * // Start a new task
-   * const taskController = new AbortController();
-   * observer.addSignal(taskController.signal);
-   *
-   * // Start another task
-   * const anotherController = new AbortController();
-   * observer.addSignal(anotherController.signal);
-   *
-   * // Either controller aborting will trigger the observer update
-   * ```
-   *
-   * @example
-   * Adding timeout signals:
-   * ```typescript
-   * const observer = new AbortableValueObserver(
-   *   true,
-   *   () => false,
-   *   [userController.signal]
-   * );
-   *
-   * // Add a timeout signal
-   * const timeoutController = new AbortController();
-   * setTimeout(() => timeoutController.abort(), 5000);
-   * observer.addSignal(timeoutController.signal);
-   * ```
-   */
-  addSignal(signal: AbortSignal) {
-    this.#signals.push(signal);
-    this.#addSignalListener(signal);
-  }
-
-  /**
-   * Adds an abort event listener to the specified signal.
-   *
-   * This method registers the internal abort handler to be called when the signal
-   * is aborted. The handler is bound to maintain the correct `this` context.
-   *
-   * @param signal - The AbortSignal to attach the event listener to
-   * @private
-   */
-  #addSignalListener(signal: AbortSignal) {
-    signal.addEventListener("abort", this.#handleAbort);
-  }
-
-  /**
-   * Handles the abort event by updating the observed value using the abort value factory.
-   *
-   * This method is automatically called when any monitored AbortSignal is aborted.
-   * It calls the `abortValueFactory` function provided in the constructor to get the
-   * new value and updates the observer, which will notify all subscribers.
-   *
-   * This method is implemented as an arrow function to maintain the correct `this` context
-   * when used as an event listener callback.
-   *
-   * @private
-   */
-  #handleAbort = () => {
-    this.set(this.#abortValueFactory());
-  };
-
-  /**
-   * Disposes of the observer by removing all abort event listeners.
-   *
-   * This method implements the Disposable pattern and is automatically called when using
-   * the `using` declaration. It ensures that all event listeners are properly cleaned up
-   * to prevent memory leaks, especially important when working with long-lived AbortSignals.
-   *
-   * @remarks
-   * After disposal, the observer will no longer respond to abort signals, but it will
-   * continue to function as a regular ValueObserver for manual value updates via `set()`.
-   * The observer's current value is preserved after disposal.
-   *
-   * @example
-   * Manual disposal:
-   * ```typescript
-   * const observer = new AbortableValueObserver(true, () => false, [signal]);
-   *
-   * // Manual cleanup
-   * observer[Symbol.dispose]();
-   *
-   * // Observer still works for manual updates
-   * observer.set(false); // Still works
-   * // But signal abort won't trigger updates anymore
-   * ```
-   *
-   * @example
-   * Automatic disposal with `using`:
-   * ```typescript
-   * {
-   *   using observer = new AbortableValueObserver(true, () => false, [signal]);
-   *   // Use observer...
-   * } // Automatic cleanup happens here
-   * ```
-   */
-  [Symbol.dispose]() {
-    for (const signal of this.#signals) {
-      signal.removeEventListener("abort", this.#handleAbort);
-    }
-  }
-}
-
-/**
- * Represents a message in the queue system.
- *
- * Each message contains data, a unique identifier, timestamps for creation
- * and acknowledgment, and methods for managing its lifecycle.
- *
- * @example
- * ```typescript
- * const message = new Message({ task: "process-data", priority: 1 });
- * console.log(message.id); // Auto-generated UUID
- * message.acknowledge(); // Marks message as acknowledged
- * ```
- */
-export class Message<T extends object = any> {
-  /** Unique identifier for the message */
-  id: string = crypto.randomUUID();
-  /** Timestamp when the message was created */
-  createdAt: number;
-  /** Timestamp when the message was last acknowledged, null if never acknowledged */
-  acknowledgedAt: null | number = null;
-
-  /**
-   * Creates a new message with the provided data.
-   * @param data - The payload data for this message
-   */
-  constructor(
-    public data: T,
-    createdAt?: number,
-  ) {
-    this.createdAt = createdAt ?? Date.now();
-  }
-
-  /**
-   * Marks the message as acknowledged with the current timestamp.
-   * This is used to track when the message was last processed or claimed.
-   */
-  acknowledge() {
-    this.acknowledgedAt = Date.now();
-  }
-}
-
-/**
- * Abstract base class representing a message store for a queue system.
- *
- * Implementations of this class are responsible for persisting, retrieving,
- * acknowledging, deleting, and claiming messages within a queue. This abstraction
- * allows for different storage backends (memory, database, file system, etc.).
- *
- * @remarks
- * - All methods are async to support various storage implementations
- * - The `claimMessage` method is atomic and should handle concurrent access safely
- * - Implementations should ensure message consistency and prevent data loss
- *
- * @example
- * ```typescript
- * class DatabaseStore extends Store {
- *   async addMessage(message: Message): Promise<void> {
- *     // Implementation for database storage
- *   }
- *   // ... other method implementations
- * }
- * ```
- */
-export abstract class Store {
-  /**
-   * Adds a new message to the store.
-   * @param message - The message to add to the store
-   */
-  abstract addMessage(message: Message): Promise<void>;
-
-  /**
-   * Retrieves a message by its ID.
-   * @param messageId - The unique identifier of the message
-   * @returns The message if found, null otherwise
-   */
-  abstract getMessage(messageId: string): Promise<Message | null>;
-
-  /**
-   * Acknowledges a message by updating its acknowledgedAt timestamp.
-   * @param messageId - The unique identifier of the message to acknowledge
-   */
-  abstract acknowledgeMessage(messageId: string): Promise<void>;
-
-  /**
-   * Permanently deletes a message from the store.
-   * @param messageId - The unique identifier of the message to delete
-   */
-  abstract deleteMessage(messageId: string): Promise<void>;
-
-  /**
-   * Atomically finds an unacknowledged message and claims it by acknowledging it.
-   *
-   * A message is considered unacknowledged if:
-   * - It has never been acknowledged (acknowledgedAt is null), OR
-   * - Its last acknowledgment was older than the timeout period
-   *
-   * This operation should be implemented atomically to handle concurrent access safely,
-   * ensuring that multiple workers don't claim the same message simultaneously.
-   *
-   * @param acknowledgeTimeoutMs - Timeout in milliseconds for considering messages unacknowledged
-   * @param now - Current timestamp to compare against
-   * @param abort - Optional AbortSignal to cancel the claim operation
-   * @returns The claimed message if found, null if no unacknowledged messages exist
-   */
-  abstract claimMessage(
-    acknowledgeTimeoutMs: number,
-    now: number,
-    abort?: AbortSignal,
-  ): Promise<Message | null>;
-
-  /**
-   * Gets the total number of messages currently in the store.
-   * @returns The count of messages in the store
-   */
-  abstract getSize(): Promise<number>;
-}
-
-/**
- * In-memory implementation of the Store abstract class.
- *
- * This store keeps all messages in memory using a simple array. It's suitable
- * for development, testing, or applications where message persistence across
- * restarts is not required.
- *
- * @remarks
- * - All messages are lost when the application restarts
- * - Not suitable for production use where message durability is important
- * - Good for testing and development environments
- *
- * @example
- * ```typescript
- * const store = new MemoryStore();
- * const queue = new Queue({ store });
- * ```
- */
-export class MemoryStore extends Store {
-  /** Array containing all messages currently stored in memory */
-  messages: Message[] = [];
-  /** Observer tracking the current size of the queue */
-  queueSize = new ValueObserver(0);
-  lastMessageId = new ValueObserver<string | null>(null);
-
-  /**
-   * Adds a message to the in-memory array.
-   * @param message - The message to add
-   */
-  async addMessage(message: Message) {
-    this.messages.push(message);
-    this.queueSize.set(this.messages.length);
-    this.lastMessageId.set(message.id);
-  }
-
-  /**
-   * Finds a message by ID in the messages array.
-   * @param messageId - The unique identifier of the message
-   * @returns The message if found, null otherwise
-   */
-  async getMessage(messageId: string): Promise<Message | null> {
-    return this.messages.find((message) => message.id === messageId) ?? null;
-  }
-
-  /**
-   * Acknowledges a message by updating its acknowledgedAt timestamp.
-   * @param messageId - The unique identifier of the message to acknowledge
-   */
-  async acknowledgeMessage(messageId: string) {
-    const message = await this.getMessage(messageId);
-    message?.acknowledge();
-  }
-
-  /**
-   * Removes a message from the messages array.
-   * @param messageId - The unique identifier of the message to delete
-   */
-  async deleteMessage(messageId: string) {
-    this.messages = this.messages.filter((message) => message.id !== messageId);
-    this.queueSize.set(this.messages.length);
-  }
-
-  /**
-   * Finds the first unacknowledged message and claims it by acknowledging it.
-   *
-   * This implementation includes polling behavior and supports abortion via AbortSignal.
-   * It continuously searches for unacknowledged messages until one is found or the operation
-   * is aborted. The method is not truly atomic in a concurrent environment, but is sufficient
-   * for single-threaded applications.
-   *
-   * @param acknowledgeTimeoutMs - Timeout for considering messages unacknowledged
-   * @param now - Current timestamp
-   * @param signal - Optional AbortSignal to cancel the claiming operation
-   * @returns The claimed message if found, null if no unacknowledged messages exist or operation was aborted
-   */
-  async claimMessage(
-    acknowledgeTimeoutMs: number,
-    now: number,
-    signal?: AbortSignal,
-  ): Promise<Message | null> {
-    const timeStart = Date.now();
-    const claimActive = new AbortableValueObserver(true, () => false);
-    if (signal) claimActive.addSignal(signal);
-
-    while (claimActive.get()) {
-      const message =
-        this.messages.find((message) => {
-          const acknowledgedAt = message.acknowledgedAt;
-          const a = Date.now() - timeStart + now;
-          return (
-            acknowledgedAt === null || acknowledgedAt < a - acknowledgeTimeoutMs
-          );
-        }) ?? null;
-      if (!message) {
-        await new Promise((r) => setTimeout(r, 50));
-        continue;
-      }
-      message?.acknowledge();
-      return message;
-    }
-
-    return null;
-  }
-
-  /**
-   * Returns the number of messages in the array.
-   * @returns The count of messages
-   */
-  async getSize(): Promise<number> {
-    return this.messages.length;
-  }
-}
+import { MemoryStore } from "./store/memory-store.js";
+import { Message } from "./message/message.js";
+import { Store } from "./store/store.js";
+import { AbortableValueObserver } from "./value-observer/abortable-value-observer.js";
+import { ValueObserver } from "./value-observer/value-observer.js";
 
 /**
  * Configuration options for creating a Queue instance.
@@ -672,6 +124,127 @@ export class Queue {
   }
 
   /**
+   * Gracefully shuts down the queue and stops all message consumption operations.
+   *
+   * This method initiates a graceful shutdown process by setting the internal queue state to inactive.
+   * Once called, all active message consumption operations (such as `consume()` and async iterators)
+   * will complete their current message processing and then terminate cleanly.
+   *
+   * **Shutdown Behavior:**
+   * - **Immediate Effect**: No new messages will be claimed from the store
+   * - **Graceful Termination**: Currently processing messages will complete normally
+   * - **Resource Cleanup**: All abort subscriptions and consumers will be notified to stop
+   * - **Irreversible**: Once closed, the queue cannot be reopened
+   *
+   * **What Happens When Queue is Closed:**
+   * 1. Internal `#queueIsActive` state is set to `false`
+   * 2. All abort subscriptions created by `#createAbortSubscription()` are triggered
+   * 3. Active `consume()` generators stop claiming new messages
+   * 4. Current message processing completes with proper cleanup
+   * 5. Keep-alive processes for active messages continue until acknowledgment
+   *
+   * **Safe Shutdown Pattern:**
+   * The queue implements a safe shutdown mechanism where:
+   * - Messages being processed are not interrupted
+   * - Acknowledgments and deletions complete normally
+   * - Resources are properly disposed of
+   * - No messages are lost during shutdown
+   *
+   * @example
+   * Basic shutdown:
+   * ```typescript
+   * const queue = new Queue();
+   *
+   * // Start consuming messages
+   * const consumeTask = (async () => {
+   *   for await (const message of queue) {
+   *     await processMessage(message);
+   *     queue.ack(message);
+   *   }
+   *   console.log("Queue consumption ended gracefully");
+   * })();
+   *
+   * // Shutdown after some time
+   * setTimeout(() => {
+   *   console.log("Shutting down queue...");
+   *   queue.close(); // Graceful shutdown
+   * }, 30000);
+   *
+   * await consumeTask; // Wait for graceful completion
+   * ```
+   *
+   * @example
+   * Shutdown with multiple consumers:
+   * ```typescript
+   * const queue = new Queue();
+   *
+   * // Multiple consumers
+   * const consumers = Array.from({ length: 3 }, async (_, i) => {
+   *   console.log(`Consumer ${i} starting...`);
+   *   for await (const message of queue) {
+   *     await processMessage(message, i);
+   *     queue.ack(message);
+   *   }
+   *   console.log(`Consumer ${i} stopped gracefully`);
+   * });
+   *
+   * // Shutdown all consumers
+   * setTimeout(() => {
+   *   queue.close(); // All consumers will stop gracefully
+   * }, 60000);
+   *
+   * await Promise.all(consumers);
+   * console.log("All consumers stopped");
+   * ```
+   *
+   * @example
+   * Shutdown with error handling:
+   * ```typescript
+   * const queue = new Queue();
+   * let isShuttingDown = false;
+   *
+   * const consumer = (async () => {
+   *   try {
+   *     for await (const message of queue) {
+   *       if (isShuttingDown) {
+   *         console.log("Shutdown in progress, completing current message...");
+   *       }
+   *       await processMessage(message);
+   *       queue.ack(message);
+   *     }
+   *   } catch (error) {
+   *     console.error("Consumer error:", error);
+   *   } finally {
+   *     console.log("Consumer cleanup completed");
+   *   }
+   * })();
+   *
+   * // Graceful shutdown with notification
+   * const shutdown = async () => {
+   *   isShuttingDown = true;
+   *   console.log("Initiating graceful shutdown...");
+   *   queue.close();
+   *   await consumer;
+   *   console.log("Shutdown complete");
+   * };
+   *
+   * process.on('SIGTERM', shutdown);
+   * process.on('SIGINT', shutdown);
+   * ```
+   *
+   * @remarks
+   * - This method is synchronous and returns immediately
+   * - The actual shutdown process is asynchronous and happens in the background
+   * - Messages being processed when `close()` is called will complete normally
+   * - New message consumption attempts will terminate immediately
+   * - The queue instance becomes unusable after calling `close()`
+   */
+  close() {
+    this.#queueIsActive.set(false);
+    this.#store.close();
+  }
+
+  /**
    * Adds a new message to the queue.
    *
    * The message will be wrapped in a Message instance with auto-generated ID
@@ -773,69 +346,220 @@ export class Queue {
   }
 
   /**
-   * Consumes messages from the queue as an async generator.
+   * Consumes messages from the queue as an async generator with automatic resource management and robust error handling.
    *
-   * This method continuously polls the store for unacknowledged messages,
-   * processes them with keep-alive acknowledgments, yields the message data,
-   * and then deletes the message **only if** it has been explicitly acknowledged.
+   * This method implements a production-ready message consumption pattern that continuously polls the store
+   * for unacknowledged messages, establishes keep-alive mechanisms to prevent timeout during processing,
+   * and ensures proper cleanup regardless of how processing completes. It provides at-least-once delivery
+   * semantics with automatic message recovery and graceful shutdown capabilities.
    *
-   * The consumer will:
-   * 1. Claim an unacknowledged message from the store
-   * 2. Start a keep-alive process to prevent timeout
-   * 3. Yield the message data for processing
-   * 4. Check if message was acknowledged with ack() or acknowledgeMessage()
-   * 5. Delete the message from the store only if acknowledged
-   * 6. Stop the keep-alive process
-   * 7. Repeat while queue is active
+   * **Message Processing Flow:**
+   * 1. **Initialize**: Creates an AbortableValueObserver to coordinate shutdown signals
+   * 2. **Poll**: Continuously checks the store for available unacknowledged messages
+   * 3. **Claim**: Atomically claims an unacknowledged message from the store
+   * 4. **Setup**: Establishes keep-alive process and acknowledgment tracking
+   * 5. **Yield**: Provides the message data payload to the consumer for processing
+   * 6. **Monitor**: Tracks acknowledgment state during consumer processing
+   * 7. **Cleanup**: Deletes acknowledged messages; retains unacknowledged for reprocessing
+   * 8. **Repeat**: Continues the cycle until queue closure or abort signal
    *
-   * @param signal - Optional AbortSignal for cancellation (currently not implemented)
-   * @yields The data payload of each message in the queue
+   * **Key Features:**
+   * - **At-least-once delivery**: Messages are only deleted after explicit acknowledgment
+   * - **Automatic retry**: Unacknowledged messages are reclaimed after timeout for retry
+   * - **Keep-alive mechanism**: Prevents message timeout during long-running processing
+   * - **Resource cleanup**: Uses disposable resources (`using` declarations) for automatic cleanup
+   * - **Graceful shutdown**: Respects queue closure and abort signals with proper cleanup
+   * - **Concurrent safety**: Handles multiple consumers safely through atomic message claiming
+   * - **Memory management**: Automatically disposes resources and cleans up event listeners
+   *
+   * **Message Acknowledgment Behavior:**
+   * - **Acknowledged messages**: Automatically deleted from the store after processing
+   * - **Unacknowledged messages**: Remain in the store and become available for reclaim after timeout
+   * - **Failed processing**: Messages not acknowledged due to errors will be retried
+   * - **Keep-alive updates**: Periodic acknowledgments prevent timeout during long-running operations
+   *
+   * **Shutdown and Cancellation:**
+   * - **Queue closure**: When `queue.close()` is called, all active consumers stop gracefully
+   * - **AbortSignal**: External abort signals immediately terminate message consumption
+   * - **Resource disposal**: All resources are properly cleaned up regardless of termination reason
+   * - **Current messages**: Messages being processed during shutdown complete normally
+   *
+   * **Performance Characteristics:**
+   * - **Polling interval**: Configurable through store implementation (MemoryStore uses 50ms)
+   * - **Keep-alive frequency**: Controlled by `ackIntervalMs` queue option (default: 100ms)
+   * - **Memory efficiency**: Uses WeakMap for message tracking to prevent memory leaks
+   * - **Concurrent consumers**: Multiple consumers can safely process messages concurrently
+   *
+   * @param signal - Optional AbortSignal to cancel message consumption. When aborted,
+   *                the generator will immediately stop yielding new messages and perform
+   *                complete resource cleanup. Existing messages being processed will
+   *                complete normally before termination.
+   * @yields The data payload of each claimed message from the queue. Each yielded value
+   *         represents a message that needs processing and must be explicitly acknowledged
+   *         with `ack()` or `acknowledgeMessage()` for deletion.
+   * @throws {Error} When the store encounters an unrecoverable error during message operations
    *
    * @example
-   * Basic usage with manual acknowledgment:
+   * Basic message processing with comprehensive error handling:
    * ```typescript
+   * const queue = new Queue({
+   *   messageTimeoutMs: 30000,  // 30 seconds before reclaim
+   *   ackIntervalMs: 5000       // Keep-alive every 5 seconds
+   * });
+   *
    * for await (const messageData of queue.consume()) {
    *   try {
    *     console.log("Processing message:", messageData);
-   *     // Your message processing logic here
+   *
+   *     // Simulate long-running processing
    *     await processMessage(messageData);
    *
-   *     // Acknowledge successful processing
+   *     // Critical: Acknowledge successful processing
    *     queue.ack(messageData);
+   *     console.log("Message processed successfully");
    *   } catch (error) {
-   *     // Don't acknowledge - message will be reclaimed
    *     console.error("Processing failed:", error);
+   *     // Don't acknowledge - message will be reclaimed for retry
+   *     // Consider implementing retry limits or dead letter queue
    *   }
    * }
    * ```
    *
    * @example
-   * Using with AbortSignal (when implemented):
+   * Graceful shutdown with signal coordination:
    * ```typescript
    * const controller = new AbortController();
+   * let processedCount = 0;
    *
-   * const consumePromise = (async () => {
+   * // Start consuming messages with graceful shutdown handling
+   * const consumeTask = (async () => {
    *   try {
    *     for await (const messageData of queue.consume(controller.signal)) {
-   *       console.log("Processing:", messageData);
+   *       console.log(`Processing message ${++processedCount}`);
    *       await processMessage(messageData);
    *       queue.ack(messageData);
    *     }
+   *     console.log(`Queue consumption completed gracefully. Processed ${processedCount} messages.`);
    *   } catch (error) {
-   *     console.log("Queue consumption stopped");
+   *     if (error.name === 'AbortError') {
+   *       console.log(`Queue consumption was cancelled after processing ${processedCount} messages`);
+   *     } else {
+   *       console.error("Unexpected error during consumption:", error);
+   *     }
    *   }
    * })();
    *
-   * // Stop consumption after 10 seconds
-   * setTimeout(() => controller.abort(), 10000);
+   * // Set up graceful shutdown on system signals
+   * process.on('SIGTERM', () => {
+   *   console.log("Received SIGTERM, initiating graceful shutdown...");
+   *   controller.abort();
+   * });
+   *
+   * // Trigger shutdown after processing time limit
+   * setTimeout(() => {
+   *   console.log("Time limit reached, initiating graceful shutdown...");
+   *   controller.abort();
+   * }, 300000); // 5 minutes
+   *
+   * await consumeTask;
    * ```
+   *
+   * @example
+   * Advanced message acknowledgment with retry logic and dead letter handling:
+   * ```typescript
+   * const maxRetries = 3;
+   * const retryTracker = new Map();
+   *
+   * for await (const messageData of queue.consume()) {
+   *   const messageId = JSON.stringify(messageData); // Simple message ID
+   *   const attempts = (retryTracker.get(messageId) || 0) + 1;
+   *
+   *   try {
+   *     console.log(`Processing message (attempt ${attempts}):`, messageData);
+   *     const result = await processMessage(messageData);
+   *
+   *     if (result.success) {
+   *       queue.ack(messageData); // Delete successful messages
+   *       retryTracker.delete(messageId);
+   *       console.log("Message processed successfully");
+   *     } else if (result.retryable && attempts < maxRetries) {
+   *       // Don't acknowledge - will retry after timeout
+   *       retryTracker.set(messageId, attempts);
+   *       console.log(`Message will be retried (attempt ${attempts}/${maxRetries})`);
+   *     } else {
+   *       // Max retries reached or non-retryable error
+   *       console.error("Moving message to dead letter queue:", result.error);
+   *       await deadLetterQueue.add({
+   *         originalMessage: messageData,
+   *         error: result.error,
+   *         attempts: attempts,
+   *         failedAt: new Date().toISOString()
+   *       });
+   *       queue.ack(messageData); // Acknowledge to prevent infinite retries
+   *       retryTracker.delete(messageId);
+   *     }
+   *   } catch (error) {
+   *     console.error(`Unexpected error (attempt ${attempts}):`, error);
+   *     if (attempts >= maxRetries) {
+   *       console.error("Max retries exceeded, acknowledging message to prevent infinite loop");
+   *       queue.ack(messageData);
+   *       retryTracker.delete(messageId);
+   *     } else {
+   *       retryTracker.set(messageId, attempts);
+   *     }
+   *   }
+   * }
+   * ```
+   *
+   * @example
+   * Multiple concurrent consumers with load balancing:
+   * ```typescript
+   * const queue = new Queue({
+   *   messageTimeoutMs: 60000,  // 1 minute timeout
+   *   ackIntervalMs: 10000      // Keep-alive every 10 seconds
+   * });
+   *
+   * // Create multiple concurrent consumers
+   * const createConsumer = (consumerId: string) => async () => {
+   *   console.log(`Consumer ${consumerId} starting...`);
+   *   let messagesProcessed = 0;
+   *
+   *   for await (const messageData of queue.consume()) {
+   *     try {
+   *       console.log(`Consumer ${consumerId} processing message ${++messagesProcessed}`);
+   *       await processMessage(messageData, consumerId);
+   *       queue.ack(messageData);
+   *     } catch (error) {
+   *       console.error(`Consumer ${consumerId} failed to process message:`, error);
+   *       // Message will be retried by this or another consumer
+   *     }
+   *   }
+   *
+   *   console.log(`Consumer ${consumerId} stopped after processing ${messagesProcessed} messages`);
+   * };
+   *
+   * // Start multiple consumers
+   * const consumers = await Promise.allSettled([
+   *   createConsumer('worker-1')(),
+   *   createConsumer('worker-2')(),
+   *   createConsumer('worker-3')()
+   * ]);
+   *
+   * console.log("All consumers completed:", consumers);
+   * ```
+   *
+   * @remarks
+   * - This method is the core of the queue's message processing system
+   * - The generator pattern allows for clean resource management and cancellation
+   * - Keep-alive acknowledgments ensure messages don't timeout during legitimate processing
+   * - The method handles all edge cases including queue closure, abort signals, and store errors
+   * - Multiple consumers can safely process messages concurrently from the same queue
+   * - Proper error handling and acknowledgment patterns are critical for reliable message processing
    */
   async *consume(signal?: AbortSignal) {
-    using consumeIsActive = new AbortableValueObserver(
-      true,
-      () => false,
-      signal ? [signal] : [],
-    );
+    using consumeIsActive = new AbortableValueObserver(true, () => false);
+    if (signal) consumeIsActive.addSignal(signal);
+    consumeIsActive.addSignal(this.#queueIsActive.createAbortSignal());
     while (consumeIsActive.get()) {
       const message = await this.#store.claimMessage(
         this.#messageTimeoutMs,
