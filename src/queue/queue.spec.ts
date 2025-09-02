@@ -1,5 +1,8 @@
 import { describe, test, expect, mock } from "bun:test";
-import { Queue, MemoryStore, Message } from "./queue.js";
+import { Queue } from "./queue.js";
+import { MemoryStore } from "./store/memory-store.js";
+import { Message } from "./message/message.js";
+import { ValueObserver } from "./value-observer/value-observer.js";
 
 describe("Queue", () => {
   test("should add messages to the store", async () => {
@@ -165,6 +168,66 @@ describe("Queue", () => {
     expect(workflowOff).toHaveBeenCalled();
     await process;
   });
+
+  test("should stop queue consumption when queue is closed", async () => {
+    const workflowOn = mock();
+    const workflowOff = mock();
+    const queue = new Queue();
+    const worker = (async () => {
+      workflowOn();
+      for await (const message of queue.consume()) {
+        // nothing
+      }
+      workflowOff();
+    })();
+
+    queue.close();
+
+    await worker;
+    expect(workflowOn).toHaveBeenCalled();
+    expect(workflowOff).toHaveBeenCalled();
+  });
+
+  test("should gracefully handle workers attempting to consume from pre-closed queue", async () => {
+    const workflowOn = mock();
+    const workflowOff = mock();
+    const queue = new Queue();
+    queue.close();
+
+    const worker = (async () => {
+      workflowOn();
+      for await (const message of queue.consume()) {
+        // nothing
+      }
+      workflowOff();
+    })();
+
+    await worker;
+    expect(workflowOn).toHaveBeenCalled();
+    expect(workflowOff).toHaveBeenCalled();
+  });
+  test("test", async () => {
+    const workflowOn = mock();
+    const workflowOff = mock();
+    const queue = new Queue();
+    queue.close();
+    queue.close();
+    queue.close();
+    queue.close();
+    queue.close();
+
+    const worker = (async () => {
+      workflowOn();
+      for await (const message of queue.consume()) {
+        // nothing
+      }
+      workflowOff();
+    })();
+
+    await worker;
+    expect(workflowOn).toHaveBeenCalled();
+    expect(workflowOff).toHaveBeenCalled();
+  });
 });
 
 describe("MemoryStore", () => {
@@ -201,5 +264,72 @@ describe("MemoryStore", () => {
     const message = await memory.claimMessage(10, 10);
 
     expect(message).toBeDefined();
+  });
+
+  test("should stop claiming messages when store is already closed", async () => {
+    const workflowOff = mock();
+    const memory = new MemoryStore();
+    memory.close();
+    const worker = (async () => {
+      await memory.claimMessage(10, 10);
+      workflowOff();
+    })();
+    await worker;
+    expect(workflowOff).toHaveBeenCalled();
+  });
+
+  test("should stop claiming messages when store is closed during operation", async () => {
+    const workflowOff = mock();
+    const memory = new MemoryStore();
+    const worker = (async () => {
+      await memory.claimMessage(10, 10);
+      workflowOff();
+    })();
+    setTimeout(() => {
+      memory.close();
+    }, 10);
+    await worker;
+    expect(workflowOff).toHaveBeenCalled();
+  });
+});
+
+describe("ValueObserver.createAbortSignal", () => {
+  test("should immediately abort if initial value is falsy", () => {
+    const observer = new ValueObserver(false);
+    const signal = observer.createAbortSignal().signal;
+    expect(signal.aborted).toBe(true);
+  });
+
+  test("should not abort if initial value is truthy", () => {
+    const observer = new ValueObserver(true);
+    const signal = observer.createAbortSignal().signal;
+    expect(signal.aborted).toBe(false);
+  });
+
+  test("should abort when value changes to falsy", () => {
+    const observer = new ValueObserver(true);
+    const signal = observer.createAbortSignal().signal;
+    expect(signal.aborted).toBe(false);
+    observer.set(false);
+    expect(signal.aborted).toBe(true);
+  });
+
+  test("should not abort when value changes to another truthy value", () => {
+    const observer = new ValueObserver(1);
+    const signal = observer.createAbortSignal().signal;
+    expect(signal.aborted).toBe(false);
+    observer.set(2);
+    expect(signal.aborted).toBe(false);
+  });
+
+  test("should abort when value changes to falsy and remain aborted", () => {
+    const observer = new ValueObserver("hello");
+    const signal = observer.createAbortSignal().signal;
+    expect(signal.aborted).toBe(false);
+    observer.set(""); // falsy
+    expect(signal.aborted).toBe(true);
+    // Changing again should not throw or re-abort
+    observer.set("world");
+    expect(signal.aborted).toBe(true);
   });
 });
