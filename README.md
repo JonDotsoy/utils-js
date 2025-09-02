@@ -604,6 +604,31 @@ const controller = new AbortController();
 setTimeout(() => controller.abort(), 10_000);
 ```
 
+**Graceful shutdown:**
+
+```ts
+const queue = new Queue();
+
+// Start consumers
+const consumer = (async () => {
+  for await (const job of queue) {
+    await processJob(job);
+    queue.ack(job);
+  }
+  console.log("Consumer stopped gracefully");
+})();
+
+// Graceful shutdown - completes current messages before stopping
+setTimeout(() => queue.close(), 30_000);
+await consumer;
+
+// Or use Disposable pattern for automatic cleanup
+{
+  using queue = new Queue();
+  // Queue automatically closed when leaving scope
+}
+```
+
 ### Queue Options
 
 ```ts
@@ -657,6 +682,7 @@ abstract class Store {
     abort?: AbortSignal,
   ): Promise<Message | null>;
   abstract getSize(): Promise<number>;
+  abstract close(): Promise<void>;
 }
 
 class RedisStore extends Store {
@@ -687,6 +713,10 @@ class RedisStore extends Store {
   async getSize(): Promise<number> {
     // Your Redis implementation
   }
+
+  async close(): Promise<void> {
+    // Your Redis cleanup implementation
+  }
 }
 
 const queue = new Queue({ store: new RedisStore() });
@@ -695,7 +725,8 @@ const queue = new Queue({ store: new RedisStore() });
 ### Features
 
 - **🔄 Async Iterator Support**: Clean `for await...of` consumption pattern
-- **💾 Pluggable Storage**: Abstract `Store` interface with in-memory implementation
+- **� Graceful Shutdown**: `close()` method and Disposable pattern support
+- **�💾 Pluggable Storage**: Abstract `Store` interface with in-memory implementation
 - **⚡ Keep-Alive Acknowledgments**: Prevents message timeout during long processing
 - **🔀 Concurrent Workers**: Multiple consumers safely process different messages
 - **🛡️ Message Recovery**: Automatic reclaim of failed/stalled messages after timeout

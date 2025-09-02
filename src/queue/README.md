@@ -7,6 +7,7 @@ High–level, lightweight asynchronous message queue with periodic acknowledgmen
 ## Features
 
 - Async iterator consumption (`for await ... of queue`)
+- **Graceful shutdown** with `close()` method and Disposable pattern support
 - Periodic acknowledgement keep‑alive while a message is being processed
 - Automatic deletion after successful processing (in `finally` block safety)
 - Reclaim (re-deliver) messages whose acknowledgement timeout elapsed
@@ -49,7 +50,8 @@ for await (const job of queue) {
 | Acknowledge keep‑alive | Timer re‑acknowledging the message every `ackIntervalMs` until processing finishes.                                          |
 | Manual acknowledgment  | Messages must be explicitly acknowledged with `ack()` or `acknowledgeMessage()` to be deleted from the queue.                |
 | Reclaim                | If a message's last `acknowledgedAt` is older than `now - messageTimeoutMs`, it is eligible to be claimed by another worker. |
-| Store                  | Abstraction for persistence; must implement methods to add / get / acknowledge / delete / claim / count.                     |
+| Graceful shutdown      | Queue can be closed with `close()` to stop all message consumption gracefully without interrupting current processing.       |
+| Store                  | Abstraction for persistence; must implement methods to add / get / acknowledge / delete / claim / count / close.             |
 | MemoryStore            | Simple array based store (dev / tests). Not durable.                                                                         |
 
 ## Message Lifecycle
@@ -73,7 +75,9 @@ class Queue {
   ack(messageRef: any): void;
   acknowledgeMessage(messageRef: any): void;
   consume(signal?: AbortSignal): AsyncGenerator<any>;
+  close(): void;
   [Symbol.asyncIterator](): AsyncGenerator<any>;
+  [Symbol.dispose](): void;
 }
 ```
 
@@ -107,6 +111,46 @@ Returns an async generator that yields message `data` values. **Important**: Mes
 | `AbortSignal` | Exits when signal is aborted (fully supported). |
 
 > Keep‑alive continues until message processing finishes. Messages are **only deleted** if explicitly acknowledged with `ack()` or `acknowledgeMessage()`.
+
+#### `close()`
+
+Gracefully shuts down the queue and stops all message consumption operations. This method:
+
+- Immediately stops claiming new messages from the store
+- Allows currently processing messages to complete normally
+- Notifies all active consumers to stop gracefully
+- Closes the underlying store
+- Is irreversible - the queue cannot be reopened
+
+**Example:**
+
+```ts
+const queue = new Queue();
+
+// Start consuming messages
+const consumer = (async () => {
+  for await (const message of queue) {
+    await processMessage(message);
+    queue.ack(message);
+  }
+  console.log("Consumer stopped gracefully");
+})();
+
+// Shutdown after some time
+setTimeout(() => queue.close(), 30000);
+await consumer; // Wait for graceful completion
+```
+
+#### `[Symbol.dispose]()`
+
+Implements the Disposable pattern by calling `close()`. This allows the queue to be used with the `using` declaration for automatic resource cleanup:
+
+```ts
+{
+  using queue = new Queue();
+  // Use queue...
+} // Queue is automatically closed here
+```
 
 ##### Consumption Patterns
 
@@ -163,10 +207,13 @@ abstract class Store {
     abort?: AbortSignal,
   ): Promise<Message | null>;
   abstract getSize(): Promise<number>;
+  abstract close(): Promise<void>;
 }
 ```
 
 `claimMessage` should be atomic in multi‑producer / multi‑consumer implementations (the provided `MemoryStore` is not safe for concurrent multi‑process usage).
+
+The `close()` method should clean up resources and stop any ongoing operations. For example, the `MemoryStore` implementation clears all messages and stops active claim operations.
 
 ### MemoryStore
 
@@ -197,6 +244,52 @@ Multiple async consumers can iterate the same queue instance. Each claimed messa
 ### Cancellation
 
 Use `AbortController` or a custom observer to terminate a long‑lived consumer cleanly.
+
+### Graceful Shutdown
+
+The queue supports graceful shutdown through the `close()` method, which stops all active consumers safely:
+
+```ts
+const queue = new Queue();
+
+// Multiple consumers
+const consumers = [
+  worker("Consumer-1"),
+  worker("Consumer-2"),
+  worker("Consumer-3"),
+];
+
+async function worker(name: string) {
+  for await (const job of queue) {
+    console.log(name, "processing", job);
+    await processJob(job);
+    queue.ack(job);
+  }
+  console.log(name, "stopped gracefully");
+}
+
+// Shutdown all consumers gracefully
+setTimeout(() => {
+  console.log("Initiating graceful shutdown...");
+  queue.close(); // All consumers will stop after completing current messages
+}, 60000);
+
+await Promise.all(consumers);
+console.log("All consumers stopped");
+```
+
+**Disposable Pattern:**
+
+```ts
+{
+  using queue = new Queue();
+  // Queue will be automatically closed when leaving this scope
+  for await (const job of queue) {
+    await processJob(job);
+    queue.ack(job);
+  }
+} // Automatic cleanup here
+```
 
 ### Limitations & TODO
 
