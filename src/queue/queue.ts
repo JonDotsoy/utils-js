@@ -86,7 +86,6 @@ type QueueOptions = {
  * With custom configuration:
  * ```typescript
  * const queue = new Queue({
- *   pollingIntervalMs: 1000,    // Poll every second
  *   messageTimeoutMs: 30000,    // 30 second timeout
  *   ackIntervalMs: 5000,        // Keep-alive every 5 seconds
  *   store: new DatabaseStore()  // Custom storage backend
@@ -245,6 +244,21 @@ export class Queue {
     this.#store.close();
   }
 
+  /**
+   * Disposes the queue by calling {@link close}.
+   *
+   * This method implements the Disposable pattern, allowing the queue to be used
+   * with the `using` declaration for automatic resource cleanup when the queue
+   * goes out of scope.
+   *
+   * @example
+   * ```typescript
+   * {
+   *   using queue = new Queue();
+   *   // Use queue...
+   * } // Queue is automatically closed here
+   * ```
+   */
   [Symbol.dispose]() {
     this.close();
   }
