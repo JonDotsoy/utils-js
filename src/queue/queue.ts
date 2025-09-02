@@ -4,6 +4,7 @@ import { Store } from "./store/store.js";
 import { AbortableValueObserver } from "./value-observer/abortable-value-observer.js";
 import { ValueObserver } from "./value-observer/value-observer.js";
 export { Store, MemoryStore } from "./store/store.js";
+export { Message } from "./message/message.js";
 
 /**
  * Configuration options for creating a Queue instance.
