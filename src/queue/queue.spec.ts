@@ -168,7 +168,7 @@ describe("Queue", () => {
 });
 
 describe("MemoryStore", () => {
-  test("test", async () => {
+  test("should process a message after it is added to the store", async () => {
     const memory = new MemoryStore();
 
     const done = mock();
@@ -193,7 +193,7 @@ describe("MemoryStore", () => {
     await process;
   });
 
-  test("test", async () => {
+  test("should claim a message after it is added to the store", async () => {
     const memory = new MemoryStore();
 
     memory.addMessage(new Message({ foo: "bar" }));
