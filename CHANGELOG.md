@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.3](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.13.2...utils-js-v0.13.3) (2025-09-02)
+
+
+### Bug Fixes
+
+* **queue:** export Message from message module ([ff47c8b](https://github.com/JonDotsoy/utils-js/commit/ff47c8bec666bab9a532a4012cc6709ed9d52871))
+
 ## [0.13.2](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.13.1...utils-js-v0.13.2) (2025-09-02)
 
 
