@@ -1,4 +1,5 @@
 import type { Message } from "../message/message";
+export { MemoryStore } from "./memory-store.js";
 
 /**
  * Abstract base class representing a message store for a queue system.
