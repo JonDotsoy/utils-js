@@ -18,3 +18,4 @@ libs/types:
 .PHONY: update-package-json
 update-package-json:
 	bun scripts/update-package.json.ts --write
+	bun x prettier -w package.json

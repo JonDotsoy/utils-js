@@ -56,13 +56,18 @@
     "./visit": {
       "import": "./libs/esm/visit/visit.js",
       "types": "./libs/types/visit/visit.d.ts"
+    },
+    "./queue/store/indexeddb-store": {
+      "import": "./libs/esm/queue/store/indexeddb-store.js",
+      "types": "./libs/esm/queue/store/indexeddb-store.d.ts"
     }
   },
   "devDependencies": {
     "@types/bun": "latest",
     "expect-type": "^1.2.1",
     "prettier": "^3.3.3",
-    "zod": "^3.25.51"
+    "zod": "^3.25.51",
+    "fake-indexeddb": "^6.0.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
