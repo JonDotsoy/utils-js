@@ -3,6 +3,10 @@ import { Store } from "./store";
 import { AbortableValueObserver } from "../value-observer/abortable-value-observer";
 import { ValueObserver } from "../value-observer/value-observer";
 
+const MemoryStorePerformance = {
+  cleanupIntervalMilliseconds: 1000,
+};
+
 /**
  * In-memory implementation of the Store abstract class.
  *
@@ -21,8 +25,9 @@ import { ValueObserver } from "../value-observer/value-observer";
  * const queue = new Queue({ store });
  * ```
  */
-
 export class MemoryStore extends Store {
+  static defaultPerformance = MemoryStorePerformance;
+
   /** Array containing all messages currently stored in memory */
   messages: Message[] = [];
   /** Observer tracking the current size of the queue */
@@ -31,11 +36,22 @@ export class MemoryStore extends Store {
   /** Observer tracking whether the store is active (not closed) */
   #storeIsActive = new ValueObserver<boolean>(true);
 
+  #cleanupInterval = setInterval(() => {
+    const now = Date.now();
+    this.messages = this.messages.filter((message) => {
+      if (!message.ttl) return true;
+      return message.ttl > now;
+    });
+    this.queueSize.set(this.messages.length);
+  }, MemoryStore.defaultPerformance.cleanupIntervalMilliseconds);
+
   /**
    * Adds a message to the in-memory array.
    * @param message - The message to add
    */
   async addMessage(message: Message) {
+    const now = Date.now();
+    if (message.ttl && message.ttl < now) return;
     this.messages.push(message);
     this.queueSize.set(this.messages.length);
     this.lastMessageId.set(message.id);
@@ -149,5 +165,7 @@ export class MemoryStore extends Store {
     this.messages = [];
     this.queueSize.set(0);
     this.lastMessageId.set(null);
+
+    clearInterval(this.#cleanupInterval);
   }
 }
