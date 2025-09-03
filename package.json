@@ -56,6 +56,10 @@
     "./visit": {
       "import": "./libs/esm/visit/visit.js",
       "types": "./libs/types/visit/visit.d.ts"
+    },
+    "./queue/store/indexeddb-store": {
+      "import": "./libs/esm/queue/store/indexeddb-store.js",
+      "types": "./libs/esm/queue/store/indexeddb-store.d.ts"
     }
   },
   "devDependencies": {
