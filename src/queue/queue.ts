@@ -3,7 +3,8 @@ import { Message } from "./message/message.js";
 import { Store } from "./store/store.js";
 import { AbortableValueObserver } from "./value-observer/abortable-value-observer.js";
 import { ValueObserver } from "./value-observer/value-observer.js";
-export { Store, MemoryStore } from "./store/store.js";
+export { Store } from "./store/store.js";
+export { MemoryStore } from "./store/memory-store.js";
 export { Message } from "./message/message.js";
 
 /**
