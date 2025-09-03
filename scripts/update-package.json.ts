@@ -97,7 +97,7 @@ const pkgExports = await pipe(globModules("../src/", "*"))
 
 Reflect.set(pkg, "exports", {
   ...pkg.exports,
-  ...pkgExports
+  ...pkgExports,
 });
 
 // console.log("🚀 ~ pkg:", pkg)
