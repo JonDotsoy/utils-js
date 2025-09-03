@@ -2,7 +2,7 @@
 
 High–level, lightweight asynchronous message queue with periodic acknowledgments, cooperative workers and pluggable storage.
 
-> This module exports: `Queue`, `MemoryStore`, `Store` (abstract base), and `Message`.
+> This module exports: `Queue`, `MemoryStore`, `Store` (abstract base), and `Message`. `IndexedDBStore` is available separately via `@jondotsoy/utils-js/queue/store/indexeddb-store`.
 
 ## Features
 
@@ -11,7 +11,8 @@ High–level, lightweight asynchronous message queue with periodic acknowledgmen
 - Periodic acknowledgement keep‑alive while a message is being processed
 - Automatic deletion after successful processing (in `finally` block safety)
 - Reclaim (re-deliver) messages whose acknowledgement timeout elapsed
-- Pluggable storage through the `Store` abstraction (in‑memory implementation included)
+- Pluggable storage through the `Store` abstraction (in‑memory and IndexedDB implementations included)
+- **Persistent storage** with IndexedDB for browser environments
 - Zero external dependencies
 
 ## Installation
@@ -42,6 +43,26 @@ for await (const job of queue) {
 }
 ```
 
+### With Persistent Storage (IndexedDB)
+
+```ts
+import { Queue } from "@jondotsoy/utils-js/queue";
+import { IndexedDBStore } from "@jondotsoy/utils-js/queue/store/indexeddb-store";
+
+// Messages persist across browser sessions
+const queue = new Queue({
+  store: new IndexedDBStore("my-app-queue"),
+});
+
+await queue.add({ task: "process-order", orderId: "123" });
+
+for await (const job of queue) {
+  console.log("Processing", job);
+  // Messages are automatically persisted
+  queue.ack(job);
+}
+```
+
 ## Concepts
 
 | Concept                | Description                                                                                                                  |
@@ -53,6 +74,7 @@ for await (const job of queue) {
 | Graceful shutdown      | Queue can be closed with `close()` to stop all message consumption gracefully without interrupting current processing.       |
 | Store                  | Abstraction for persistence; must implement methods to add / get / acknowledge / delete / claim / count / close.             |
 | MemoryStore            | Simple array based store (dev / tests). Not durable.                                                                         |
+| IndexedDBStore         | Browser-based persistent store using IndexedDB. Messages survive page reloads and browser restarts.                          |
 
 ## Message Lifecycle
 
@@ -188,9 +210,42 @@ class Message {
   id: string;
   createdAt: number;
   acknowledgedAt: number | null;
-  constructor(public data: any);
+  data: any;
+  constructor(data: any, message?: Partial<Omit<MessageData, "data">>);
   acknowledge(): void;
+  static from<T>(message: MessageData<T>): Message<T>;
 }
+```
+
+The `Message` class now supports flexible construction and serialization:
+
+- **Enhanced constructor**: Optionally specify custom `id`, `createdAt`, or `acknowledgedAt` timestamps
+- **Static factory method**: `Message.from()` reconstructs Message instances from serialized data
+- **Perfect for persistence**: Seamlessly works with IndexedDB and other storage backends
+
+**Examples:**
+
+```ts
+// Basic message with auto-generated ID and timestamp
+const msg1 = new Message({ task: "send-email" });
+
+// Message with custom metadata (useful for reconstruction from storage)
+const msg2 = new Message(
+  { task: "process-order" },
+  {
+    id: "custom-id",
+    createdAt: Date.now() - 1000,
+  },
+);
+
+// Reconstruct from stored data (e.g., from IndexedDB)
+const storedData = {
+  id: "msg-123",
+  data: { task: "cleanup" },
+  createdAt: 1693737600000,
+  acknowledgedAt: null,
+};
+const message = Message.from(storedData);
 ```
 
 ### Store (abstract)
@@ -218,6 +273,65 @@ The `close()` method should clean up resources and stop any ongoing operations. 
 ### MemoryStore
 
 Reference implementation for tests & development. **Not durable.** Adds a reactive internal observer (not exported) to track queue size.
+
+### IndexedDBStore
+
+**Browser-only** persistent storage implementation using IndexedDB. Messages are stored durably and survive page reloads, browser restarts, and crashes.
+
+```ts
+import { IndexedDBStore } from "@jondotsoy/utils-js/queue/store/indexeddb-store";
+
+// Basic usage
+const store = new IndexedDBStore("my-app-queue");
+
+// With custom object store name
+const store = new IndexedDBStore("my-app-queue", "tasks");
+
+// For testing (with fake-indexeddb)
+const store = new IndexedDBStore("test-db", "messages", fakeIndexedDB);
+```
+
+**Features:**
+
+- **Atomic operations**: Prevents race conditions in concurrent environments
+- **Automatic schema creation**: Creates database and indexes automatically
+- **Efficient querying**: Uses indexes on `createdAt` and `acknowledgedAt` for performance
+- **Cross-session persistence**: Messages survive browser restarts and page reloads
+- **Graceful error handling**: Handles browser storage quota limits and database errors
+
+**Browser Support:**
+
+- All modern browsers with IndexedDB support
+- Chrome 24+, Firefox 16+, Safari 8+, Edge 12+
+- Throws error if IndexedDB is unavailable (can provide custom factory for testing)
+
+**Example with persistence across sessions:**
+
+```ts
+import { Queue } from "@jondotsoy/utils-js/queue";
+import { IndexedDBStore } from "@jondotsoy/utils-js/queue/store/indexeddb-store";
+
+const queue = new Queue({
+  store: new IndexedDBStore("task-queue"),
+  messageTimeoutMs: 30000,
+  ackIntervalMs: 5000,
+});
+
+// Add some tasks
+await queue.add({ type: "email", recipient: "user@example.com" });
+await queue.add({ type: "report", userId: 123 });
+
+// Process tasks (survives page reload)
+for await (const task of queue) {
+  try {
+    await processTask(task);
+    queue.ack(task); // Remove from persistent storage
+  } catch (error) {
+    console.error("Task failed, will retry:", error);
+    // Don't acknowledge - task remains in IndexedDB for retry
+  }
+}
+```
 
 ### Error & Failure Semantics
 
@@ -297,6 +411,7 @@ console.log("All consumers stopped");
 - No priority ordering (FIFO only via array scan order).
 - No visibility into in‑flight messages besides store inspection.
 - No backpressure signal (`add` always succeeds). Add your own capacity guard if needed.
+- `IndexedDBStore` is browser-only (requires IndexedDB support).
 
 Potential future extensions: priority queues, batch consumption, dead‑letter store, exponential retry.
 
