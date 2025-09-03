@@ -33,7 +33,19 @@ visit(node, test);
 ```ts
 import { visit } from "@jondotsoy/utils-js/visit";
 
-const v = visit([1, 2, 3]);
+const v = vis### Features
+
+- **🔄 Async Iterator Support**: Clean `for await...of` consumption pattern
+- **🛑 Graceful Shutdown**: `close()` method and Disposable pattern support
+- **💾 Pluggable Storage**: Abstract `Store` interface with in-memory and IndexedDB implementations
+- **🌐 Persistent Storage**: IndexedDB support for browser environments - messages survive page reloads and browser restarts
+- **⚡ Keep-Alive Acknowledgments**: Prevents message timeout during long processing
+- **🔀 Concurrent Workers**: Multiple consumers safely process different messages
+- **🛡️ Message Recovery**: Automatic reclaim of failed/stalled messages after timeout
+- **✋ Manual Acknowledgment**: Explicit `ack()` required for message deletion
+- **📦 Zero Dependencies**: Pure TypeScript implementation
+- **🔒 Type Safe**: Full TypeScript support with comprehensive type definitions
+- **🔁 At-Least-Once Delivery**: Failed messages are automatically retried);
 v.next().value; // [1, 2, 3]
 v.next().value; // 1
 v.next().value; // 2
@@ -537,6 +549,9 @@ A lightweight asynchronous message queue system with support for pluggable stora
 
 ```ts
 import { Queue } from "@jondotsoy/utils-js/queue";
+
+// For persistent storage (browser environments)
+import { IndexedDBStore } from "@jondotsoy/utils-js/queue/store/indexeddb-store";
 ```
 
 ### Basic Usage
@@ -585,6 +600,25 @@ const worker = (name) => async () => {
 
 // Both workers process different messages concurrently
 await Promise.all([worker("Worker-1")(), worker("Worker-2")()]);
+```
+
+**With persistent storage (IndexedDB):**
+
+```ts
+import { IndexedDBStore } from "@jondotsoy/utils-js/queue/store/indexeddb-store";
+
+// Messages persist across browser sessions
+const queue = new Queue({
+  store: new IndexedDBStore("my-app-queue"),
+});
+
+await queue.add({ task: "process-order", orderId: "123" });
+
+for await (const job of queue) {
+  console.log("Processing:", job);
+  // Messages are automatically persisted to IndexedDB
+  queue.ack(job);
+}
 ```
 
 **With AbortSignal support:**
@@ -721,6 +755,11 @@ class RedisStore extends Store {
 
 const queue = new Queue({ store: new RedisStore() });
 ```
+
+**Built-in stores:**
+
+- **MemoryStore**: Default in-memory storage (development/testing)
+- **IndexedDBStore**: Browser-only persistent storage - messages survive browser restarts
 
 ### Features
 
