@@ -95,7 +95,10 @@ const pkgExports = await pipe(globModules("../src/", "*"))
   .pipe((list) => Object.fromEntries(list))
   .value();
 
-Reflect.set(pkg, "exports", pkgExports);
+Reflect.set(pkg, "exports", {
+  ...pkg.exports,
+  ...pkgExports
+});
 
 // console.log("🚀 ~ pkg:", pkg)
 const writeMode = process.argv.indexOf("--write") !== -1;
