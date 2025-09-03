@@ -96,9 +96,11 @@ export class IndexedDBStore extends Store {
         }
 
         // Reconstruct Message instance
-        const message = new Message(result.data, result.createdAt);
-        message.id = result.id;
-        message.acknowledgedAt = result.acknowledgedAt;
+        const message = new Message(result.data, {
+          id: result.id,
+          createdAt: result.createdAt,
+          acknowledgedAt: result.acknowledgedAt,
+        });
         resolve(message);
       };
     });
@@ -166,9 +168,11 @@ export class IndexedDBStore extends Store {
           updateRequest.onerror = () => reject(updateRequest.error);
           updateRequest.onsuccess = () => {
             // Reconstruct Message instance
-            const message = new Message(record.data, record.createdAt);
-            message.id = record.id;
-            message.acknowledgedAt = now;
+            const message = new Message(record.data, {
+              id: record.id,
+              createdAt: record.createdAt,
+              acknowledgedAt: now,
+            });
             resolve(message);
           };
         } else {

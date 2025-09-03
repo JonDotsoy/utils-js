@@ -27,10 +27,8 @@ describe("IndexedDBStore", () => {
 
   describe("addMessage", () => {
     it("should add messages to the store", async () => {
-      const message1 = new Message({ data: "test1" });
-      message1.id = "1";
-      const message2 = new Message({ data: "test2" });
-      message2.id = "2";
+      const message1 = new Message({ data: "test1" }, { id: "1" });
+      const message2 = new Message({ data: "test2" }, { id: "2" });
 
       await store.addMessage(message1);
       await store.addMessage(message2);
@@ -40,10 +38,8 @@ describe("IndexedDBStore", () => {
     });
 
     it("should handle messages with different data types", async () => {
-      const message1 = new Message({ name: "test" });
-      message1.id = "1";
-      const message2 = new Message([1, 2, 3]);
-      message2.id = "2";
+      const message1 = new Message({ name: "test" }, { id: "1" });
+      const message2 = new Message([1, 2, 3], { id: "2" });
 
       await store.addMessage(message1);
       await store.addMessage(message2);
@@ -55,8 +51,7 @@ describe("IndexedDBStore", () => {
 
   describe("getMessage", () => {
     it("should retrieve message by id", async () => {
-      const message = new Message({ data: "test-data" });
-      message.id = "test-id";
+      const message = new Message({ data: "test-data" }, { id: "test-id" });
 
       await store.addMessage(message);
       const retrieved = await store.getMessage("test-id");
@@ -72,10 +67,20 @@ describe("IndexedDBStore", () => {
 
   describe("claimMessage", () => {
     it("should claim the oldest available message", async () => {
-      const message1 = new Message({ data: "first" }, Date.now() - 1000);
-      message1.id = "1";
-      const message2 = new Message({ data: "second" }, Date.now());
-      message2.id = "2";
+      const message1 = new Message(
+        { data: "first" },
+        {
+          id: "1",
+          createdAt: Date.now() - 1000,
+        },
+      );
+      const message2 = new Message(
+        { data: "second" },
+        {
+          id: "2",
+          createdAt: Date.now(),
+        },
+      );
 
       await store.addMessage(message1);
       await store.addMessage(message2);
@@ -91,8 +96,13 @@ describe("IndexedDBStore", () => {
     });
 
     it("should respect acknowledgment timeout", async () => {
-      const message = new Message({ data: "test" }, Date.now());
-      message.id = "1";
+      const message = new Message(
+        { data: "test" },
+        {
+          id: "1",
+          createdAt: Date.now(),
+        },
+      );
       await store.addMessage(message);
 
       // Claim with short timeout
@@ -110,8 +120,13 @@ describe("IndexedDBStore", () => {
     });
 
     it("should handle abort signal", async () => {
-      const message = new Message({ data: "test" }, Date.now());
-      message.id = "1";
+      const message = new Message(
+        { data: "test" },
+        {
+          id: "1",
+          createdAt: Date.now(),
+        },
+      );
       await store.addMessage(message);
 
       const abortController = new AbortController();
@@ -125,8 +140,13 @@ describe("IndexedDBStore", () => {
 
   describe("acknowledgeMessage", () => {
     it("should acknowledge a claimed message", async () => {
-      const message = new Message({ data: "test" }, Date.now());
-      message.id = "1";
+      const message = new Message(
+        { data: "test" },
+        {
+          id: "1",
+          createdAt: Date.now(),
+        },
+      );
       await store.addMessage(message);
 
       await store.claimMessage(5000, Date.now());
@@ -154,8 +174,13 @@ describe("IndexedDBStore", () => {
 
   describe("deleteMessage", () => {
     it("should delete a message by id", async () => {
-      const message = new Message({ data: "test" }, Date.now());
-      message.id = "1";
+      const message = new Message(
+        { data: "test" },
+        {
+          id: "1",
+          createdAt: Date.now(),
+        },
+      );
       await store.addMessage(message);
 
       await store.deleteMessage("1");
@@ -186,10 +211,20 @@ describe("IndexedDBStore", () => {
     });
 
     it("should return correct count after adding messages", async () => {
-      const message1 = new Message({ data: "test1" }, Date.now());
-      message1.id = "1";
-      const message2 = new Message({ data: "test2" }, Date.now());
-      message2.id = "2";
+      const message1 = new Message(
+        { data: "test1" },
+        {
+          id: "1",
+          createdAt: Date.now(),
+        },
+      );
+      const message2 = new Message(
+        { data: "test2" },
+        {
+          id: "2",
+          createdAt: Date.now(),
+        },
+      );
 
       await store.addMessage(message1);
       expect(await store.getSize()).toBe(1);
@@ -199,12 +234,27 @@ describe("IndexedDBStore", () => {
     });
 
     it("should return correct count after operations", async () => {
-      const message1 = new Message({ data: "test1" }, Date.now());
-      message1.id = "1";
-      const message2 = new Message({ data: "test2" }, Date.now());
-      message2.id = "2";
-      const message3 = new Message({ data: "test3" }, Date.now());
-      message3.id = "3";
+      const message1 = new Message(
+        { data: "test1" },
+        {
+          id: "1",
+          createdAt: Date.now(),
+        },
+      );
+      const message2 = new Message(
+        { data: "test2" },
+        {
+          id: "2",
+          createdAt: Date.now(),
+        },
+      );
+      const message3 = new Message(
+        { data: "test3" },
+        {
+          id: "3",
+          createdAt: Date.now(),
+        },
+      );
 
       await store.addMessage(message1);
       await store.addMessage(message2);
@@ -222,8 +272,13 @@ describe("IndexedDBStore", () => {
 
   describe("close", () => {
     it("should close the store without errors", async () => {
-      const message = new Message({ data: "test" }, Date.now());
-      message.id = "1";
+      const message = new Message(
+        { data: "test" },
+        {
+          id: "1",
+          createdAt: Date.now(),
+        },
+      );
       await store.addMessage(message);
 
       // This should not throw an error
@@ -241,8 +296,13 @@ describe("IndexedDBStore", () => {
     it("should handle concurrent message additions", async () => {
       const promises = [];
       for (let i = 0; i < 10; i++) {
-        const message = new Message({ data: `test${i}` }, Date.now() + i);
-        message.id = `${i}`;
+        const message = new Message(
+          { data: `test${i}` },
+          {
+            id: `${i}`,
+            createdAt: Date.now() + i,
+          },
+        );
         promises.push(store.addMessage(message));
       }
 
@@ -253,8 +313,13 @@ describe("IndexedDBStore", () => {
     it("should handle concurrent claim operations", async () => {
       // Add messages
       for (let i = 0; i < 5; i++) {
-        const message = new Message({ data: `test${i}` }, Date.now() + i);
-        message.id = `${i}`;
+        const message = new Message(
+          { data: `test${i}` },
+          {
+            id: `${i}`,
+            createdAt: Date.now() + i,
+          },
+        );
         await store.addMessage(message);
       }
 

@@ -1,3 +1,10 @@
+type MessageData<T> = {
+  id: string;
+  data: T;
+  createdAt: number;
+  acknowledgedAt: null | number;
+};
+
 /**
  * Represents a message in the queue system.
  *
@@ -18,16 +25,18 @@ export class Message<T extends object = any> {
   createdAt: number;
   /** Timestamp when the message was last acknowledged, null if never acknowledged */
   acknowledgedAt: null | number = null;
+  /** The payload data for this message */
+  data: T;
 
   /**
    * Creates a new message with the provided data.
    * @param data - The payload data for this message
    */
-  constructor(
-    public data: T,
-    createdAt?: number,
-  ) {
-    this.createdAt = createdAt ?? Date.now();
+  constructor(data: T, message?: Partial<Omit<MessageData<T>, "data">>) {
+    this.id = message?.id ?? this.id;
+    this.data = data;
+    this.createdAt = message?.createdAt ?? Date.now();
+    this.acknowledgedAt = message?.acknowledgedAt ?? null;
   }
 
   /**
@@ -36,5 +45,13 @@ export class Message<T extends object = any> {
    */
   acknowledge() {
     this.acknowledgedAt = Date.now();
+  }
+
+  static from<T extends object = any>(message: MessageData<T>) {
+    return new Message(message.data, {
+      id: message.id,
+      createdAt: message.createdAt,
+      acknowledgedAt: message.acknowledgedAt,
+    });
   }
 }
