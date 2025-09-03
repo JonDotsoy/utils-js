@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.13.3...utils-js-v0.14.0) (2025-09-03)
+
+
+### Features
+
+* **queue:** Implementa almacenamiento persistente IndexedDB con API de Message mejorada ([#41](https://github.com/JonDotsoy/utils-js/issues/41)) ([3392f58](https://github.com/JonDotsoy/utils-js/commit/3392f58142b64c0d06bb49d3094841e2a7dba4a3))
+
 ## [0.13.3](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.13.2...utils-js-v0.13.3) (2025-09-02)
 
 
