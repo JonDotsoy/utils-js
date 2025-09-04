@@ -37,6 +37,12 @@ export class IndexedDBStore extends Store {
   /** IndexedDB factory instance for creating database connections */
   private idbFactory: IDBFactory;
 
+  /** Interval ID for the cleanup timer */
+  private cleanupInterval?: ReturnType<typeof setInterval>;
+
+  /** Default configuration for cleanup operations */
+  private static readonly CLEANUP_INTERVAL_MS = 60000; // Clean up every minute
+
   /**
    * Creates a new IndexedDB store instance.
    *
@@ -74,13 +80,16 @@ export class IndexedDBStore extends Store {
     }
 
     this.db = this.initializeDatabase();
+
+    // Start periodic cleanup of expired messages
+    this.startCleanupInterval();
   }
 
   /**
    * Initializes the IndexedDB database and creates the object store with indexes.
    *
    * This method:
-   * - Opens or creates the database with version 1
+   * - Opens or creates the database with version 2 (updated to support TTL)
    * - Creates the object store with 'id' as the key path
    * - Creates indexes on 'createdAt' and 'acknowledgedAt' for efficient querying
    *
@@ -90,7 +99,7 @@ export class IndexedDBStore extends Store {
    */
   private initializeDatabase(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
-      const dbRequest = this.idbFactory.open(this.dbName, 1);
+      const dbRequest = this.idbFactory.open(this.dbName, 2);
 
       dbRequest.onerror = () => reject(dbRequest.error);
       dbRequest.onsuccess = () => {
@@ -118,19 +127,113 @@ export class IndexedDBStore extends Store {
    *
    * This method should be called when the store is no longer needed to free up resources.
    * After calling this method, the store should not be used for further operations.
+   * Also stops the periodic cleanup of expired messages.
    *
    * @returns Promise that resolves when the database is closed
    */
   async close(): Promise<void> {
+    this.stopCleanupInterval();
     const database = await this.db;
     database.close();
+  }
+
+  /**
+   * Starts the periodic cleanup interval for expired messages.
+   *
+   * This method sets up a timer that regularly removes expired messages from the store.
+   * The cleanup runs every minute by default to maintain good performance while keeping
+   * the store clean of expired messages.
+   *
+   * @private
+   */
+  private startCleanupInterval(): void {
+    this.cleanupInterval = setInterval(() => {
+      this.cleanupExpiredMessages().catch((error) => {
+        console.warn("Failed to cleanup expired messages:", error);
+      });
+    }, IndexedDBStore.CLEANUP_INTERVAL_MS);
+  }
+
+  /**
+   * Stops the periodic cleanup interval.
+   *
+   * @private
+   */
+  private stopCleanupInterval(): void {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = undefined;
+    }
+  }
+
+  /**
+   * Removes all expired messages from the IndexedDB store.
+   *
+   * This method scans through all messages in the store and removes those that have
+   * exceeded their TTL (Time-to-Live). It's called automatically by the cleanup
+   * interval, but can also be called manually for immediate cleanup.
+   *
+   * @returns Promise that resolves to the number of messages that were removed
+   * @throws {Error} If the database operation fails
+   *
+   * @example
+   * ```typescript
+   * // Manually clean up expired messages
+   * const removedCount = await store.cleanupExpiredMessages();
+   * console.log(`Removed ${removedCount} expired messages`);
+   * ```
+   */
+  async cleanupExpiredMessages(): Promise<number> {
+    const database = await this.db;
+    const now = Date.now();
+
+    return new Promise((resolve, reject) => {
+      const transaction = database.transaction([this.storeName], "readwrite");
+      const store = transaction.objectStore(this.storeName);
+      const request = store.openCursor();
+
+      let removedCount = 0;
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = (event) => {
+        const cursor = (event.target as IDBRequest)
+          .result as IDBCursorWithValue;
+
+        if (!cursor) {
+          resolve(removedCount);
+          return;
+        }
+
+        const record = cursor.value;
+
+        // Check if the message is expired
+        const tempMessage = new Message(record.data, {
+          id: record.id,
+          createdAt: record.createdAt,
+          acknowledgedAt: record.acknowledgedAt,
+          ttl: record.ttl,
+        });
+
+        if (tempMessage.isExpired(now)) {
+          const deleteRequest = cursor.delete();
+          deleteRequest.onerror = () => reject(deleteRequest.error);
+          deleteRequest.onsuccess = () => {
+            removedCount++;
+            cursor.continue();
+          };
+        } else {
+          cursor.continue();
+        }
+      };
+    });
   }
 
   /**
    * Adds a new message to the IndexedDB store.
    *
    * The message is stored with all its properties including id, data,
-   * createdAt timestamp, and acknowledgedAt timestamp (if any).
+   * createdAt timestamp, acknowledgedAt timestamp (if any), and TTL value.
+   * Messages that are already expired will be rejected and not stored.
    *
    * @param message - The message to add to the store
    * @returns Promise that resolves when the message is successfully added
@@ -143,6 +246,12 @@ export class IndexedDBStore extends Store {
    * ```
    */
   async addMessage(message: Message): Promise<void> {
+    // Reject already expired messages
+    const now = Date.now();
+    if (message.isExpired(now)) {
+      return;
+    }
+
     const database = await this.db;
     return new Promise((resolve, reject) => {
       const transaction = database.transaction([this.storeName], "readwrite");
@@ -153,6 +262,7 @@ export class IndexedDBStore extends Store {
         data: message.data,
         createdAt: message.createdAt,
         acknowledgedAt: message.acknowledgedAt,
+        ttl: message.ttl,
       });
 
       request.onerror = () => reject(request.error);
@@ -197,7 +307,15 @@ export class IndexedDBStore extends Store {
           id: result.id,
           createdAt: result.createdAt,
           acknowledgedAt: result.acknowledgedAt,
+          ttl: result.ttl,
         });
+
+        // Filter out expired messages
+        const now = Date.now();
+        if (message.isExpired(now)) {
+          resolve(null);
+          return;
+        }
         resolve(message);
       };
     });
@@ -323,6 +441,20 @@ export class IndexedDBStore extends Store {
         }
 
         const record = cursor.value;
+
+        // Check if message is expired and skip it
+        const tempMessage = new Message(record.data, {
+          id: record.id,
+          createdAt: record.createdAt,
+          acknowledgedAt: record.acknowledgedAt,
+          ttl: record.ttl,
+        });
+
+        if (tempMessage.isExpired(now)) {
+          cursor.continue();
+          return;
+        }
+
         const isUnacknowledged =
           record.acknowledgedAt === null ||
           record.acknowledgedAt < now - acknowledgeTimeoutMs;
@@ -342,6 +474,7 @@ export class IndexedDBStore extends Store {
               id: record.id,
               createdAt: record.createdAt,
               acknowledgedAt: now,
+              ttl: record.ttl,
             });
             resolve(message);
           };
