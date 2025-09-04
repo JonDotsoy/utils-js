@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.14.0...utils-js-v0.15.0) (2025-09-04)
+
+
+### Features
+
+* **queue:** add TTL (Time-to-Live) support for automatic message expiration ([#44](https://github.com/JonDotsoy/utils-js/issues/44)) ([a8631b0](https://github.com/JonDotsoy/utils-js/commit/a8631b054e96df6ce5de61325188682441361551))
+* **queue:** implement TTL support with automatic cleanup for IndexedDB store ([#46](https://github.com/JonDotsoy/utils-js/issues/46)) ([e8e5f33](https://github.com/JonDotsoy/utils-js/commit/e8e5f33424c9e6fc92095dcf3347a0563126386e))
+
 ## [0.14.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.13.3...utils-js-v0.14.0) (2025-09-03)
 
 
