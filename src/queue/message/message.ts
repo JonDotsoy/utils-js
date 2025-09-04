@@ -50,7 +50,7 @@ type MessageData<T extends object = any> = {
    * - Used to calculate absolute expiration time: `createdAt + (ttl * 1000)`
    * - Store implementations may automatically clean up expired messages
    */
-  ttl: null | number;
+  ttl?: null | number;
 };
 
 /**
