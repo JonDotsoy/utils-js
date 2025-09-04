@@ -33,19 +33,7 @@ visit(node, test);
 ```ts
 import { visit } from "@jondotsoy/utils-js/visit";
 
-const v = vis### Features
-
-- **🔄 Async Iterator Support**: Clean `for await...of` consumption pattern
-- **🛑 Graceful Shutdown**: `close()` method and Disposable pattern support
-- **💾 Pluggable Storage**: Abstract `Store` interface with in-memory and IndexedDB implementations
-- **🌐 Persistent Storage**: IndexedDB support for browser environments - messages survive page reloads and browser restarts
-- **⚡ Keep-Alive Acknowledgments**: Prevents message timeout during long processing
-- **🔀 Concurrent Workers**: Multiple consumers safely process different messages
-- **🛡️ Message Recovery**: Automatic reclaim of failed/stalled messages after timeout
-- **✋ Manual Acknowledgment**: Explicit `ack()` required for message deletion
-- **📦 Zero Dependencies**: Pure TypeScript implementation
-- **🔒 Type Safe**: Full TypeScript support with comprehensive type definitions
-- **🔁 At-Least-Once Delivery**: Failed messages are automatically retried);
+const v = visit([1, 2, 3]);
 v.next().value; // [1, 2, 3]
 v.next().value; // 1
 v.next().value; // 2
