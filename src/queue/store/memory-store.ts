@@ -39,8 +39,7 @@ export class MemoryStore extends Store {
   #cleanupInterval = setInterval(() => {
     const now = Date.now();
     this.messages = this.messages.filter((message) => {
-      if (!message.ttl) return true;
-      return message.ttl > now;
+      return !message.isExpired(now);
     });
     this.queueSize.set(this.messages.length);
   }, MemoryStore.defaultPerformance.cleanupIntervalMilliseconds);
@@ -51,7 +50,7 @@ export class MemoryStore extends Store {
    */
   async addMessage(message: Message) {
     const now = Date.now();
-    if (message.ttl && message.ttl < now) return;
+    if (message.isExpired(now)) return;
     this.messages.push(message);
     this.queueSize.set(this.messages.length);
     this.lastMessageId.set(message.id);
