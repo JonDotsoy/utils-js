@@ -25,6 +25,67 @@ bun add @jondotsoy/utils-js
 npm install @jondotsoy/utils-js
 ```
 
+## TTL (Time-to-Live) Usage
+
+Messages can optionally include a TTL (Time-to-Live) timestamp to automatically expire after a certain time. This is useful for implementing message expiration, cleanup tasks, and preventing stale message processing.
+
+### Basic TTL Usage
+
+```ts
+import { Queue, MemoryStore, Message } from "@jondotsoy/utils-js/queue";
+
+const queue = new Queue({ store: new MemoryStore() });
+
+// Create a message with TTL directly (expires in 5 minutes)
+const message = new Message(
+  { task: "send-notification", userId: "123" },
+  { ttl: 5 * 60 }, // TTL in seconds: 5 minutes
+);
+await queue.add(message);
+
+// Or create a message with TTL for urgent tasks (expires in 2 minutes)
+const urgentMessage = new Message(
+  { task: "urgent-cleanup", priority: "high" },
+  { ttl: 2 * 60 }, // TTL in seconds: 2 minutes
+);
+```
+
+### TTL Behavior by Store
+
+**MemoryStore:**
+
+- Automatically cleans up expired messages every 1 second (configurable)
+- Rejects messages that are already expired when added
+- Cleanup interval can be tuned: `MemoryStore.defaultPerformance.cleanupIntervalMilliseconds = 500`
+
+**IndexedDBStore:**
+
+- Similar TTL support with persistent cleanup
+- Expired messages are removed during database operations
+
+### TTL Best Practices
+
+```ts
+// For time-sensitive notifications (expire in 1 hour)
+const notification = new Message(
+  { type: "user-notification", content: "Your session expires soon" },
+  { ttl: 60 * 60 }, // 3600 seconds = 1 hour
+);
+
+// For cleanup tasks (expire in 24 hours)
+const cleanupTask = new Message(
+  { type: "cleanup", resource: "/tmp/uploads" },
+  { ttl: 24 * 60 * 60 }, // 86400 seconds = 24 hours
+);
+
+// For testing with quick expiration (expires in 0.5 seconds)
+MemoryStore.defaultPerformance.cleanupIntervalMilliseconds = 100;
+const testMessage = new Message(
+  { test: true },
+  { ttl: 0.5 }, // 0.5 seconds for quick testing
+);
+```
+
 ## Quick Start
 
 ```ts
@@ -65,16 +126,17 @@ for await (const job of queue) {
 
 ## Concepts
 
-| Concept                | Description                                                                                                                  |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Message                | Wrapper carrying `data`, `id`, timestamps `createdAt`, `acknowledgedAt`.                                                     |
-| Acknowledge keep‑alive | Timer re‑acknowledging the message every `ackIntervalMs` until processing finishes.                                          |
-| Manual acknowledgment  | Messages must be explicitly acknowledged with `ack()` or `acknowledgeMessage()` to be deleted from the queue.                |
-| Reclaim                | If a message's last `acknowledgedAt` is older than `now - messageTimeoutMs`, it is eligible to be claimed by another worker. |
-| Graceful shutdown      | Queue can be closed with `close()` to stop all message consumption gracefully without interrupting current processing.       |
-| Store                  | Abstraction for persistence; must implement methods to add / get / acknowledge / delete / claim / count / close.             |
-| MemoryStore            | Simple array based store (dev / tests). Not durable.                                                                         |
-| IndexedDBStore         | Browser-based persistent store using IndexedDB. Messages survive page reloads and browser restarts.                          |
+| Concept                | Description                                                                                                                                                       |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Message                | Wrapper carrying `data`, `id`, timestamps `createdAt`, `acknowledgedAt`, and optional `ttl` (Time-to-Live).                                                       |
+| Acknowledge keep‑alive | Timer re‑acknowledging the message every `ackIntervalMs` until processing finishes.                                                                               |
+| Manual acknowledgment  | Messages must be explicitly acknowledged with `ack()` or `acknowledgeMessage()` to be deleted from the queue.                                                     |
+| Reclaim                | If a message's last `acknowledgedAt` is older than `now - messageTimeoutMs`, it is eligible to be claimed by another worker.                                      |
+| TTL (Time-to-Live)     | Optional expiration duration in seconds. Messages automatically expire after `createdAt + (ttl * 1000)` milliseconds and are cleaned up by store implementations. |
+| Graceful shutdown      | Queue can be closed with `close()` to stop all message consumption gracefully without interrupting current processing.                                            |
+| Store                  | Abstraction for persistence; must implement methods to add / get / acknowledge / delete / claim / count / close.                                                  |
+| MemoryStore            | Simple array based store (dev / tests). Not durable. Includes automatic TTL cleanup every 1 second (configurable).                                                |
+| IndexedDBStore         | Browser-based persistent store using IndexedDB. Messages survive page reloads and browser restarts.                                                               |
 
 ## Message Lifecycle
 
@@ -211,15 +273,21 @@ class Message {
   createdAt: number;
   acknowledgedAt: number | null;
   data: any;
+  ttl: null | number;
   constructor(data: any, message?: Partial<Omit<MessageData, "data">>);
   acknowledge(): void;
+  isExpired(now: number): boolean;
+  toJSON(): MessageData<object>;
   static from<T>(message: MessageData<T>): Message<T>;
 }
 ```
 
-The `Message` class now supports flexible construction and serialization:
+The `Message` class now supports flexible construction, serialization, and TTL (Time-to-Live) functionality:
 
-- **Enhanced constructor**: Optionally specify custom `id`, `createdAt`, or `acknowledgedAt` timestamps
+- **Enhanced constructor**: Optionally specify custom `id`, `createdAt`, `acknowledgedAt`, or `ttl` values
+- **TTL Support**: Messages can include an optional expiration duration in seconds for automatic cleanup
+- **Expiration checking**: Use `isExpired()` method to check if a message has expired
+- **JSON serialization**: Perfect conversion to/from plain objects with `toJSON()` and `from()`
 - **Static factory method**: `Message.from()` reconstructs Message instances from serialized data
 - **Perfect for persistence**: Seamlessly works with IndexedDB and other storage backends
 
@@ -229,12 +297,19 @@ The `Message` class now supports flexible construction and serialization:
 // Basic message with auto-generated ID and timestamp
 const msg1 = new Message({ task: "send-email" });
 
-// Message with custom metadata (useful for reconstruction from storage)
+// Message with TTL (expires in 1 hour)
 const msg2 = new Message(
+  { task: "temporary-cleanup" },
+  { ttl: 60 * 60 }, // 3600 seconds = 1 hour
+);
+
+// Message with custom metadata (useful for reconstruction from storage)
+const msg3 = new Message(
   { task: "process-order" },
   {
     id: "custom-id",
     createdAt: Date.now() - 1000,
+    ttl: 30 * 60, // 30 minutes
   },
 );
 
@@ -244,6 +319,7 @@ const storedData = {
   data: { task: "cleanup" },
   createdAt: 1693737600000,
   acknowledgedAt: null,
+  ttl: 60 * 60, // 1 hour duration in seconds
 };
 const message = Message.from(storedData);
 ```
@@ -272,7 +348,27 @@ The `close()` method should clean up resources and stop any ongoing operations. 
 
 ### MemoryStore
 
-Reference implementation for tests & development. **Not durable.** Adds a reactive internal observer (not exported) to track queue size.
+Reference implementation for tests & development. **Not durable.** Adds a reactive internal observer (not exported) to track queue size and includes automatic TTL cleanup for expired messages.
+
+**TTL Features:**
+
+- **Automatic cleanup**: Expired messages are automatically removed every 1 second (configurable via `MemoryStore.defaultPerformance.cleanupIntervalMilliseconds`)
+- **Expiration calculation**: Messages expire when `createdAt + (ttl * 1000) <= now` (TTL specified in seconds, converted to milliseconds)
+- **Rejection of expired messages**: Messages that are already expired when added to the store are silently rejected
+- **Performance tuning**: Cleanup interval can be adjusted for testing or different performance requirements
+
+**Example:**
+
+```ts
+// Configure cleanup interval for testing
+MemoryStore.defaultPerformance.cleanupIntervalMilliseconds = 500; // Check every 500ms
+
+const store = new MemoryStore();
+const message = new Message(
+  { task: "expires-soon" },
+  { ttl: 2 }, // Expires in 2 seconds
+);
+```
 
 ### IndexedDBStore
 

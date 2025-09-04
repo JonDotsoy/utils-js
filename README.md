@@ -543,7 +543,7 @@ new BytesFormat("de-DE").format(123456789); // '117,74 MB'
 
 ## Queue
 
-A lightweight asynchronous message queue system with support for pluggable storage, keep-alive acknowledgments, and manual message confirmation. Perfect for background job processing, task coordination, and reliable message distribution with at-least-once delivery semantics.
+A lightweight asynchronous message queue system with support for pluggable storage, keep-alive acknowledgments, TTL (Time-to-Live) message expiration, and manual message confirmation. Perfect for background job processing, task coordination, and reliable message distribution with at-least-once delivery semantics.
 
 **Import:**
 
@@ -636,6 +636,27 @@ const controller = new AbortController();
 
 // Stop processing after 10 seconds
 setTimeout(() => controller.abort(), 10_000);
+```
+
+**With TTL (Time-to-Live) message expiration:**
+
+```ts
+import { Queue, Message } from "@jondotsoy/utils-js/queue";
+
+const queue = new Queue();
+
+// Add a message that expires in 5 minutes
+const message = new Message(
+  { task: "send-notification", userId: "123" },
+  { ttl: 5 * 60 }, // TTL in seconds
+);
+await queue.add(message);
+
+// Messages are automatically cleaned up when expired
+for await (const job of queue) {
+  console.log("Processing:", job);
+  queue.ack(job);
+}
 ```
 
 **Graceful shutdown:**
@@ -764,9 +785,10 @@ const queue = new Queue({ store: new RedisStore() });
 ### Features
 
 - **🔄 Async Iterator Support**: Clean `for await...of` consumption pattern
-- **� Graceful Shutdown**: `close()` method and Disposable pattern support
-- **�💾 Pluggable Storage**: Abstract `Store` interface with in-memory implementation
+- **🛑 Graceful Shutdown**: `close()` method and Disposable pattern support
+- **💾 Pluggable Storage**: Abstract `Store` interface with in-memory and IndexedDB implementations
 - **⚡ Keep-Alive Acknowledgments**: Prevents message timeout during long processing
+- **⏱️ TTL Support**: Optional Time-to-Live for automatic message expiration and cleanup
 - **🔀 Concurrent Workers**: Multiple consumers safely process different messages
 - **🛡️ Message Recovery**: Automatic reclaim of failed/stalled messages after timeout
 - **✋ Manual Acknowledgment**: Explicit `ack()` required for message deletion
