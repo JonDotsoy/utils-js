@@ -540,6 +540,9 @@ import { Queue } from "@jondotsoy/utils-js/queue";
 
 // For persistent storage (browser environments)
 import { IndexedDBStore } from "@jondotsoy/utils-js/queue/store/indexeddb-store";
+
+// For worker-based storage (browser and Node.js)
+import { WorkerStore } from "@jondotsoy/utils-js/queue/store/worker-store";
 ```
 
 ### Basic Usage
@@ -607,6 +610,33 @@ for await (const job of queue) {
   // Messages are automatically persisted to IndexedDB
   queue.ack(job);
 }
+```
+
+**With worker-based storage (non-blocking):**
+
+```ts
+import { WorkerStore } from "@jondotsoy/utils-js/queue/store/worker-store";
+
+// Create worker that handles storage operations
+const worker = new Worker("/worker-store-backend.js");
+const queue = new Queue({
+  store: new WorkerStore(worker),
+});
+
+await queue.add({ task: "cpu-intensive-work", data: largeDataset });
+
+for await (const job of queue) {
+  console.log("Processing:", job);
+  // Storage operations happen in worker thread - main thread stays responsive
+  queue.ack(job);
+}
+
+// Health check
+const response = await queue.store.ping(); // "pong"
+
+// Cleanup
+await queue.close();
+worker.terminate();
 ```
 
 **With TTL (Time-to-Live) expiration:**
@@ -794,6 +824,7 @@ const queue = new Queue({ store: new RedisStore() });
 
 - **MemoryStore**: Default in-memory storage (development/testing) with automatic TTL cleanup
 - **IndexedDBStore**: Browser-only persistent storage with TTL support - messages survive browser restarts and include automatic cleanup of expired messages
+- **WorkerStore**: Worker-based storage that delegates operations to a Web Worker/Worker Thread - prevents main thread blocking for better performance
 
 ### Features
 
