@@ -5,19 +5,52 @@
  * including its unique identifier, payload data, lifecycle timestamps,
  * and optional TTL (Time-to-Live) for automatic expiration.
  *
- * @template T - The type of the message payload data
+ * @template T - The type of the message payload data (must extend object)
+ *
+ * @public
  */
-type MessageData<T> = {
-  /** Unique identifier for the message */
+type MessageData<T extends object = any> = {
+  /**
+   * Unique identifier for the message.
+   *
+   * @remarks Auto-generated UUID when not explicitly provided
+   */
   id: string;
-  /** The payload data contained in the message */
+
+  /**
+   * The payload data contained in the message.
+   *
+   * @remarks Must be an object type containing the actual message content
+   */
   data: T;
-  /** Timestamp when the message was created (in milliseconds) */
+
+  /**
+   * Timestamp when the message was created (in milliseconds since Unix epoch).
+   *
+   * @remarks Automatically set to Date.now() during message creation
+   */
   createdAt: number;
-  /** Timestamp when the message was acknowledged, or null if never acknowledged */
+
+  /**
+   * Timestamp when the message was acknowledged (in milliseconds since Unix epoch).
+   *
+   * @remarks
+   * - `null` indicates the message has never been acknowledged
+   * - A number indicates when the message was last processed
+   * - Optional field that may be undefined in some contexts
+   */
   acknowledgedAt?: null | number;
-  /** Time-to-live (TTL) timestamp in milliseconds since Unix epoch - when null/undefined, message never expires */
-  ttl?: null | number;
+
+  /**
+   * Time-to-live duration in seconds (relative to createdAt).
+   *
+   * @remarks
+   * - Specifies how long the message should remain valid after creation
+   * - `null` means the message never expires
+   * - Used to calculate absolute expiration time: `createdAt + (ttl * 1000)`
+   * - Store implementations may automatically clean up expired messages
+   */
+  ttl: null | number;
 };
 
 /**
@@ -35,45 +68,13 @@ type MessageData<T> = {
  * and preventing duplicate processing in distributed systems.
  *
  * **TTL Support**: Messages can optionally specify a TTL (Time-to-Live) value
- * that determines when the message should expire. Store implementations may
- * automatically clean up expired messages or reject already-expired messages
- * when they are added to the queue.
+ * in seconds that determines how long the message remains valid after creation.
+ * Store implementations may automatically clean up expired messages or reject
+ * already-expired messages when they are added to the queue.
  *
  * @template T - The type of the payload data (must extend object)
  *
- * @example
- * ```typescript
- * // Basic message creation
- * const message = new Message({ task: "process-data", priority: 1 });
- * console.log(message.id); // Auto-generated UUID
- *
- * // Message with TTL (expires in 5 minutes)
- * const ttlMessage = new Message(
- *   { content: "Temporary notification" },
- *   {
- *     ttl: Date.now() + (5 * 60 * 1000) // 5 minutes from now
- *   }
- * );
- *
- * // Message with custom metadata
- * const customMessage = new Message(
- *   { content: "Hello World" },
- *   {
- *     id: "custom-id-123",
- *     createdAt: Date.now() - 1000 // 1 second ago
- *   }
- * );
- *
- * // Acknowledge a message after processing
- * await processMessage(message.data);
- * message.acknowledge();
- * console.log(message.acknowledgedAt); // Current timestamp
- *
- * // Check if message has been acknowledged
- * if (message.acknowledgedAt !== null) {
- *   console.log('Message was processed');
- * }
- * ```
+ * @public
  */
 export class Message<T extends object = any> {
   /**
@@ -81,6 +82,8 @@ export class Message<T extends object = any> {
    *
    * Automatically generated using crypto.randomUUID() if not provided in constructor.
    * This ensures each message has a globally unique identifier for tracking purposes.
+   *
+   * @readonly
    */
   id: string = crypto.randomUUID();
 
@@ -89,6 +92,8 @@ export class Message<T extends object = any> {
    *
    * Automatically set to Date.now() when the message is instantiated,
    * unless explicitly provided in the constructor options.
+   *
+   * @readonly
    */
   createdAt: number;
 
@@ -108,36 +113,28 @@ export class Message<T extends object = any> {
    *
    * Can be any object type and contains the actual information or task
    * that this message represents in the queue system.
+   *
+   * @readonly
    */
   data: T;
 
   /**
-   * Time-to-live (TTL) for the message, in milliseconds since Unix epoch.
+   * Time-to-live (TTL) for the message, specified as a duration in seconds.
    *
-   * When set, this field defines an absolute timestamp when the message expires.
-   * Messages with TTL values in the past are considered expired and may be:
+   * When set, this field defines how long the message remains valid after creation.
+   * The actual expiration time is calculated as: `createdAt + (ttl * 1000)`.
+   * Messages that have exceeded their TTL are considered expired and may be:
    * - Automatically rejected when added to stores (like MemoryStore)
    * - Periodically cleaned up by store implementations
    * - Filtered out during message retrieval operations
    *
    * @remarks
-   * - Use `Date.now() + durationMs` to set TTL relative to current time
+   * - Specify TTL as duration in seconds (e.g., 300 for 5 minutes)
    * - Store implementations may handle TTL differently
-   * - A `null` or `undefined` value means the message never expires
-   *
-   * @example
-   * ```typescript
-   * // Message that expires in 1 hour
-   * const message = new Message(
-   *   { task: "cleanup" },
-   *   { ttl: Date.now() + (60 * 60 * 1000) }
-   * );
-   *
-   * // Check if message is expired
-   * const isExpired = message.ttl && message.ttl < Date.now();
-   * ```
+   * - A `null` value means the message never expires
+   * - Use {@link isExpired} method to check if a message has expired
    */
-  ttl?: null | number;
+  ttl: null | number;
 
   /**
    * Creates a new message instance with the provided data and optional metadata.
@@ -149,50 +146,18 @@ export class Message<T extends object = any> {
    * @param data - The payload data for this message (must be an object)
    * @param message - Optional metadata to override default values
    * @param message.id - Custom message ID (defaults to auto-generated UUID)
-   * @param message.createdAt - Custom creation timestamp (defaults to Date.now())
-   * @param message.acknowledgedAt - Custom acknowledgment timestamp (defaults to null)
-   * @param message.ttl - Time-to-live timestamp in milliseconds since Unix epoch (defaults to null)
+   * @param message.createdAt - Custom creation timestamp in ms (defaults to Date.now())
+   * @param message.acknowledgedAt - Custom acknowledgment timestamp in ms (defaults to null)
+   * @param message.ttl - Time-to-live duration in seconds (defaults to null for no expiration)
    *
-   * @example
-   * ```typescript
-   * // Simple message with auto-generated metadata
-   * const msg1 = new Message({ action: 'send-email', to: 'user@example.com' });
-   *
-   * // Message with TTL (expires in 30 minutes)
-   * const msg2 = new Message(
-   *   { task: 'temporary-job' },
-   *   {
-   *     ttl: Date.now() + (30 * 60 * 1000)
-   *   }
-   * );
-   *
-   * // Message with custom ID and creation time
-   * const msg3 = new Message(
-   *   { task: 'process-order' },
-   *   {
-   *     id: 'order-123',
-   *     createdAt: Date.now() - 5000 // 5 seconds ago
-   *   }
-   * );
-   *
-   * // Message already acknowledged (e.g., when reconstructing from storage)
-   * const msg4 = new Message(
-   *   { result: 'completed' },
-   *   {
-   *     id: 'task-456',
-   *     createdAt: 1630000000000,
-   *     acknowledgedAt: 1630000005000,
-   *     ttl: 1630000300000 // Expires at specific time
-   *   }
-   * );
-   * ```
+   * @throws {Error} When data parameter is not an object
    */
   constructor(data: T, message?: Partial<Omit<MessageData<T>, "data">>) {
     this.id = message?.id ?? this.id;
     this.data = data;
     this.createdAt = message?.createdAt ?? Date.now();
     this.acknowledgedAt = message?.acknowledgedAt ?? null;
-    this.ttl = message?.ttl;
+    this.ttl = message?.ttl ?? null;
   }
 
   /**
@@ -206,23 +171,53 @@ export class Message<T extends object = any> {
    * - Implement reliable delivery patterns
    * - Prevent duplicate processing
    * - Enable acknowledgment timeouts for failed processors
-   *
-   * @example
-   * ```typescript
-   * const message = new Message({ task: 'send-notification' });
-   *
-   * // Process the message
-   * await sendNotification(message.data);
-   *
-   * // Acknowledge successful processing
-   * message.acknowledge();
-   *
-   * console.log(`Message acknowledged at: ${message.acknowledgedAt}`);
-   * // Output: Message acknowledged at: 1693737600000
-   * ```
    */
-  acknowledge() {
+  acknowledge(): void {
     this.acknowledgedAt = Date.now();
+  }
+
+  /**
+   * Checks if the message has expired based on its TTL (Time-to-Live) setting.
+   *
+   * This method calculates whether the message has exceeded its time-to-live
+   * by comparing the current time with the computed expiration timestamp.
+   * The expiration is calculated as: `createdAt + (ttl * 1000)`.
+   *
+   * @param now - Current timestamp in milliseconds since Unix epoch (typically Date.now())
+   * @returns `true` if the message has expired, `false` if it's still valid or has no TTL
+   */
+  isExpired(now: number): boolean {
+    // format epoch-ms
+    const createdAt = this.createdAt;
+    // relative seconds
+    const ttl = this.ttl;
+    if (!ttl) return false;
+    const expirationAt = createdAt + ttl * 1000;
+    return expirationAt <= now;
+  }
+
+  /**
+   * Serializes the message instance to a plain JavaScript object.
+   *
+   * This method converts the Message instance into a MessageData object
+   * that can be safely serialized to JSON, stored in databases, or transmitted
+   * over networks. It includes all message properties: id, data, timestamps,
+   * and TTL information.
+   *
+   * The returned object is compatible with the {@link MessageData} interface
+   * and can be used with the {@link Message.from} static method to reconstruct
+   * the message instance later.
+   *
+   * @returns A plain object containing all message data suitable for serialization
+   */
+  toJSON(): MessageData<object> {
+    return {
+      id: this.id,
+      data: this.data,
+      createdAt: this.createdAt,
+      acknowledgedAt: this.acknowledgedAt,
+      ttl: this.ttl,
+    };
   }
 
   /**
@@ -240,33 +235,11 @@ export class Message<T extends object = any> {
    * @param message - Complete message data object with all required properties
    * @returns A new Message instance with the provided data
    *
-   * @example
-   * ```typescript
-   * // Reconstruct message from storage
-   * const storedData: MessageData<{task: string}> = {
-   *   id: 'msg-123',
-   *   data: { task: 'process-order' },
-   *   createdAt: 1693737600000,
-   *   acknowledgedAt: null,
-   *   ttl: 1693737900000 // Expires 5 minutes after creation
-   * };
+   * @throws {Error} When the message parameter is invalid or missing required fields
    *
-   * const message = Message.from(storedData);
-   * console.log(message.id); // 'msg-123'
-   * console.log(message.data.task); // 'process-order'
-   * console.log(message.ttl); // 1693737900000
-   *
-   * // Check if reconstructed message is expired
-   * const isExpired = message.ttl && message.ttl < Date.now();
-   *
-   * // Useful when loading from IndexedDB or other storage
-   * const messages = await loadMessagesFromDB();
-   * const messageInstances = messages
-   *   .map(data => Message.from(data))
-   *   .filter(msg => !msg.ttl || msg.ttl > Date.now()); // Filter expired
-   * ```
+   * @static
    */
-  static from<T extends object = any>(message: MessageData<T>) {
+  static from<T extends object = any>(message: MessageData<T>): Message<T> {
     return new Message(message.data, {
       id: message.id,
       createdAt: message.createdAt,
