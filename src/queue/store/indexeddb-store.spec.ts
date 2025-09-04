@@ -794,4 +794,262 @@ describe("IndexedDB Store Integration with Queue", () => {
       });
     });
   });
+
+  describe("TTL (Time-to-Live) support", () => {
+    it("should store and retrieve messages with TTL", async () => {
+      const message = new Message(
+        { data: "test-with-ttl" },
+        {
+          id: "ttl-test",
+          ttl: 300, // 5 minutes TTL
+        },
+      );
+
+      await store.addMessage(message);
+      const retrieved = await store.getMessage("ttl-test");
+
+      expect(retrieved).not.toBeNull();
+      expect(retrieved?.ttl).toBe(300);
+      expect(retrieved?.data).toEqual({ data: "test-with-ttl" });
+    });
+
+    it("should reject expired messages when adding to store", async () => {
+      // Create a message that's already expired
+      const expiredMessage = new Message(
+        { data: "expired-data" },
+        {
+          id: "expired-msg",
+          createdAt: Date.now() - 10000, // 10 seconds ago
+          ttl: 5, // 5 seconds TTL (already expired)
+        },
+      );
+
+      // Adding expired message should silently succeed but not actually store it
+      await store.addMessage(expiredMessage);
+
+      const retrieved = await store.getMessage("expired-msg");
+      expect(retrieved).toBeNull();
+
+      const size = await store.getSize();
+      expect(size).toBe(0);
+    });
+
+    it("should filter out expired messages in getMessage", async () => {
+      // Create a message with very short TTL
+      const message = new Message(
+        { data: "will-expire" },
+        {
+          id: "short-ttl",
+          createdAt: Date.now() - 6000, // 6 seconds ago
+          ttl: 5, // 5 seconds TTL (already expired)
+        },
+      );
+
+      // Manually add to database to bypass addMessage's expiration check
+      const database = await (store as any).db;
+      await new Promise<void>((resolve, reject) => {
+        const transaction = database.transaction(
+          [(store as any).storeName],
+          "readwrite",
+        );
+        const objectStore = transaction.objectStore((store as any).storeName);
+        const request = objectStore.add({
+          id: message.id,
+          data: message.data,
+          createdAt: message.createdAt,
+          acknowledgedAt: message.acknowledgedAt,
+          ttl: message.ttl,
+        });
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve();
+      });
+
+      // getMessage should filter out the expired message
+      const retrieved = await store.getMessage("short-ttl");
+      expect(retrieved).toBeNull();
+    });
+
+    it("should skip expired messages in claimMessage", async () => {
+      const validMessage = new Message(
+        { data: "valid-data" },
+        {
+          id: "valid-msg",
+          createdAt: Date.now() - 1000, // 1 second ago
+          ttl: 60, // 1 minute TTL (still valid)
+        },
+      );
+
+      const expiredMessage = new Message(
+        { data: "expired-data" },
+        {
+          id: "expired-msg",
+          createdAt: Date.now() - 10000, // 10 seconds ago
+          ttl: 5, // 5 seconds TTL (already expired)
+        },
+      );
+
+      // Add valid message first
+      await store.addMessage(validMessage);
+
+      // Manually add expired message to database to bypass addMessage's expiration check
+      const database = await (store as any).db;
+      await new Promise<void>((resolve, reject) => {
+        const transaction = database.transaction(
+          [(store as any).storeName],
+          "readwrite",
+        );
+        const objectStore = transaction.objectStore((store as any).storeName);
+        const request = objectStore.add({
+          id: expiredMessage.id,
+          data: expiredMessage.data,
+          createdAt: expiredMessage.createdAt,
+          acknowledgedAt: expiredMessage.acknowledgedAt,
+          ttl: expiredMessage.ttl,
+        });
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve();
+      });
+
+      // claimMessage should skip expired message and claim the valid one
+      const claimed = await store.claimMessage(5000, Date.now());
+      expect(claimed).not.toBeNull();
+      expect(claimed?.id).toBe("valid-msg");
+      expect(claimed?.data).toEqual({ data: "valid-data" });
+    });
+
+    it("should clean up expired messages", async () => {
+      // Add a mix of valid and expired messages
+      const validMessage = new Message(
+        { data: "valid" },
+        {
+          id: "valid",
+          ttl: 60, // 1 minute TTL (valid)
+        },
+      );
+
+      const expiredMessage1 = new Message(
+        { data: "expired1" },
+        {
+          id: "expired1",
+          createdAt: Date.now() - 10000, // 10 seconds ago
+          ttl: 5, // 5 seconds TTL (expired)
+        },
+      );
+
+      const expiredMessage2 = new Message(
+        { data: "expired2" },
+        {
+          id: "expired2",
+          createdAt: Date.now() - 15000, // 15 seconds ago
+          ttl: 10, // 10 seconds TTL (expired)
+        },
+      );
+
+      // Add valid message normally
+      await store.addMessage(validMessage);
+
+      // Manually add expired messages to database
+      const database = await (store as any).db;
+      for (const msg of [expiredMessage1, expiredMessage2]) {
+        await new Promise<void>((resolve, reject) => {
+          const transaction = database.transaction(
+            [(store as any).storeName],
+            "readwrite",
+          );
+          const objectStore = transaction.objectStore((store as any).storeName);
+          const request = objectStore.add({
+            id: msg.id,
+            data: msg.data,
+            createdAt: msg.createdAt,
+            acknowledgedAt: msg.acknowledgedAt,
+            ttl: msg.ttl,
+          });
+          request.onerror = () => reject(request.error);
+          request.onsuccess = () => resolve();
+        });
+      }
+
+      // Verify we have 3 messages total
+      let size = await store.getSize();
+      expect(size).toBe(3);
+
+      // Clean up expired messages
+      const removedCount = await store.cleanupExpiredMessages();
+      expect(removedCount).toBe(2);
+
+      // Verify only valid message remains
+      size = await store.getSize();
+      expect(size).toBe(1);
+
+      const remaining = await store.getMessage("valid");
+      expect(remaining).not.toBeNull();
+      expect(remaining?.data).toEqual({ data: "valid" });
+    });
+
+    it("should handle messages without TTL (null TTL)", async () => {
+      const messageWithoutTTL = new Message(
+        { data: "no-ttl" },
+        {
+          id: "no-ttl-msg",
+          ttl: null,
+        },
+      );
+
+      await store.addMessage(messageWithoutTTL);
+      const retrieved = await store.getMessage("no-ttl-msg");
+
+      expect(retrieved).not.toBeNull();
+      expect(retrieved?.ttl).toBeNull();
+      expect(retrieved?.isExpired(Date.now())).toBe(false);
+    });
+
+    it("should properly handle TTL with Queue integration", async () => {
+      const queue = new Queue({ store });
+
+      // Add a message with TTL using the Queue API
+      await queue.add({ task: "ttl-task" }, { ttl: 30 }); // 30 seconds TTL
+
+      // Verify the message is in the store
+      const size = await store.getSize();
+      expect(size).toBe(1);
+
+      // Consume and acknowledge the message
+      let messageFound = false;
+      for await (const messageData of queue.consume()) {
+        expect(messageData).toEqual({ task: "ttl-task" });
+        queue.ack(messageData);
+        messageFound = true;
+        break;
+      }
+
+      expect(messageFound).toBe(true);
+
+      // Verify message was acknowledged and removed
+      const finalSize = await store.getSize();
+      expect(finalSize).toBe(0);
+    });
+
+    it("should start and stop cleanup interval properly", async () => {
+      // Create a new store instance to test cleanup interval
+      const testStore = new IndexedDBStore(
+        `cleanup-test-${Date.now()}`,
+        `store-${Date.now()}`,
+        indexedDB,
+      );
+
+      // Verify cleanup interval is running
+      expect((testStore as any).cleanupInterval).toBeDefined();
+
+      // Close the store
+      await testStore.close();
+
+      // Verify cleanup interval is stopped
+      expect((testStore as any).cleanupInterval).toBeUndefined();
+
+      // Clean up the test database
+      if (typeof indexedDB !== "undefined") {
+        indexedDB.deleteDatabase(`cleanup-test-${Date.now()}`);
+      }
+    });
+  });
 });

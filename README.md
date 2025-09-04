@@ -621,6 +621,31 @@ for await (const job of queue) {
 }
 ```
 
+**With TTL (Time-to-Live) expiration:**
+
+```ts
+import { IndexedDBStore } from "@jondotsoy/utils-js/queue/store/indexeddb-store";
+
+const queue = new Queue({
+  store: new IndexedDBStore("task-queue"),
+});
+
+// Add message with TTL (expires in 1 hour)
+await queue.add(
+  { task: "send-notification", userId: "123" },
+  { ttl: 60 * 60 }, // 3600 seconds = 1 hour
+);
+
+// Add urgent task (expires in 5 minutes)
+await queue.add(
+  { task: "urgent-cleanup", resource: "/tmp" },
+  { ttl: 5 * 60 }, // 300 seconds = 5 minutes
+);
+
+// Expired messages are automatically filtered out and cleaned up
+// Manual cleanup also available: await queue.store.cleanupExpiredMessages();
+```
+
 **With AbortSignal support:**
 
 ```ts
@@ -779,8 +804,8 @@ const queue = new Queue({ store: new RedisStore() });
 
 **Built-in stores:**
 
-- **MemoryStore**: Default in-memory storage (development/testing)
-- **IndexedDBStore**: Browser-only persistent storage - messages survive browser restarts
+- **MemoryStore**: Default in-memory storage (development/testing) with automatic TTL cleanup
+- **IndexedDBStore**: Browser-only persistent storage with TTL support - messages survive browser restarts and include automatic cleanup of expired messages
 
 ### Features
 
