@@ -49,11 +49,12 @@ type QueueOptions = {
 
 /**
  * Represents a persistent, asynchronous message queue with support for message acknowledgment,
- * polling, and manual message confirmation.
+ * TTL (Time-to-Live) expiration, polling, and manual message confirmation.
  *
  * The `Queue` class provides a robust message queue implementation with features like:
  * - Asynchronous message consumption using async iterators
  * - Manual message acknowledgment to prevent message loss
+ * - TTL (Time-to-Live) support for automatic message expiration and cleanup
  * - Configurable polling and timeout behavior
  * - Pluggable storage backends via the Store interface
  * - Keep-alive mechanism to prevent message timeout during processing
@@ -85,6 +86,25 @@ type QueueOptions = {
  * ```
  *
  * @example
+ * With TTL (Time-to-Live) message expiration:
+ * ```typescript
+ * const queue = new Queue();
+ *
+ * // Add a message that expires in 5 minutes
+ * await queue.add({ task: "send-notification" }, { ttl: 5 * 60 });
+ *
+ * // Add a message that expires in 1 hour
+ * await queue.add({ task: "cleanup-temp-files" }, { ttl: 60 * 60 });
+ *
+ * // Messages are automatically cleaned up when expired
+ * for await (const message of queue) {
+ *   // Only non-expired messages will be processed
+ *   await processMessage(message);
+ *   queue.ack(message);
+ * }
+ * ```
+ *
+ * @example
  * With custom configuration:
  * ```typescript
  * const queue = new Queue({
@@ -99,6 +119,7 @@ type QueueOptions = {
  * - The keep-alive mechanism ensures long-running message processing doesn't timeout
  * - Messages are **only deleted** when explicitly acknowledged with ack() or acknowledgeMessage()
  * - Failed or unacknowledged messages are automatically reclaimed after timeout
+ * - TTL functionality allows messages to automatically expire and be cleaned up
  */
 export class Queue {
   /** Timeout for considering messages as unacknowledged (ms) */
@@ -266,22 +287,46 @@ export class Queue {
   }
 
   /**
-   * Adds a new message to the queue.
+   * Adds a new message to the queue with optional TTL (Time-to-Live) expiration.
    *
    * The message will be wrapped in a Message instance with auto-generated ID
-   * and timestamp before being stored.
+   * and timestamp before being stored. If TTL is specified, the message will
+   * automatically expire and be cleaned up by the store after the specified duration.
    *
-   * @param data - The data payload for the message
+   * @param data - The data payload for the message (must be an object)
+   * @param options - Optional configuration for the message
+   * @param options.ttl - Time-to-Live in seconds. If specified, the message will
+   *                     automatically expire after this duration. `null` means no expiration.
    *
    * @example
+   * Basic usage:
    * ```typescript
    * await queue.add({ userId: 123, action: "process" });
    * await queue.add("simple string message");
    * await queue.add({ complex: { nested: "object" } });
    * ```
+   *
+   * @example
+   * With TTL expiration:
+   * ```typescript
+   * // Message expires in 5 minutes
+   * await queue.add({ task: "send-notification" }, { ttl: 5 * 60 });
+   *
+   * // Message expires in 1 hour
+   * await queue.add({ task: "cleanup" }, { ttl: 60 * 60 });
+   *
+   * // Message never expires (default)
+   * await queue.add({ task: "permanent" }, { ttl: null });
+   * ```
+   *
+   * @remarks
+   * - TTL is specified as duration in seconds, not a timestamp
+   * - Expired messages are automatically cleaned up by store implementations
+   * - MemoryStore cleans up expired messages every 1 second (configurable)
+   * - Messages that are already expired when added may be rejected by the store
    */
-  async add<T extends object>(data: T) {
-    const message = new Message(data);
+  async add<T extends object>(data: T, { ttl }: { ttl?: null | number } = {}) {
+    const message = new Message(data, { ttl });
     await this.#store.addMessage(message);
   }
 
