@@ -1,6 +1,9 @@
 .PHONY: all
 all: build
 
+.PHONY: rebuild
+rebuild: clean build
+
 .PHONY: clean
 clean:
 	rm -rf libs/esm
