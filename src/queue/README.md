@@ -60,8 +60,10 @@ const urgentMessage = new Message(
 
 **IndexedDBStore:**
 
-- Similar TTL support with persistent cleanup
-- Expired messages are removed during database operations
+- Full TTL support with automatic cleanup every minute
+- Expired messages are filtered out during all database operations
+- Manual cleanup available with `cleanupExpiredMessages()` method
+- Rejects messages that are already expired when added
 
 ### TTL Best Practices
 
@@ -136,7 +138,7 @@ for await (const job of queue) {
 | Graceful shutdown      | Queue can be closed with `close()` to stop all message consumption gracefully without interrupting current processing.                                            |
 | Store                  | Abstraction for persistence; must implement methods to add / get / acknowledge / delete / claim / count / close.                                                  |
 | MemoryStore            | Simple array based store (dev / tests). Not durable. Includes automatic TTL cleanup every 1 second (configurable).                                                |
-| IndexedDBStore         | Browser-based persistent store using IndexedDB. Messages survive page reloads and browser restarts.                                                               |
+| IndexedDBStore         | Browser-based persistent store using IndexedDB. Messages survive page reloads and browser restarts. Includes automatic TTL cleanup every minute.                  |
 
 ## Message Lifecycle
 
@@ -393,6 +395,9 @@ const store = new IndexedDBStore("test-db", "messages", fakeIndexedDB);
 - **Automatic schema creation**: Creates database and indexes automatically
 - **Efficient querying**: Uses indexes on `createdAt` and `acknowledgedAt` for performance
 - **Cross-session persistence**: Messages survive browser restarts and page reloads
+- **TTL support**: Full Time-to-Live support with automatic cleanup every minute
+- **Expired message handling**: Filters out expired messages during all operations
+- **Manual cleanup**: `cleanupExpiredMessages()` method for immediate cleanup
 - **Graceful error handling**: Handles browser storage quota limits and database errors
 
 **Browser Support:**
@@ -416,6 +421,16 @@ const queue = new Queue({
 // Add some tasks
 await queue.add({ type: "email", recipient: "user@example.com" });
 await queue.add({ type: "report", userId: 123 });
+
+// Add task with TTL (expires in 1 hour)
+await queue.add(
+  { type: "notification", message: "Session expires soon" },
+  { ttl: 60 * 60 }, // 3600 seconds = 1 hour
+);
+
+// Manual cleanup of expired messages (returns count removed)
+const removedCount = await queue.store.cleanupExpiredMessages();
+console.log(`Removed ${removedCount} expired messages`);
 
 // Process tasks (survives page reload)
 for await (const task of queue) {
