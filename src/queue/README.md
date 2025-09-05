@@ -2,7 +2,7 @@
 
 High–level, lightweight asynchronous message queue with periodic acknowledgments, cooperative workers and pluggable storage.
 
-> This module exports: `Queue`, `MemoryStore`, `Store` (abstract base), and `Message`. `IndexedDBStore` is available separately via `@jondotsoy/utils-js/queue/store/indexeddb-store`.
+> This module exports: `Queue`, `MemoryStore`, `Store` (abstract base), and `Message`. `IndexedDBStore` is available separately via `@jondotsoy/utils-js/queue/store/indexeddb-store`. `WorkerStore` is available separately via `@jondotsoy/utils-js/queue/store/worker-store`.
 
 ## Features
 
@@ -126,6 +126,27 @@ for await (const job of queue) {
 }
 ```
 
+### With Worker-based Storage
+
+```ts
+import { Queue } from "@jondotsoy/utils-js/queue";
+import { WorkerStore } from "@jondotsoy/utils-js/queue/store/worker-store";
+
+// Create a worker that handles the storage backend
+const worker = new Worker("/path/to/worker-store-backend.js");
+const queue = new Queue({
+  store: new WorkerStore(worker),
+});
+
+await queue.add({ task: "cpu-intensive-work", data: largeDataset });
+
+for await (const job of queue) {
+  console.log("Processing", job);
+  // Storage operations happen in the worker thread
+  queue.ack(job);
+}
+```
+
 ## Concepts
 
 | Concept                | Description                                                                                                                                                       |
@@ -139,6 +160,7 @@ for await (const job of queue) {
 | Store                  | Abstraction for persistence; must implement methods to add / get / acknowledge / delete / claim / count / close.                                                  |
 | MemoryStore            | Simple array based store (dev / tests). Not durable. Includes automatic TTL cleanup every 1 second (configurable).                                                |
 | IndexedDBStore         | Browser-based persistent store using IndexedDB. Messages survive page reloads and browser restarts. Includes automatic TTL cleanup every minute.                  |
+| WorkerStore            | Web Worker-based store that offloads storage operations to a worker thread. Provides better performance for heavy workloads by avoiding main thread blocking.     |
 
 ## Message Lifecycle
 
@@ -444,6 +466,115 @@ for await (const task of queue) {
 }
 ```
 
+### WorkerStore
+
+**Browser and Node.js** Worker-based storage implementation that delegates all storage operations to a Web Worker (browser) or Worker Thread (Node.js). This provides better performance for heavy workloads by preventing storage operations from blocking the main thread.
+
+```ts
+import { WorkerStore } from "@jondotsoy/utils-js/queue/store/worker-store";
+
+// Basic usage with Web Worker
+const worker = new Worker("/path/to/worker-store-backend.js");
+const store = new WorkerStore(worker);
+
+// With Node.js Worker Threads
+import { Worker } from "worker_threads";
+const worker = new Worker("/path/to/worker-store-backend.js");
+const store = new WorkerStore(worker);
+```
+
+**Features:**
+
+- **Non-blocking operations**: All storage operations run in a separate thread
+- **JSON-RPC communication**: Uses standardized JSON-RPC 2.0 protocol for worker communication
+- **Full Store API**: Implements all Store methods (add, get, acknowledge, delete, claim, getSize, close)
+- **Abort support**: Supports cancellation of long-running operations via AbortSignal
+- **Error handling**: Properly propagates errors from worker thread to main thread
+- **Health checking**: Includes ping/pong mechanism to verify worker responsiveness
+- **Thread safety**: Worker backend uses MemoryStore with proper synchronization
+
+**Worker Backend Setup:**
+
+The WorkerStore requires a corresponding worker script that imports the backend implementation:
+
+```ts
+// worker-store-backend.js
+import "@jondotsoy/utils-js/queue/store/worker-store-be";
+```
+
+**Example with performance optimization:**
+
+```ts
+import { Queue } from "@jondotsoy/utils-js/queue";
+import { WorkerStore } from "@jondotsoy/utils-js/queue/store/worker-store";
+
+// Setup worker-based storage
+const worker = new Worker("/worker-store-backend.js");
+const queue = new Queue({
+  store: new WorkerStore(worker),
+  messageTimeoutMs: 30000,
+  ackIntervalMs: 5000,
+});
+
+// Add CPU-intensive tasks
+await queue.add({ type: "image-processing", imagePath: "/large-image.jpg" });
+await queue.add({ type: "data-analysis", dataset: largeDataArray });
+
+// Process tasks without blocking main thread
+for await (const task of queue) {
+  console.log("Processing task:", task.type);
+
+  try {
+    await processTask(task);
+    queue.ack(task); // Remove from worker storage
+  } catch (error) {
+    console.error("Task failed, will retry:", error);
+    // Don't acknowledge - task remains in worker for retry
+  }
+}
+
+// Health check
+try {
+  const response = await queue.store.ping();
+  console.log("Worker health:", response); // "pong"
+} catch (error) {
+  console.error("Worker not responding:", error);
+}
+
+// Graceful shutdown
+await queue.close(); // Stops queue operations
+worker.terminate(); // Clean up worker resources
+```
+
+**Performance Considerations:**
+
+- **Best for**: CPU-intensive applications, large message payloads, high-throughput scenarios
+- **Overhead**: Adds serialization/deserialization overhead for message passing
+- **Memory**: Worker maintains separate memory space, so total memory usage is higher
+- **Concurrency**: Allows main thread to remain responsive during storage operations
+
+**Browser Support:**
+
+- All modern browsers with Web Worker support
+- Chrome 4+, Firefox 3.5+, Safari 4+, Edge 12+
+- Node.js 10.5+ with Worker Threads support
+
+**Error Handling:**
+
+```ts
+try {
+  await store.addMessage(message);
+} catch (error) {
+  if (error.message.includes("Worker not responding")) {
+    // Handle worker communication errors
+    console.error("Worker communication failed:", error);
+  } else {
+    // Handle storage-specific errors
+    console.error("Storage operation failed:", error);
+  }
+}
+```
+
 ### Error & Failure Semantics
 
 - Messages are **only deleted** if explicitly acknowledged with `ack()` or `acknowledgeMessage()`.
@@ -523,6 +654,7 @@ console.log("All consumers stopped");
 - No visibility into in‑flight messages besides store inspection.
 - No backpressure signal (`add` always succeeds). Add your own capacity guard if needed.
 - `IndexedDBStore` is browser-only (requires IndexedDB support).
+- `WorkerStore` adds serialization overhead and requires separate worker lifecycle management.
 
 Potential future extensions: priority queues, batch consumption, dead‑letter store, exponential retry.
 

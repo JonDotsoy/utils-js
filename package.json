@@ -60,6 +60,14 @@
     "./queue/store/indexeddb-store": {
       "import": "./libs/esm/queue/store/indexeddb-store.js",
       "types": "./libs/esm/queue/store/indexeddb-store.d.ts"
+    },
+    "./queue/store/worker-store": {
+      "import": "./libs/esm/queue/store/worker-store.js",
+      "types": "./libs/types/queue/store/worker-store.d.ts"
+    },
+    "./queue/store/worker-store-be": {
+      "import": "./libs/esm/queue/store/worker-store-be.js",
+      "types": "./libs/types/queue/store/worker-store-be.d.ts"
     }
   },
   "devDependencies": {
