@@ -92,9 +92,28 @@
     "url": "git+https://github.com/JonDotsoy/utils-js.git"
   },
   "keywords": [
+    "javascript",
+    "typescript",
+    "utilities",
+    "helpers",
+    "functional-programming",
+    "async",
+    "error-handling",
+    "data-transformation",
+    "object-manipulation",
     "get",
     "set",
     "visit",
-    "pipe"
+    "pipe",
+    "result",
+    "queue",
+    "bytes",
+    "cleanuptasks",
+    "memory-management",
+    "ast-traversal",
+    "safe-assignment",
+    "message-queue",
+    "data-structures",
+    "zero-dependencies"
   ]
 }
