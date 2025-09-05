@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.15.0...utils-js-v0.16.0) (2025-09-05)
+
+
+### Features
+
+* **queue:** implement WorkerStore for non-blocking message storage operations ([#47](https://github.com/JonDotsoy/utils-js/issues/47)) ([0874d6e](https://github.com/JonDotsoy/utils-js/commit/0874d6e0078e28b11eea59b75e7ebe44e55a8bce))
+
 ## [0.15.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.14.0...utils-js-v0.15.0) (2025-09-04)
 
 
