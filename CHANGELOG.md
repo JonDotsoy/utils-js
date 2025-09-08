@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.16.1...utils-js-v0.17.0) (2025-09-08)
+
+
+### Features
+
+* add Workspace module for advanced shell command execution with stream support ([#51](https://github.com/JonDotsoy/utils-js/issues/51)) ([a8ff816](https://github.com/JonDotsoy/utils-js/commit/a8ff816fd82c725578ca32f8e6404c8a90f89992))
+
 ## [0.16.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.16.0...utils-js-v0.16.1) (2025-09-08)
 
 
