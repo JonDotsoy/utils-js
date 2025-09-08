@@ -1,7 +1,7 @@
-import type { Message } from "../message/message";
-import { Store } from "./store";
-import { AbortableValueObserver } from "../value-observer/abortable-value-observer";
-import { ValueObserver } from "../value-observer/value-observer";
+import type { Message } from "../message/message.js";
+import { Store } from "./store.js";
+import { AbortableValueObserver } from "../value-observer/abortable-value-observer.js";
+import { ValueObserver } from "../value-observer/value-observer.js";
 
 const MemoryStorePerformance = {
   cleanupIntervalMilliseconds: 1000,

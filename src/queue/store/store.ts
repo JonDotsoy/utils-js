@@ -1,4 +1,4 @@
-import type { Message } from "../message/message";
+import type { Message } from "../message/message.js";
 
 /**
  * Abstract base class representing a message store for a queue system.
