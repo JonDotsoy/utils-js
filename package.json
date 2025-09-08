@@ -5,6 +5,9 @@
   "module": "./libs/esm/index.js",
   "type": "module",
   "license": "MIT",
+  "engines": {
+    "node": ">=16.4.1"
+  },
   "typesVersions": {
     "*": {
       "*": [
@@ -68,6 +71,10 @@
     "./queue/store/worker-store-be": {
       "import": "./libs/esm/queue/store/worker-store-be.js",
       "types": "./libs/types/queue/store/worker-store-be.d.ts"
+    },
+    "./workspace": {
+      "import": "./libs/esm/workspace/workspace.js",
+      "types": "./libs/types/workspace/workspace.d.ts"
     }
   },
   "devDependencies": {

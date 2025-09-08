@@ -11,6 +11,7 @@ Some utilities for JS. Will be util to reduce common logic in your code.
 - [Bytes](#bytes)
 - [BytesFormat](#bytesformat)
 - [Queue](#queue)
+- [Workspace](#workspace)
 
 ## Visit
 
@@ -849,6 +850,63 @@ const queue = new Queue({ store: new RedisStore() });
 - **Real-time message distribution systems**
 
 For complete API documentation and advanced usage examples, see [src/queue/README.md](src/queue/README.md).
+
+## Workspace
+
+A powerful and flexible API for executing shell commands in Node.js applications with stream-based execution, environment management, and workspace isolation. It provides modern, composable command execution with full control over input/output streams, timeouts, and cancellation signals. For complete API documentation and advanced usage examples, see [src/workspace/README.md](src/workspace/README.md).
+
+**Syntax:**
+
+```ts
+import { shell, Workspace } from "@jondotsoy/utils-js/workspace";
+
+// Basic command execution
+const response = shell(command);
+const response = shell(command, options);
+
+// Workspace management
+const workspace = new Workspace(options);
+const response = workspace.run(command);
+```
+
+**Arguments:**
+
+- `command` `<string>`: Command to execute
+- `options` `<object>`: Optional configuration
+  - `stdin` `<ReadableStream>`: Input stream to pipe to the command
+  - `env` `<Record<string, string>>`: Environment variables
+  - `shell` `<string>`: Shell to use for execution
+  - `cwd` `<string>`: Working directory
+  - `signal` `<AbortSignal>`: Signal for cancellation/timeout
+
+**Examples:**
+
+```ts
+import { shell, Workspace } from "@jondotsoy/utils-js/workspace";
+
+// Simple command execution
+const response = shell('echo "Hello World"');
+const output = await response.text();
+console.log(output); // "Hello World"
+
+// Command with timeout
+const response = shell("long-running-command", {
+  signal: AbortSignal.timeout(5000), // 5 seconds
+});
+
+// Workspace for multiple commands
+const workspace = new Workspace({
+  workingDirectory: "/path/to/project",
+  timeout: 30000, // 30 seconds default timeout
+});
+
+const result1 = workspace.run("npm install");
+const result2 = workspace.run("npm test");
+
+// Temporary workspace
+const tmpWorkspace = Workspace.mktmp();
+const response = tmpWorkspace.run('echo "temp work" > file.txt');
+```
 
 ## License
 
