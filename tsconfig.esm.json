@@ -1,11 +1,12 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "target": "es2020",
     "noEmit": false,
     "emitDeclarationOnly": false,
     "allowImportingTsExtensions": false,
     "declaration": true,
     "sourceMap": true
   },
-  "exclude": ["scripts", "node_modules", "libs", "**/*.spec.ts"]
+  "exclude": ["scripts", "node_modules", "libs", "**/*.spec.ts", "tests"]
 }
