@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.16.0...utils-js-v0.16.1) (2025-09-08)
+
+
+### Bug Fixes
+
+* **queue:** update import statements to include file extensions ([f7d3be7](https://github.com/JonDotsoy/utils-js/commit/f7d3be7ad58b511f04e3c2df9a2dd1cd30c900e5))
+
 ## [0.16.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.15.0...utils-js-v0.16.0) (2025-09-05)
 
 
