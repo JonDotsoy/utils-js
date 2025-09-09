@@ -21,7 +21,7 @@ const bunVersions = [
 ];
 
 beforeAll(async () => {
-  await shell(
+  const exitCode = await shell(
     `
       cd $PROJECT_ROOT
 
@@ -43,6 +43,10 @@ beforeAll(async () => {
       },
     },
   ).verbose().exitCode;
+
+  if (exitCode !== 0) {
+    throw new Error(`Failed to create pack file at ${packFile}`);
+  }
 });
 
 for (const nodeVersion of nodeVersions) {
