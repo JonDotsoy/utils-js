@@ -1,12 +1,8 @@
 import { describe, test, expect } from "bun:test";
 import { tmpdir } from "os";
 import fs from "fs";
-import {
-  Workspace,
-  ShellRequest,
-  ShellResponse,
-  StdioStream,
-} from "./workspace.js";
+import { Workspace } from "./workspace.js";
+import { ShellRequest, ShellResponse } from "@jondotsoy/shell";
 
 describe("Workspace", () => {
   test("should initialize workspace with default working directory and shell", () => {
@@ -189,23 +185,23 @@ describe("Workspace", () => {
   });
 
   test("should create ShellResponse from StdioStream with stdout content", async () => {
-    const response = new ShellResponse(
-      new StdioStream({
+    const response = new ShellResponse({
+      stdio: {
         stdout: new ReadableStream({
           start(controller) {
             controller.enqueue(`ok`);
             controller.close();
           },
         }),
-      }),
-    );
+      },
+    });
 
     expect(await response.text()).toEqual(`ok`);
   });
 
   test("should handle stderr content from StdioStream", async () => {
-    const response = new ShellResponse(
-      new StdioStream({
+    const response = new ShellResponse({
+      stdio: {
         stdout: new ReadableStream({
           start(controller) {
             controller.close();
@@ -217,8 +213,8 @@ describe("Workspace", () => {
             controller.close();
           },
         }),
-      }),
-    );
+      },
+    });
 
     expect(await response.text()).toEqual(``);
     expect(await response.stderr.text()).toEqual(`ok`);
@@ -226,7 +222,7 @@ describe("Workspace", () => {
 
   test("should create ShellResponse with complete stdio configuration and exit code", async () => {
     const response = new ShellResponse({
-      stdio: new StdioStream({
+      stdio: {
         stdout: new ReadableStream({
           start(controller) {
             controller.close();
@@ -238,7 +234,7 @@ describe("Workspace", () => {
             controller.close();
           },
         }),
-      }),
+      },
       exitCode: Promise.resolve(0),
     });
 
