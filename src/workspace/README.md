@@ -1,12 +1,17 @@
 # Workspace Module
 
-The Workspace module provides a powerful and flexible API for executing shell commands in Node.js applications. It offers stream-based command execution with full control over input/output streams, environment variables, and working directories.
+The Workspace module provides a managed environment for executing shell commands in Node.js applications. It builds on top of the `@jondotsoy/shell` package to offer a workspace-centric approach to command execution with default configurations for working directories, shell types, environment variables, and timeouts.
 
 ## Why This Module Exists
 
-Traditional Node.js approaches to shell command execution often fall short when dealing with complex scenarios involving streaming data, environment management, and workspace isolation. While `child_process.exec()` and similar APIs work for simple cases, they become cumbersome when you need fine-grained control over input/output streams, environment variables, or when working with multiple related commands in a specific context.
+Traditional Node.js approaches to shell command execution often fall short when dealing with multiple related commands that need to be executed in a specific context or with consistent configuration. While `child_process.exec()` and similar APIs work for simple cases, they become cumbersome when you need to:
 
-This module was created to bridge that gap by providing a modern, stream-first approach to shell command execution. It enables developers to work with commands as composable units that can be chained, monitored, and controlled with precision. Whether you're building development tools, CI/CD pipelines, or applications that need to interact with system commands, this module provides the flexibility and reliability you need without sacrificing performance or type safety.
+- Execute multiple commands in the same working directory
+- Maintain consistent environment variables across commands
+- Apply default timeouts to all commands in a workspace
+- Create temporary workspaces for isolated operations
+
+This module was created to provide a workspace-centric approach to shell command execution. It enables developers to define a context once and execute multiple commands within that context, ensuring consistency and reducing configuration repetition. Whether you're building development tools, CI/CD pipelines, or applications that need to interact with system commands in a structured way, this module provides the organization and reliability you need.
 
 ## Table of Contents
 
@@ -21,27 +26,14 @@ This module was created to bridge that gap by providing a modern, stream-first a
 
 The workspace module consists of several key components:
 
-- **`shell()`** - Core function for executing shell commands
-- **`Workspace`** - Managed environment for command execution
-- **`ShellRequest`** - Command configuration container
-- **`ShellResponse`** - Command execution result with streams
-- **`ReadableTools`** - Utilities for working with streams
-- **`StdioStream`** - Container for stdout/stderr streams
+- **`Workspace`** - Main class providing a managed environment for command execution
+- **Shell Integration** - Built on `@jondotsoy/shell` for `shell()`, `ShellRequest`, `ShellResponse` functionality
+- **Timeout Support** - Automatic timeout handling via `AbortSignal.timeout()`
+- **Temporary Workspaces** - Easy creation of isolated temporary directories
 
 ## Quick Start
 
-### Basic Command Execution
-
-```typescript
-import { shell } from "./workspace.js";
-
-// Simple command execution
-const response = shell('echo "Hello World"');
-const output = await response.text();
-console.log(output); // "Hello World"
-```
-
-### Using Workspace for Multiple Commands
+### Using Workspace for Command Execution
 
 ```typescript
 import { Workspace } from "./workspace.js";
@@ -57,6 +49,17 @@ const response1 = workspace.run("pwd");
 const response2 = workspace.run("ls -la");
 
 console.log(await response1.text()); // /path/to/project
+```
+
+### Basic Command Execution with Shell Integration
+
+```typescript
+import { shell } from "@jondotsoy/shell";
+
+// Simple command execution (direct shell usage)
+const response = shell('echo "Hello World"');
+const output = await response.text();
+console.log(output); // "Hello World"
 ```
 
 ### Using Workspace with Timeout
@@ -88,7 +91,25 @@ await response.exitCode; // Wait for command completion
 
 ## API Reference
 
+### Import Statement
+
+```typescript
+import { Workspace } from "@jondotsoy/utils-js/workspace";
+// or
+import { Workspace } from "./workspace.js";
+```
+
+### Shell Integration
+
+The Workspace module builds on the `@jondotsoy/shell` package. For direct shell command execution without workspace context, import from the shell package:
+
+```typescript
+import { shell, ShellRequest, ShellResponse } from "@jondotsoy/shell";
+```
+
 ### `shell(command, options?)`
+
+_Note: This function is provided by `@jondotsoy/shell`, not directly by the workspace module._
 
 Executes a shell command and returns a `ShellResponse`.
 
@@ -106,30 +127,105 @@ Executes a shell command and returns a `ShellResponse`.
 
 ### `Workspace`
 
-#### Constructor
+### Constructor
+
+Creates a new Workspace instance with specified configuration.
 
 ```typescript
 new Workspace(options?: WorkspaceOptions)
 ```
 
-**Options:**
+**Options (WorkspaceOptions):**
 
-- `workingDirectory` (string | URL) - Working directory for commands
-- `shell` (string, optional) - Shell to use (default: '/bin/sh')
-- `env` (Record<string, string>, optional) - Environment variables
-- `timeout` (number, optional) - Timeout in milliseconds for command execution
+- `workingDirectory` (string | URL, **required**) - Working directory for commands. Must be a valid path that can be parsed as a file URL.
+- `shell` (string, optional) - Shell to use for command execution (default: '/bin/sh')
+- `env` (Record<string, string>, optional) - Environment variables to apply to all commands
+- `timeout` (number, optional) - Timeout in milliseconds for command execution. If specified, creates `AbortSignal.timeout()` automatically for all commands.
+
+**Throws:**
+
+- `Error` - When `workingDirectory` is not provided or cannot be parsed as a valid file URL
+
+**Example:**
+
+```typescript
+const workspace = new Workspace({
+  workingDirectory: "/path/to/project",
+  shell: "/bin/bash",
+  env: { NODE_ENV: "development" },
+  timeout: 30000, // 30 seconds
+});
+```
 
 #### Methods
 
-##### `run(command, options?)`
+##### `run(...requestOptions)`
 
-Executes a command in the workspace context.
+Executes a shell command within the workspace context. Inherits all workspace defaults (working directory, shell, environment variables, and timeout) unless explicitly overridden in the command options.
+
+**Parameters:**
+
+- `...requestOptions` (ShellRequestParameters) - Command options in any format accepted by `ShellRequest` constructor
+
+**Returns:**
+
+- `ShellResponse` - Response object with stdout/stderr streams and exit code promise
+
+**Behavior:**
+
+- Applies workspace's `workingDirectory` as default `cwd`
+- Applies workspace's `shell` as default shell
+- Applies workspace's `env` as default environment variables
+- If workspace has `timeout` configured, automatically creates `AbortSignal.timeout()` and applies it
+
+**Example:**
+
+```typescript
+const workspace = new Workspace({
+  workingDirectory: "/project",
+  timeout: 5000,
+});
+
+// All these inherit workspace defaults
+const response1 = workspace.run("npm test");
+const response2 = workspace.run("git status", { env: { GIT_PAGER: "cat" } });
+const response3 = workspace.run({ command: "ls -la" });
+```
 
 ##### `static mktmp(options?)`
 
-Creates a temporary workspace in the system temp directory.
+Creates a temporary workspace in the system's temporary directory. The directory is automatically created with a unique name based on timestamp and random values.
+
+**Parameters:**
+
+- `options` (Omit<WorkspaceOptions, "workingDirectory">, optional) - Configuration options excluding working directory (automatically generated)
+
+**Returns:**
+
+- `Workspace` - New Workspace instance pointing to the created temporary directory
+
+**Directory Naming:**
+
+- Format: `workspace-{timestamp}{random}`
+- Location: System temp directory (`os.tmpdir()`)
+- Automatically created with `recursive: true`
+
+**Example:**
+
+```typescript
+const tmpWorkspace = Workspace.mktmp({
+  shell: "/bin/bash",
+  timeout: 10000,
+});
+
+const response = tmpWorkspace.run('echo "Working in temp: $(pwd)"');
+console.log(await response.text());
+// Output: Working in temp: /tmp/workspace-xyz123abc/
+```
 
 ### `ShellResponse`
+
+_Note: This class is provided by `@jondotsoy/shell` package._
 
 Represents the result of command execution.
 
@@ -162,10 +258,12 @@ const data = await response.json();
 Enables console logging of stdout/stderr while preserving streams.
 
 ```typescript
-const response = shell("npm install").verbose();
+const response = workspace.run("npm install").verbose();
 ```
 
 ### `ReadableTools`
+
+_Note: This utility class is provided by `@jondotsoy/shell` package._
 
 Utility class for working with ReadableStream instances.
 
@@ -185,9 +283,33 @@ Creates an async iterable from a ReadableStream.
 
 ## Examples
 
+### Working with Workspace and Shell Integration
+
+```typescript
+import { Workspace } from "@jondotsoy/utils-js/workspace";
+import { shell } from "@jondotsoy/shell";
+
+// Direct shell execution
+const directResponse = shell("echo 'Direct command'");
+
+// Workspace-managed execution
+const workspace = new Workspace({
+  workingDirectory: "/project",
+  timeout: 5000,
+});
+
+const workspaceResponse = workspace.run("echo 'Workspace command'");
+
+// Both return the same ShellResponse type
+console.log(await directResponse.text());
+console.log(await workspaceResponse.text());
+```
+
 ### Command with Timeout and Signal
 
 ```typescript
+import { shell } from "@jondotsoy/shell";
+
 // Using AbortSignal for manual control
 const controller = new AbortController();
 const response = shell("long-running-command", {
@@ -207,9 +329,26 @@ try {
 }
 ```
 
+### Workspace-level Timeout
+
+```typescript
+import { Workspace } from "@jondotsoy/utils-js/workspace";
+
+// All commands automatically get 10-second timeout
+const workspace = new Workspace({
+  workingDirectory: "/project",
+  timeout: 10000,
+});
+
+const response = workspace.run("long-running-command");
+// Will automatically timeout after 10 seconds with AbortError
+```
+
 ### Command with Custom Environment
 
 ```typescript
+import { shell } from "@jondotsoy/shell";
+
 const response = shell("echo $MY_VAR", {
   env: { MY_VAR: "Hello from env!" },
 });
@@ -221,7 +360,10 @@ console.log(output); // "Hello from env!"
 ### Handling Command Errors
 
 ```typescript
-const response = shell("nonexistent-command");
+import { Workspace } from "@jondotsoy/utils-js/workspace";
+
+const workspace = new Workspace({ workingDirectory: "/project" });
+const response = workspace.run("nonexistent-command");
 
 try {
   const exitCode = await response.exitCode;
@@ -237,6 +379,8 @@ try {
 ### Streaming Command Output
 
 ```typescript
+import { shell, ReadableTools } from "@jondotsoy/shell";
+
 const response = shell('find /large/directory -name "*.js"');
 
 // Process output as it arrives
@@ -249,6 +393,8 @@ for await (const chunk of ReadableTools.iterable(response.stdout.stream)) {
 ### Piping Input to Command
 
 ```typescript
+import { shell } from "@jondotsoy/shell";
+
 const input = new ReadableStream({
   start(controller) {
     controller.enqueue(new TextEncoder().encode("line 1\n"));
@@ -322,7 +468,10 @@ for (const command of commands) {
 ### JSON Processing
 
 ```typescript
-const response = shell("npm list --json --depth=0");
+import { Workspace } from "@jondotsoy/utils-js/workspace";
+
+const workspace = new Workspace({ workingDirectory: "/project" });
+const response = workspace.run("npm list --json --depth=0");
 const packageInfo = await response.json();
 
 console.log("Dependencies:", Object.keys(packageInfo.dependencies || {}));
@@ -330,10 +479,39 @@ console.log("Dependencies:", Object.keys(packageInfo.dependencies || {}));
 
 ## Advanced Usage
 
+### Workspace Constructor Validation
+
+```typescript
+import { Workspace } from "@jondotsoy/utils-js/workspace";
+
+try {
+  // This will throw an error
+  const workspace = new Workspace({
+    workingDirectory: undefined, // Required parameter missing
+  });
+} catch (error) {
+  console.error(error.message); // "A valid working directory must be provided."
+}
+
+try {
+  // This will throw an error
+  const workspace = new Workspace({
+    workingDirectory: "invalid-url", // Invalid URL format
+  });
+} catch (error) {
+  console.error(error.message); // "A valid working directory must be provided."
+}
+
+// Valid usage
+const workspace = new Workspace({
+  workingDirectory: "/valid/path",
+});
+```
+
 ### Timeout and Signal Handling
 
 ```typescript
-import { ShellRequest } from "./workspace.js";
+import { shell, ShellRequest } from "@jondotsoy/shell";
 
 // Create a request with custom timeout
 const signal = AbortSignal.timeout(5000); // 5 seconds
@@ -359,7 +537,7 @@ try {
 ### Custom Shell Request Configuration
 
 ```typescript
-import { ShellRequest } from "./workspace.js";
+import { shell, ShellRequest } from "@jondotsoy/shell";
 
 const request = new ShellRequest("complex-command", {
   cwd: "/specific/directory",
@@ -370,15 +548,37 @@ const request = new ShellRequest("complex-command", {
 const response = shell(request);
 ```
 
-### Combining Streams
+### Workspace vs Direct Shell Usage
 
 ```typescript
-const response1 = shell('echo "data1"');
-const response2 = shell('echo "data2"');
+import { Workspace } from "@jondotsoy/utils-js/workspace";
+import { shell } from "@jondotsoy/shell";
 
-const combined = new StdioStream({
-  stdout: response1.stdout.stream,
-  stderr: response2.stderr.stream,
+// Direct shell usage - configure each command
+const response1 = shell("npm test", {
+  cwd: "/project",
+  shell: "/bin/bash",
+  env: { NODE_ENV: "test" },
+});
+
+const response2 = shell("npm build", {
+  cwd: "/project",
+  shell: "/bin/bash",
+  env: { NODE_ENV: "production" },
+});
+
+// Workspace usage - configure once, inherit everywhere
+const workspace = new Workspace({
+  workingDirectory: "/project",
+  shell: "/bin/bash",
+  env: { CI: "true" },
+});
+
+const response3 = workspace.run("npm test", {
+  env: { NODE_ENV: "test" }, // Merges with workspace env
+});
+const response4 = workspace.run("npm build", {
+  env: { NODE_ENV: "production" }, // Merges with workspace env
 });
 ```
 
@@ -406,10 +606,16 @@ setTimeout(() => controller.abort(), 5000);
 ### Error Handling Best Practices
 
 ```typescript
+import { Workspace } from "@jondotsoy/utils-js/workspace";
+
 async function safeExecute(command: string, timeout?: number) {
   try {
-    const options = timeout ? { signal: AbortSignal.timeout(timeout) } : {};
-    const response = shell(command, options);
+    const workspace = new Workspace({
+      workingDirectory: "/project",
+      timeout: timeout,
+    });
+
+    const response = workspace.run(command);
     const exitCode = await response.exitCode;
 
     if (exitCode === 0) {
@@ -440,17 +646,32 @@ async function safeExecute(command: string, timeout?: number) {
 The module is fully typed with TypeScript, providing excellent IDE support and compile-time error checking:
 
 ```typescript
+import { Workspace } from "@jondotsoy/utils-js/workspace";
+import type { ShellResponse } from "@jondotsoy/shell";
+
 // Types are automatically inferred
-const response: ShellResponse = shell("echo test");
+const workspace: Workspace = new Workspace({ workingDirectory: "/project" });
+const response: ShellResponse = workspace.run("echo test");
 const output: Promise<string> = response.text();
 const exitCode: Promise<number> = response.exitCode;
+
+// Workspace options are type-checked
+const workspace2 = new Workspace({
+  workingDirectory: "/project", // string | URL (required)
+  shell: "/bin/bash", // string (optional)
+  env: { NODE_ENV: "test" }, // Record<string, string> (optional)
+  timeout: 5000, // number (optional)
+});
 ```
 
 ## Notes
 
-- Commands can be configured with custom timeouts using `AbortSignal.timeout()` or workspace timeout settings
-- Environment variables are inherited from `process.env` by default
-- Working directory defaults to the workspace's configured directory
-- All streams are properly managed and cleaned up automatically
-- The module handles both text and binary data streams
-- Timeout and cancellation are handled gracefully with proper error reporting
+- **Workspace Management**: Workspaces provide consistent configuration across multiple command executions
+- **Automatic Timeout**: When a workspace timeout is configured, `AbortSignal.timeout()` is automatically created and applied to all commands
+- **URL Validation**: Working directories must be valid paths that can be parsed as file URLs - the constructor validates this and throws an error if invalid
+- **Environment Inheritance**: Environment variables are inherited from `process.env` by default, with workspace and command-specific variables taking precedence
+- **Directory Creation**: The `mktmp()` method automatically creates temporary directories with unique names using timestamps and random values
+- **Shell Integration**: Built on `@jondotsoy/shell` for robust command execution - all shell functionality remains available
+- **Stream Management**: All streams are properly managed and cleaned up automatically
+- **Cross-Platform**: Works with different shells (`/bin/sh`, `/bin/bash`, `/bin/zsh`, etc.) based on your system and configuration
+- **Error Handling**: Timeout and cancellation are handled gracefully with proper error reporting and AbortError detection

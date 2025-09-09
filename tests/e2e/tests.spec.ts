@@ -1,7 +1,7 @@
 import { describe, test, beforeAll, afterAll } from "bun:test";
 import { TestingWorkspace } from "./testing-workspace/testing-workspace.js";
-import { shell } from "../../src/workspace/workspace.js";
 import { tmpdir } from "os";
+import { shell } from "@jondotsoy/shell";
 
 const projectRoot = new URL("../../", import.meta.url);
 const packFile = new URL(`file:${tmpdir()}/utils-js-pack.tgz`);
@@ -21,9 +21,11 @@ const bunVersions = [
 ];
 
 beforeAll(async () => {
-  await shell(
+  const exitCode = await shell(
     `
       cd $PROJECT_ROOT
+
+      asdf set nodejs 24.7.0
 
       packageName=\$(cat "package.json" | jq -r .name)
       packageVersion=\$(cat "package.json" | jq -r .version)
@@ -43,6 +45,10 @@ beforeAll(async () => {
       },
     },
   ).verbose().exitCode;
+
+  if (exitCode !== 0) {
+    throw new Error(`Failed to create pack file at ${packFile}`);
+  }
 });
 
 for (const nodeVersion of nodeVersions) {
@@ -52,7 +58,7 @@ for (const nodeVersion of nodeVersions) {
     beforeAll(async () => {
       workspace = await TestingWorkspace.init();
 
-      await workspace.file(".tool-versions", `nodejs ${nodeVersion}\n`);
+      await workspace.run(`asdf set nodejs ${nodeVersion}\n`);
 
       await workspace.run(`node -v`);
 
@@ -117,8 +123,9 @@ for (const denoVersion of denoVersions) {
         tar -xzf ${packFile.pathname} -C ${unpackDir.pathname} --strip-components=1
       `).exitCode;
 
-      await workspace.file(".tool-versions", `deno ${denoVersion}\n`);
+      await workspace.run(`asdf set deno ${denoVersion}`);
 
+      await workspace.run(`deno install npm:@jondotsoy/shell`);
       await workspace.run(`deno -v`);
     });
 
@@ -149,7 +156,7 @@ for (const bunVersion of bunVersions) {
     beforeAll(async () => {
       workspace = await TestingWorkspace.init();
 
-      await workspace.file(".tool-versions", `bun ${bunVersion}\n`);
+      await workspace.run(`asdf set bun ${bunVersion}\n`);
 
       await workspace.run(`bun -v`);
 
