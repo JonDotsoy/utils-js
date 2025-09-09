@@ -18,7 +18,11 @@ jobs:
         with:
           tool_versions: |
             bun 1.2.21
-      - run: |
+      - name: Install Engines
+        run: |
+          asdf plugin add deno
+          asdf plugin add bun
+          asdf plugin add nodejs
           asdf install deno 2.4.5
           asdf install bun 1.2.21
           asdf install nodejs 16.4.1
