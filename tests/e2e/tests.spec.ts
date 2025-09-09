@@ -1,7 +1,7 @@
 import { describe, test, beforeAll, afterAll } from "bun:test";
 import { TestingWorkspace } from "./testing-workspace/testing-workspace.js";
-import { shell } from "../../src/workspace/workspace.js";
 import { tmpdir } from "os";
+import { shell } from "@jondotsoy/shell";
 
 const projectRoot = new URL("../../", import.meta.url);
 const packFile = new URL(`file:${tmpdir()}/utils-js-pack.tgz`);
@@ -118,7 +118,9 @@ for (const denoVersion of denoVersions) {
       `).exitCode;
 
       await workspace.file(".tool-versions", `deno ${denoVersion}\n`);
+      await workspace.run(`asdf set deno ${denoVersion}`);
 
+      await workspace.run(`deno install npm:@jondotsoy/shell`);
       await workspace.run(`deno -v`);
     });
 

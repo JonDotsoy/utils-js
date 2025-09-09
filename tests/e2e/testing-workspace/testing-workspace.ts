@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import { URL } from "url";
-import { shell, Workspace } from "../../../src/workspace/workspace.js";
+import { Workspace } from "../../../src/workspace/workspace.js";
+import { shell } from "@jondotsoy/shell";
 
 const id = () => {
   const now = Date.now();
