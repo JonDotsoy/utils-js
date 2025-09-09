@@ -58,7 +58,7 @@ for (const nodeVersion of nodeVersions) {
     beforeAll(async () => {
       workspace = await TestingWorkspace.init();
 
-      await workspace.file(".tool-versions", `nodejs ${nodeVersion}\n`);
+      await workspace.run(`asdf set nodejs ${nodeVersion}\n`);
 
       await workspace.run(`node -v`);
 
@@ -123,7 +123,6 @@ for (const denoVersion of denoVersions) {
         tar -xzf ${packFile.pathname} -C ${unpackDir.pathname} --strip-components=1
       `).exitCode;
 
-      await workspace.file(".tool-versions", `deno ${denoVersion}\n`);
       await workspace.run(`asdf set deno ${denoVersion}`);
 
       await workspace.run(`deno install npm:@jondotsoy/shell`);
@@ -157,7 +156,7 @@ for (const bunVersion of bunVersions) {
     beforeAll(async () => {
       workspace = await TestingWorkspace.init();
 
-      await workspace.file(".tool-versions", `bun ${bunVersion}\n`);
+      await workspace.run(`asdf set bun ${bunVersion}\n`);
 
       await workspace.run(`bun -v`);
 
