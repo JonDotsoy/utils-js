@@ -25,6 +25,8 @@ beforeAll(async () => {
     `
       cd $PROJECT_ROOT
 
+      asdf set nodejs 24.7.0
+
       packageName=\$(cat "package.json" | jq -r .name)
       packageVersion=\$(cat "package.json" | jq -r .version)
       tarballName="jondotsoy-utils-js-\$packageVersion.tgz"
