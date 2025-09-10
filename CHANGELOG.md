@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.17.0...utils-js-v0.17.1) (2025-09-10)
+
+
+### Bug Fixes
+
+* remove duplicate export of shell functionality from external package ([730894d](https://github.com/JonDotsoy/utils-js/commit/730894dde4bf60a1687dab137ee1d258295900dc))
+
 ## [0.17.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.16.1...utils-js-v0.17.0) (2025-09-08)
 
 
