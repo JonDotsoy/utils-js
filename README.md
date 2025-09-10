@@ -853,59 +853,81 @@ For complete API documentation and advanced usage examples, see [src/queue/READM
 
 ## Workspace
 
-A powerful and flexible API for executing shell commands in Node.js applications with stream-based execution, environment management, and workspace isolation. It provides modern, composable command execution with full control over input/output streams, timeouts, and cancellation signals. For complete API documentation and advanced usage examples, see [src/workspace/README.md](src/workspace/README.md).
+A powerful and flexible API for executing shell commands in Node.js applications with workspace-centric command execution, environment management, and isolation. Built on top of `@jondotsoy/shell`, it provides managed environments for executing multiple related commands with consistent configuration, automatic timeout handling, and temporary workspace creation. For complete API documentation and advanced usage examples, see [src/workspace/README.md](src/workspace/README.md).
 
 **Syntax:**
 
 ```ts
+import { Workspace } from "@jondotsoy/utils-js/workspace";
+// or for both workspace and direct shell access
 import { shell, Workspace } from "@jondotsoy/utils-js/workspace";
 
-// Basic command execution
+// Basic command execution (direct shell)
 const response = shell(command);
 const response = shell(command, options);
 
 // Workspace management
 const workspace = new Workspace(options);
 const response = workspace.run(command);
+const response = workspace.run(command, options);
 ```
 
 **Arguments:**
 
 - `command` `<string>`: Command to execute
-- `options` `<object>`: Optional configuration
+- `options` `<object>`: Optional configuration for shell commands
   - `stdin` `<ReadableStream>`: Input stream to pipe to the command
   - `env` `<Record<string, string>>`: Environment variables
   - `shell` `<string>`: Shell to use for execution
   - `cwd` `<string>`: Working directory
   - `signal` `<AbortSignal>`: Signal for cancellation/timeout
+- `options` `<WorkspaceOptions>`: Configuration for workspace
+  - `workingDirectory` `<string | URL>` **required**: Working directory for the workspace
+  - `shell` `<string>`: Shell to use for command execution (default: '/bin/sh')
+  - `env` `<Record<string, string>>`: Environment variables
+  - `timeout` `<number>`: Timeout in milliseconds for all commands in workspace
 
 **Examples:**
 
 ```ts
 import { shell, Workspace } from "@jondotsoy/utils-js/workspace";
 
-// Simple command execution
+// Direct shell command execution
 const response = shell('echo "Hello World"');
 const output = await response.text();
 console.log(output); // "Hello World"
 
 // Command with timeout
-const response = shell("long-running-command", {
+const timedResponse = shell("long-running-command", {
   signal: AbortSignal.timeout(5000), // 5 seconds
 });
 
-// Workspace for multiple commands
+// Create a workspace with default settings
 const workspace = new Workspace({
   workingDirectory: "/path/to/project",
-  timeout: 30000, // 30 seconds default timeout
+  shell: "/bin/bash",
+  timeout: 30000, // 30 seconds default timeout for all commands
 });
 
+// Execute commands in the workspace context
 const result1 = workspace.run("npm install");
 const result2 = workspace.run("npm test");
+
+// All commands inherit workspace configuration
+const output = await result1.text();
+const exitCode = await result1.exitCode;
 
 // Temporary workspace
 const tmpWorkspace = Workspace.mktmp();
 const response = tmpWorkspace.run('echo "temp work" > file.txt');
+
+// Workspace with environment variables
+const devWorkspace = new Workspace({
+  workingDirectory: "/project",
+  env: { NODE_ENV: "development", CI: "true" },
+});
+
+const buildResult = devWorkspace.run("npm run build");
 ```
 
 ## License

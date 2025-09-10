@@ -95,15 +95,24 @@ await response.exitCode; // Wait for command completion
 
 ```typescript
 import { Workspace } from "@jondotsoy/utils-js/workspace";
-// or
+// or for both workspace and direct shell access
+import { shell, Workspace } from "@jondotsoy/utils-js/workspace";
+
+// For local development
 import { Workspace } from "./workspace.js";
+// or
+import { shell, Workspace } from "./workspace.js";
 ```
 
 ### Shell Integration
 
-The Workspace module builds on the `@jondotsoy/shell` package. For direct shell command execution without workspace context, import from the shell package:
+The Workspace module builds on the `@jondotsoy/shell` package and re-exports the `shell` function for convenience. You can import shell commands in two ways:
 
 ```typescript
+// Option 1: Import from workspace module (recommended for workspace-based projects)
+import { shell, Workspace } from "@jondotsoy/utils-js/workspace";
+
+// Option 2: Import directly from shell package (for standalone shell usage)
 import { shell, ShellRequest, ShellResponse } from "@jondotsoy/shell";
 ```
 
@@ -286,8 +295,7 @@ Creates an async iterable from a ReadableStream.
 ### Working with Workspace and Shell Integration
 
 ```typescript
-import { Workspace } from "@jondotsoy/utils-js/workspace";
-import { shell } from "@jondotsoy/shell";
+import { shell, Workspace } from "@jondotsoy/utils-js/workspace";
 
 // Direct shell execution
 const directResponse = shell("echo 'Direct command'");
