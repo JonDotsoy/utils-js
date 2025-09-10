@@ -1,6 +1,7 @@
 import { tmpdir } from "node:os";
 import fs from "node:fs";
 import { shell, ShellRequest, ShellResponse } from "@jondotsoy/shell";
+export { shell, ShellRequest, ShellResponse } from "@jondotsoy/shell";
 
 type ShellResponseParameters = ConstructorParameters<typeof ShellResponse>;
 type ShellRequestParameters = ConstructorParameters<typeof ShellRequest>;
