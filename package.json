@@ -52,10 +52,6 @@
       "import": "./libs/esm/set/set.js",
       "types": "./libs/types/set/set.d.ts"
     },
-    "./symbol-result": {
-      "import": "./libs/esm/symbol-result/symbol-result.js",
-      "types": "./libs/types/symbol-result/symbol-result.d.ts"
-    },
     "./visit": {
       "import": "./libs/esm/visit/visit.js",
       "types": "./libs/types/visit/visit.d.ts"
