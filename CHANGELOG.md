@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.18.0...utils-js-v0.18.1) (2025-09-24)
+
+
+### Bug Fixes
+
+* remove SymbolResult export from package and index ([46ed41a](https://github.com/JonDotsoy/utils-js/commit/46ed41a21eece934b0d5f2668bbb3212956a3794))
+
 ## [0.18.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.17.1...utils-js-v0.18.0) (2025-09-24)
 
 
