@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.17.1...utils-js-v0.18.0) (2025-09-24)
+
+
+### Miscellaneous Chores
+
+* release 0.18.0 ([61e9115](https://github.com/JonDotsoy/utils-js/commit/61e9115781f2693f3dfabba108b679d917402794))
+
 ## [0.17.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.17.0...utils-js-v0.17.1) (2025-09-10)
 
 
