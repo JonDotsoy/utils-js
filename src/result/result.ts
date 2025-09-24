@@ -1,91 +1,63 @@
-import { SymbolResult } from "../symbol-result/symbol-result.js";
+type OkResult<T> = [null, T] & { error: null; value: T };
+type ErrorResult<E> = [E, null] & { error: E; value: null };
+type GenericResult<E, T> = OkResult<T> | ErrorResult<E>;
 
-type PairResult<T> = [null, T] | [Error, null];
-type SPairResult<T> = PairResult<T> | [null, ObjectWithPairResultExpression<T>];
-type FunctionExpression<T> = () => T;
-type ObjectWithPairResultExpression<T> = {
-  [SymbolResult]: () => SPairResult<T> | Promise<SPairResult<T>>;
-};
-type Expression<T> = ObjectWithPairResultExpression<T> | FunctionExpression<T>;
+export class Result<E, T> {
+  constructor(
+    public error: E,
+    public value: T,
+  ) {}
 
-export type Result<T> =
-  T extends Promise<any>
-    ? Promise<PairResult<Awaited<T>>>
-    : PairResult<Awaited<T>>;
-
-type InferValue<T> =
-  T extends FunctionExpression<infer R>
-    ? Awaited<R>
-    : T extends [any, { [SymbolResult]: () => infer R }]
-      ? InferValue<Awaited<R>>
-      : T extends { [SymbolResult]: () => infer R }
-        ? InferValue<Awaited<R>>
-        : T extends (infer R)[]
-          ? InferValue<Exclude<Awaited<R>, null>>
-          : T;
-
-export type ValueResult<T> = [null, InferValue<T>] | [Error, null];
-
-const isObjectWithPairResultExpression = <T>(
-  expression: Expression<T>,
-): expression is ObjectWithPairResultExpression<T> =>
-  typeof expression === "object" &&
-  expression !== null &&
-  typeof expression[SymbolResult] === "function";
-
-const executeSPairResult = ([error, value]: SPairResult<any>): any => {
-  if (isObjectWithPairResultExpression(value)) {
-    return executePairResultExpression(value);
+  *[Symbol.iterator](): Generator<E | T, void, unknown> {
+    yield this.error;
+    yield this.value;
   }
-  return [error, value];
-};
 
-const executePairResultExpression = <T>(
-  expression: ObjectWithPairResultExpression<T>,
-) => {
-  const valueResult = expression[SymbolResult]();
-  if (valueResult instanceof Promise) {
-    return valueResult
-      .then((value) => executeSPairResult(value))
-      .catch((error) => [error, null]);
+  static ok<T>(value: T): OkResult<T> {
+    return new Result<null, T>(null, value) as any;
   }
-  return executeSPairResult(valueResult);
-};
 
-const executeFunctionExpression = <T>(expression: FunctionExpression<T>) => {
-  try {
-    const valueResult = expression();
-    if (valueResult instanceof Promise) {
-      return valueResult
-        .then((value) => [null, value])
-        .catch((error) => [error, null]);
+  static error<E>(error: E): ErrorResult<E> {
+    return new Result<E, null>(error, null) as any;
+  }
+
+  private static tryPromise = async <V>(value: Promise<V>) => {
+    try {
+      const resolved = await value;
+      return Result.ok(resolved);
+    } catch (error) {
+      return Result.error(error as Error);
     }
-    return [null, valueResult];
-  } catch (error) {
-    return [error, null];
-  }
-};
-
-const makeResolveExpression = () => {
-  return <T>(expression: Expression<T>): any => {
-    if (isObjectWithPairResultExpression(expression)) {
-      return executePairResultExpression(expression);
-    }
-    return executeFunctionExpression(expression);
   };
-};
 
-/**
- * @example
- * const asyncExpression = () => fetch("https://example.com");
- *
- * const [error, response] = await result(asyncExpression);
- *
- * if (error) {
- *   console.error(error);
- *   return;
- * }
- */
-export const result: <T, E extends Expression<T>>(
-  expression: E,
-) => ValueResult<E> = makeResolveExpression();
+  static try = <
+    V extends Promise<unknown> | (() => unknown | Promise<unknown>),
+  >(
+    value: V,
+  ): V extends Promise<infer R>
+    ? Promise<GenericResult<Error, Awaited<R>>>
+    : V extends () => Promise<infer R>
+      ? Promise<GenericResult<Error, Awaited<R>>>
+      : V extends () => infer R
+        ? GenericResult<Error, Awaited<R>>
+        : never => {
+    try {
+      if (value instanceof Promise) {
+        return this.tryPromise(value) as any;
+      }
+      const pending = value();
+      if (pending instanceof Promise) {
+        return this.tryPromise(pending) as any;
+      }
+      return Result.ok(pending) as any;
+    } catch (error) {
+      return Result.error(error as Error) as any;
+    }
+  };
+
+  static isResult(value: unknown): value is Result<any, any> {
+    return value instanceof Result;
+  }
+}
+
+export const result = Result.try;
