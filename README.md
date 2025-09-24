@@ -307,16 +307,16 @@ pipe(5)
 
 > Inspiring on [arthurfiorette/proposal-safe-assignment-operator](https://github.com/arthurfiorette/proposal-safe-assignment-operator)
 
-Capture the result of an expression and return it as a value.
+Capture the result of an expression and return it as a tuple with success status, error, and value. Provides type-safe error handling without try-catch blocks.
 
 ```ts
 import { result } from "@jondotsoy/utils-js/result";
 
 const asyncExpression = () => fetch("https://example.com");
 
-const [error, response] = await result(asyncExpression);
+const [ok, error, response] = await result(asyncExpression);
 
-if (error) {
+if (!ok) {
   console.error(error);
   return;
 }
@@ -327,34 +327,93 @@ console.log(response);
 **Syntax**
 
 ```ts
-const [error, value] = result(expression);
-const [error, value] = await result(asyncExpression);
+const [ok, error, value] = result(expression);
+const [ok, error, value] = await result(asyncExpression);
+const [ok, error, value] = result(fn, ...args); // Function with arguments
 ```
 
 **Arguments**
 
-- `expression` `<unknown>`: The expression to evaluate.
-- `asyncExpression` `<Promise<unknown>>`: The async expression to evaluate.
+- `expression` `<() => unknown | Promise<unknown>>`: A function that returns a value or promise.
+- `asyncExpression` `<() => Promise<unknown>>`: A function that returns a promise.
+- `fn` `<(...args: any[]) => unknown | Promise<unknown>>`: A function to call with provided arguments.
+- `...args` `<any[]>`: Arguments to pass to the function.
 
 **Return**
 
-A tuple containing the error and the value of the expression.
+A tuple containing:
 
-**Example**
+- `ok` `<boolean>`: Success status (true if successful, false if error)
+- `error` `<Error | null>`: The error (null if successful)
+- `value` `<T | null>`: The result value (null if error)
+
+**Examples**
+
+**Basic synchronous function:**
 
 ```ts
 import { result } from "@jondotsoy/utils-js/result";
 
-const asyncExpression = () => fetch("https://example.com");
+const [ok, error, data] = result(() => JSON.parse('{"key": "value"}'));
 
-const [error, response] = await result(asyncExpression);
-
-if (error) {
-  console.error(error);
+if (!ok) {
+  console.error("Parse failed:", error.message);
   return;
 }
 
-console.log(response);
+console.log("Parsed data:", data); // { key: "value" }
+```
+
+**Asynchronous function:**
+
+```ts
+const [ok, error, response] = await result(async () => {
+  const res = await fetch("https://api.example.com/data");
+  return res.json();
+});
+
+if (!ok) {
+  console.error("API call failed:", error);
+  return;
+}
+
+console.log("API data:", response);
+```
+
+**Function with arguments:**
+
+```ts
+const [ok, error, parsed] = result(JSON.parse, '{"name": "John"}');
+
+if (!ok) {
+  console.error("JSON parsing failed:", error.message);
+  return;
+}
+
+console.log("User:", parsed.name); // "John"
+```
+
+**Direct Promise handling:**
+
+```ts
+const [ok, error, value] = await result(Promise.resolve(42));
+
+if (ok) {
+  console.log("Value:", value); // 42
+}
+```
+
+**Alternative exports:**
+
+```ts
+import { Result, ok, error } from "@jondotsoy/utils-js/result";
+
+// Create results manually
+const success = ok(42); // [true, null, 42]
+const failure = error(new Error()); // [false, Error, null]
+
+// Use Result class methods
+const [isOk, err, val] = Result.try(() => riskyOperation());
 ```
 
 ## CleanupTasks
