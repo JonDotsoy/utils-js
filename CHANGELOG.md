@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.18.1...utils-js-v0.19.0) (2025-11-03)
+
+
+### Features
+
+* **meter:** Add comprehensive meter parsing and formatting library ([#59](https://github.com/JonDotsoy/utils-js/issues/59)) ([b2bd368](https://github.com/JonDotsoy/utils-js/commit/b2bd368fc2a4cf87f64b7f684d8b324d264a1185))
+
 ## [0.18.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.18.0...utils-js-v0.18.1) (2025-09-24)
 
 
