@@ -205,7 +205,7 @@ export class Inch {
     // String parsing logic
     if (typeof value === "string") {
       // Regex pattern to extract value and unit (supports decimals starting with dot)
-      const pattern = /^\s*(-?\d*\.?\d+(?:[eE][+-]?\d+)?)\s*([a-z]+)?\s*$/i;
+      const pattern = /^\s*(-?\d*\.?\d+(?:[eE][+-]?\d+)?)\s*([a-zµ]+)?\s*$/i;
       const match = value.match(pattern);
 
       if (!match) {
