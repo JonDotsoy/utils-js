@@ -56,12 +56,12 @@ console.log(result2); // "2 feet"
 
 ## Supported Units
 
-| Unit | Short Form | Long Form | Factor       |
-| ---- | ---------- | --------- | ------------ |
-| Mile | mi         | mile      | 63,360 in    |
-| Yard | yd         | yard      | 36 in        |
-| Foot | ft         | foot      | 12 in        |
-| Inch | in         | inch      | 1 in         |
+| Unit | Short Form | Long Form | Factor    |
+| ---- | ---------- | --------- | --------- |
+| Mile | mi         | mile      | 63,360 in |
+| Yard | yd         | yard      | 36 in     |
+| Foot | ft         | foot      | 12 in     |
+| Inch | in         | inch      | 1 in      |
 
 ## API
 

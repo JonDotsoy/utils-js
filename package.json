@@ -71,6 +71,14 @@
     "./workspace": {
       "import": "./libs/esm/workspace/workspace.js",
       "types": "./libs/types/workspace/workspace.d.ts"
+    },
+    "./inch": {
+      "import": "./libs/esm/inch/inch.js",
+      "types": "./libs/types/inch/inch.d.ts"
+    },
+    "./meter": {
+      "import": "./libs/esm/meter/meter.js",
+      "types": "./libs/types/meter/meter.d.ts"
     }
   },
   "devDependencies": {

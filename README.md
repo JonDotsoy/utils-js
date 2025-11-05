@@ -10,6 +10,8 @@ Some utilities for JS. Will be util to reduce common logic in your code.
 - [CleanupTasks](#cleanuptasks)
 - [Bytes](#bytes)
 - [BytesFormat](#bytesformat)
+- [Meter](#meter)
+- [Inch](#inch)
 - [Queue](#queue)
 - [Workspace](#workspace)
 
@@ -588,6 +590,116 @@ new BytesFormat("en-US", { maximumFractionDigits: 0 }).format(1536); // '2 kB'
 ```ts
 new BytesFormat("de-DE").format(123456789); // '117,74 MB'
 ```
+
+## Meter
+
+A library for parsing, converting, and formatting International System (SI) length units.
+
+**Import:**
+
+```ts
+import { Meter, MeterFormat } from "@jondotsoy/utils-js/meter";
+```
+
+**Features:**
+
+- ✅ Parse strings with units (e.g., "2.5 km", "100 cm")
+- ✅ Automatic conversion between units
+- ✅ Localized formatting using `Intl.NumberFormat`
+- ✅ Support for multiple languages (Spanish, English, Japanese, etc.)
+- ✅ Automatic pluralization based on language
+- ✅ Short and long unit forms
+
+**Basic Usage:**
+
+```ts
+// Parse from string with unit
+const distance = Meter.parse("2.5 km");
+console.log(distance.millimeter); // 2500000
+
+// Parse from number (assumes millimeters)
+const distance2 = Meter.parse(1000);
+console.log(distance2.millimeter); // 1000
+
+// Format values
+const result = Meter.parse("2m").toLocaleString();
+console.log(result); // "2 m"
+
+// Long format (full names)
+const result2 = Meter.parse("2m").toLocaleString(undefined, {
+  unitDisplay: "long",
+});
+console.log(result2); // "2 metros"
+```
+
+**Supported Units:**
+
+| Unit       | Short Form | Long Form  | Factor         |
+| ---------- | ---------- | ---------- | -------------- |
+| Kilometer  | km         | kilometer  | 1,000,000 mm   |
+| Hectometer | hm         | hectometer | 100,000 mm     |
+| Decameter  | dam        | decameter  | 10,000 mm      |
+| Meter      | m          | meter      | 1,000 mm       |
+| Decimeter  | dm         | decimeter  | 100 mm         |
+| Centimeter | cm         | centimeter | 10 mm          |
+| Millimeter | mm         | millimeter | 1 mm           |
+| Micrometer | µm         | micrometer | 0.001 mm       |
+| Nanometer  | nm         | nanometer  | 0.000001 mm    |
+| Picometer  | pm         | picometer  | 0.000000001 mm |
+
+For complete documentation, see [src/meter/README.md](src/meter/README.md).
+
+## Inch
+
+A library for parsing, converting, and formatting Imperial/US Customary length units.
+
+**Import:**
+
+```ts
+import { Inch, InchFormat } from "@jondotsoy/utils-js/inch";
+```
+
+**Features:**
+
+- ✅ Parse strings with units (e.g., "2.5 mi", "100 ft")
+- ✅ Automatic conversion between units
+- ✅ Localized formatting using `Intl.NumberFormat`
+- ✅ Support for multiple languages (English, Spanish, etc.)
+- ✅ Automatic pluralization based on language
+- ✅ Short and long unit forms
+
+**Basic Usage:**
+
+```ts
+// Parse from string with unit
+const distance = Inch.parse("2.5 mi");
+console.log(distance.inch); // 158400
+
+// Parse from number (assumes inches)
+const distance2 = Inch.parse(12);
+console.log(distance2.inch); // 12
+
+// Format values
+const result = Inch.parse("24in").toLocaleString();
+console.log(result); // "2 ft"
+
+// Long format (full names)
+const result2 = Inch.parse("24in").toLocaleString(undefined, {
+  unitDisplay: "long",
+});
+console.log(result2); // "2 feet"
+```
+
+**Supported Units:**
+
+| Unit | Short Form | Long Form | Factor    |
+| ---- | ---------- | --------- | --------- |
+| Mile | mi         | mile      | 63,360 in |
+| Yard | yd         | yard      | 36 in     |
+| Foot | ft         | foot      | 12 in     |
+| Inch | in         | inch      | 1 in      |
+
+For complete documentation, see [src/inch/README.md](src/inch/README.md).
 
 ## Queue
 

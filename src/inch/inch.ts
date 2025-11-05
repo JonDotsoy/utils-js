@@ -40,23 +40,13 @@ type InchFormatOptions = {
 namespace InchFormatOptions {
   export namespace defaults {
     export const enUs: InchFormatOptions = {
-      unitAllow: [
-        InchUnit.Inch,
-        InchUnit.Foot,
-        InchUnit.Yard,
-        InchUnit.Mile,
-      ],
+      unitAllow: [InchUnit.Inch, InchUnit.Foot, InchUnit.Yard, InchUnit.Mile],
       unitDisplay: "short",
     };
   }
 
   export const defaultInchFormatOptions: InchFormatOptions = {
-    unitAllow: [
-      InchUnit.Inch,
-      InchUnit.Foot,
-      InchUnit.Yard,
-      InchUnit.Mile,
-    ],
+    unitAllow: [InchUnit.Inch, InchUnit.Foot, InchUnit.Yard, InchUnit.Mile],
     unitDisplay: "short",
   };
 
