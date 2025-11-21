@@ -68,7 +68,8 @@ export class Result<O extends boolean, E, T> {
     readonly value: T,
   ) {}
 
-  *[Symbol.iterator](): Generator<E | T, void, unknown> {
+  *[Symbol.iterator](): Generator<O | E | T, void, unknown> {
+    yield this.ok as O;
     yield this.error;
     yield this.value;
   }

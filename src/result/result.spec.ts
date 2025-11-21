@@ -30,7 +30,8 @@ test("should create successful result with Result.ok()", async () => {
 });
 
 test("should create error result with Result.error()", async () => {
-  const [error, value] = Result.error(new Error("Error"));
+  const [ok, error, value] = Result.error(new Error("Error"));
+  expect(ok).toBe(false);
   expect(error).toBeInstanceOf(Error);
   expect(value).toBeNull();
 });
