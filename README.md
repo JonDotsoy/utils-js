@@ -5,6 +5,7 @@ Some utilities for JS. Will be util to reduce common logic in your code.
 - [visit](#visit)
 - [get](#get)
 - [set](#set)
+- [pick](#pick)
 - [pipe](#pipe)
 - [result](#result)
 - [CleanupTasks](#cleanuptasks)
@@ -223,6 +224,132 @@ set(data, ["a", "b"], 2); // => { a: { b: 2 } }
 
 set(data, ["a", "c", "d"], 3); //=> { a: { b: 2, c: { d: 3 } } }
 ```
+
+## Pick
+
+A utility for safely navigating and validating data structures with a chainable API. Returns `undefined` when an operation fails, allowing elegant handling of cases where data doesn't meet expectations.
+
+**Import:**
+
+```ts
+import { pick } from "@jondotsoy/utils-js/pick";
+```
+
+**Syntax:**
+
+```ts
+pick(value);
+```
+
+**Arguments:**
+
+- `value` `<unknown>`: The value to wrap and validate.
+
+**Return:**
+
+A Pick instance with chainable validation methods.
+
+**Basic Examples:**
+
+```ts
+// Safe property access
+const data = { user: { name: "Alice", age: 30 } };
+const name = pick(data).property("user")?.property("name")?.valueOf();
+// name = "Alice"
+
+// Type validation
+pick("hello").isString()?.valueOf(); // "hello"
+pick(123).isNumber()?.valueOf(); // 123
+pick([1, 2, 3]).isArray()?.valueOf(); // [1, 2, 3]
+
+// Returns undefined on validation failure
+pick(123).isString(); // undefined
+pick("text").isNumber(); // undefined
+```
+
+### Methods
+
+**Type Validators:**
+
+- `.isString()` - Validates the value is a string
+- `.isNumber()` - Validates the value is a number
+- `.isInteger()` - Validates the value is an integer
+- `.isBigInt()` - Validates the value is a bigint
+- `.isBoolean()` - Validates the value is a boolean
+- `.isArray()` - Validates the value is an array
+- `.isRecord()` - Validates the value is an object
+- `.isNative()` - Validates the value is a native JS type (string, number, boolean, array, or object)
+
+**Navigation & Transformation:**
+
+- `.property(key)` - Accesses an object property
+- `.pipe(transform)` - Applies a transformation function
+- `.find(filter)` - Finds an element in an array
+- `.filter(filter)` - Filters array elements
+- `.every(validator)` - Validates all array elements
+- `.oneOf(validators)` - Tries multiple validators
+- `.isEnumOf(values)` - Validates value is in a set of allowed values
+- `.valueOf()` - Returns the current value
+
+**Advanced Examples:**
+
+```ts
+// Enum validation
+const status = pick({ status: "active" })
+  .property("status")
+  ?.isEnumOf(["active", "inactive", "pending"])
+  ?.valueOf();
+// status = "active"
+
+// Transformation pipeline
+const port = pick({ port: "3000" })
+  .property("port")
+  ?.isString()
+  ?.pipe((str) => parseInt(str, 10))
+  .valueOf();
+// port = 3000
+
+// Array validation
+const tags = pick({ tags: ["typescript", "javascript"] })
+  .property("tags")
+  ?.every((v) => v.isString())
+  ?.valueOf();
+// tags = ["typescript", "javascript"]
+
+// Flexible type validation
+const timeout = pick({ timeout: 5000 })
+  .property("timeout")
+  ?.oneOf([(v) => v.isString(), (v) => v.isNumber()])
+  ?.valueOf();
+// timeout = 5000
+
+// Array filtering
+const users = [
+  { name: "Alice", active: true },
+  { name: "Bob", active: false },
+];
+const activeUsers = pick(users)
+  .filter((user: any) => user.active)
+  ?.valueOf();
+// activeUsers = [{ name: "Alice", active: true }]
+```
+
+**Utilities:**
+
+The `pick.utils` namespace exposes type validation functions for independent use:
+
+```ts
+pick.utils.isString(value); // boolean
+pick.utils.isNumber(value); // boolean
+pick.utils.isBoolean(value); // boolean
+pick.utils.isArray(value); // boolean
+pick.utils.isRecord(value); // boolean
+pick.utils.isSymbol(value); // boolean
+pick.utils.hasOwnProperty(obj, key); // boolean
+pick.utils.includes(array, value); // boolean
+```
+
+For complete API documentation and more examples, see [src/pick/README.md](src/pick/README.md).
 
 ## Pipe
 
