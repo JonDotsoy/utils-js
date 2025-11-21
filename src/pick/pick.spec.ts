@@ -1,5 +1,16 @@
 import { describe, it, expect, expectTypeOf } from "bun:test";
-import { pick, type Pick, DatePick } from "./pick";
+import {
+  pick,
+  type Pick,
+  IntegerPick,
+  BigIntPick,
+  BooleanPick,
+  ArrayPick,
+  RecordPick,
+  StringPick,
+  NumberPick,
+  DatePick,
+} from "./pick";
 
 // Reglas: Pick o cualquier clase que erede de Pick nunca deben modificar el valor
 // pick(new Date(...)).date().value instanceof Date
@@ -401,7 +412,7 @@ describe("pick", () => {
   describe("type checking", () => {
     it("should have correct types for isString", () => {
       const result = pick("hello").string();
-      expectTypeOf(result).toEqualTypeOf<Pick<string> | undefined>();
+      expectTypeOf(result).toEqualTypeOf<StringPick | undefined>();
       if (result) {
         expectTypeOf(result.valueOf()).toEqualTypeOf<string>();
       }
@@ -409,7 +420,7 @@ describe("pick", () => {
 
     it("should have correct types for isNumber", () => {
       const result = pick(123).number();
-      expectTypeOf(result).toEqualTypeOf<Pick<number> | undefined>();
+      expectTypeOf(result).toEqualTypeOf<NumberPick | undefined>();
       if (result) {
         expectTypeOf(result.valueOf()).toEqualTypeOf<number>();
       }
@@ -417,7 +428,7 @@ describe("pick", () => {
 
     it("should have correct types for isInteger", () => {
       const result = pick(42).integer();
-      expectTypeOf(result).toEqualTypeOf<Pick<number> | undefined>();
+      expectTypeOf(result).toEqualTypeOf<IntegerPick | undefined>();
       if (result) {
         expectTypeOf(result.valueOf()).toEqualTypeOf<number>();
       }
@@ -425,7 +436,7 @@ describe("pick", () => {
 
     it("should have correct types for isBigInt", () => {
       const result = pick(123n).bigInt();
-      expectTypeOf(result).toEqualTypeOf<Pick<bigint> | undefined>();
+      expectTypeOf(result).toEqualTypeOf<BigIntPick | undefined>();
       if (result) {
         expectTypeOf(result.valueOf()).toEqualTypeOf<bigint>();
       }
@@ -433,7 +444,7 @@ describe("pick", () => {
 
     it("should have correct types for isBoolean", () => {
       const result = pick(true).boolean();
-      expectTypeOf(result).toEqualTypeOf<Pick<boolean> | undefined>();
+      expectTypeOf(result).toEqualTypeOf<BooleanPick | undefined>();
       if (result) {
         expectTypeOf(result.valueOf()).toEqualTypeOf<boolean>();
       }
@@ -441,7 +452,7 @@ describe("pick", () => {
 
     it("should have correct types for isArray", () => {
       const result = pick([1, 2, 3]).array();
-      expectTypeOf(result).toEqualTypeOf<Pick<Array<unknown>> | undefined>();
+      expectTypeOf(result).toEqualTypeOf<ArrayPick<unknown> | undefined>();
       if (result) {
         expectTypeOf(result.valueOf()).toEqualTypeOf<Array<unknown>>();
       }
@@ -449,9 +460,7 @@ describe("pick", () => {
 
     it("should have correct types for isRecord", () => {
       const result = pick({ key: "value" }).record();
-      expectTypeOf(result).toEqualTypeOf<
-        Pick<Record<string, unknown>> | undefined
-      >();
+      expectTypeOf(result).toEqualTypeOf<RecordPick | undefined>();
       if (result) {
         expectTypeOf(result.valueOf()).toEqualTypeOf<Record<string, unknown>>();
       }
@@ -570,6 +579,584 @@ describe("pick", () => {
       if (result) {
         expectTypeOf(result.valueOf()).toEqualTypeOf<unknown[][]>();
       }
+    });
+  });
+});
+
+describe("IntegerPick", () => {
+  describe("validations", () => {
+    it("should validate greater than", () => {
+      expect(pick(10).integer()?.gt(5)?.valueOf()).toBe(10);
+    });
+
+    it("should validate greater than or equal", () => {
+      expect(pick(10).integer()?.gte(10)?.valueOf()).toBe(10);
+    });
+
+    it("should validate less than", () => {
+      expect(pick(5).integer()?.lt(10)?.valueOf()).toBe(5);
+    });
+
+    it("should validate less than or equal", () => {
+      expect(pick(10).integer()?.lte(10)?.valueOf()).toBe(10);
+    });
+
+    it("should validate between", () => {
+      expect(pick(5).integer()?.between(1, 10)?.valueOf()).toBe(5);
+    });
+
+    it("should validate positive", () => {
+      expect(pick(5).integer()?.positive()?.valueOf()).toBe(5);
+      expect(pick(0).integer()?.positive()).toBeUndefined();
+    });
+
+    it("should validate negative", () => {
+      expect(pick(-5).integer()?.negative()?.valueOf()).toBe(-5);
+      expect(pick(0).integer()?.negative()).toBeUndefined();
+    });
+
+    it("should validate multipleOf", () => {
+      expect(pick(10).integer()?.multipleOf(5)?.valueOf()).toBe(10);
+      expect(pick(11).integer()?.multipleOf(5)).toBeUndefined();
+    });
+
+    it("should validate even", () => {
+      expect(pick(10).integer()?.even()?.valueOf()).toBe(10);
+      expect(pick(11).integer()?.even()).toBeUndefined();
+    });
+
+    it("should validate odd", () => {
+      expect(pick(11).integer()?.odd()?.valueOf()).toBe(11);
+      expect(pick(10).integer()?.odd()).toBeUndefined();
+    });
+  });
+
+  describe("chaining", () => {
+    it("should chain multiple validations", () => {
+      const result = pick(10).integer()?.positive()?.even()?.between(1, 20);
+      expect(result?.valueOf()).toBe(10);
+    });
+
+    it("should return undefined if any validation fails", () => {
+      const result = pick(11).integer()?.positive()?.even();
+      expect(result).toBeUndefined();
+    });
+  });
+});
+
+describe("BigIntPick", () => {
+  describe("validations", () => {
+    it("should validate greater than", () => {
+      expect(pick(10n).bigInt()?.gt(5n)?.valueOf()).toBe(10n);
+    });
+
+    it("should validate greater than or equal", () => {
+      expect(pick(10n).bigInt()?.gte(10n)?.valueOf()).toBe(10n);
+    });
+
+    it("should validate less than", () => {
+      expect(pick(5n).bigInt()?.lt(10n)?.valueOf()).toBe(5n);
+    });
+
+    it("should validate less than or equal", () => {
+      expect(pick(10n).bigInt()?.lte(10n)?.valueOf()).toBe(10n);
+    });
+
+    it("should validate between", () => {
+      expect(pick(5n).bigInt()?.between(1n, 10n)?.valueOf()).toBe(5n);
+    });
+
+    it("should validate positive", () => {
+      expect(pick(5n).bigInt()?.positive()?.valueOf()).toBe(5n);
+      expect(pick(0n).bigInt()?.positive()).toBeUndefined();
+    });
+
+    it("should validate negative", () => {
+      expect(pick(-5n).bigInt()?.negative()?.valueOf()).toBe(-5n);
+      expect(pick(0n).bigInt()?.negative()).toBeUndefined();
+    });
+  });
+
+  describe("chaining", () => {
+    it("should chain multiple validations", () => {
+      const result = pick(100n).bigInt()?.positive()?.between(1n, 1000n);
+      expect(result?.valueOf()).toBe(100n);
+    });
+  });
+});
+
+describe("BooleanPick", () => {
+  describe("validations", () => {
+    it("should validate true", () => {
+      expect(pick(true).boolean()?.true()?.valueOf()).toBe(true);
+      expect(pick(false).boolean()?.true()).toBeUndefined();
+    });
+
+    it("should validate false", () => {
+      expect(pick(false).boolean()?.false()?.valueOf()).toBe(false);
+      expect(pick(true).boolean()?.false()).toBeUndefined();
+    });
+  });
+
+  describe("transformations", () => {
+    it("should invert boolean value", () => {
+      expect(pick(true).boolean()?.not().valueOf()).toBe(false);
+      expect(pick(false).boolean()?.not().valueOf()).toBe(true);
+    });
+
+    it("should chain not with validations", () => {
+      expect(pick(true).boolean()?.not().false()?.valueOf()).toBe(false);
+    });
+  });
+});
+
+describe("ArrayPick", () => {
+  describe("length validations", () => {
+    it("should validate minLength", () => {
+      expect(pick([1, 2, 3]).array()?.minLength(2)?.valueOf()).toEqual([
+        1, 2, 3,
+      ]);
+      expect(pick([1]).array()?.minLength(2)).toBeUndefined();
+    });
+
+    it("should validate maxLength", () => {
+      expect(pick([1, 2]).array()?.maxLength(5)?.valueOf()).toEqual([1, 2]);
+      expect(pick([1, 2, 3, 4, 5, 6]).array()?.maxLength(5)).toBeUndefined();
+    });
+
+    it("should validate exact length", () => {
+      expect(pick([1, 2, 3]).array()?.length(3)?.valueOf()).toEqual([1, 2, 3]);
+      expect(pick([1, 2]).array()?.length(3)).toBeUndefined();
+    });
+
+    it("should validate notEmpty", () => {
+      expect(pick([1]).array()?.notEmpty()?.valueOf()).toEqual([1]);
+      expect(pick([]).array()?.notEmpty()).toBeUndefined();
+    });
+  });
+
+  describe("element access", () => {
+    it("should get first element", () => {
+      expect(pick([1, 2, 3]).array()?.first()?.valueOf()).toBe(1);
+      expect(pick([]).array()?.first()).toBeUndefined();
+    });
+
+    it("should get last element", () => {
+      expect(pick([1, 2, 3]).array()?.last()?.valueOf()).toBe(3);
+      expect(pick([]).array()?.last()).toBeUndefined();
+    });
+
+    it("should get element at index", () => {
+      expect(pick([1, 2, 3]).array()?.at(1)?.valueOf()).toBe(2);
+      expect(pick([1, 2, 3]).array()?.at(-1)?.valueOf()).toBe(3);
+      expect(pick([1, 2, 3]).array()?.at(10)).toBeUndefined();
+    });
+  });
+
+  describe("includes", () => {
+    it("should validate includes", () => {
+      expect(pick([1, 2, 3]).array()?.includes(2)?.valueOf()).toEqual([
+        1, 2, 3,
+      ]);
+      expect(pick([1, 2, 3]).array()?.includes(5)).toBeUndefined();
+    });
+  });
+
+  describe("chaining", () => {
+    it("should chain multiple validations", () => {
+      const result = pick([1, 2, 3, 4, 5])
+        .array()
+        ?.minLength(3)
+        ?.maxLength(10)
+        ?.includes(3);
+      expect(result?.valueOf()).toEqual([1, 2, 3, 4, 5]);
+    });
+  });
+});
+
+describe("RecordPick", () => {
+  describe("key validations", () => {
+    it("should validate hasKey", () => {
+      const obj = { name: "John", age: 30 };
+      expect(pick(obj).record()?.hasKey("name")?.valueOf()).toEqual(obj);
+      expect(pick(obj).record()?.hasKey("email")).toBeUndefined();
+    });
+
+    it("should validate hasKeys", () => {
+      const obj = { name: "John", age: 30, city: "NYC" };
+      expect(pick(obj).record()?.hasKeys(["name", "age"])?.valueOf()).toEqual(
+        obj,
+      );
+      expect(pick(obj).record()?.hasKeys(["name", "email"])).toBeUndefined();
+    });
+
+    it("should validate notEmpty", () => {
+      expect(pick({ a: 1 }).record()?.notEmpty()?.valueOf()).toEqual({ a: 1 });
+      expect(pick({}).record()?.notEmpty()).toBeUndefined();
+    });
+
+    it("should validate minKeys", () => {
+      const obj = { a: 1, b: 2, c: 3 };
+      expect(pick(obj).record()?.minKeys(2)?.valueOf()).toEqual(obj);
+      expect(pick({ a: 1 }).record()?.minKeys(2)).toBeUndefined();
+    });
+
+    it("should validate maxKeys", () => {
+      const obj = { a: 1, b: 2 };
+      expect(pick(obj).record()?.maxKeys(5)?.valueOf()).toEqual(obj);
+      expect(pick({ a: 1, b: 2, c: 3 }).record()?.maxKeys(2)).toBeUndefined();
+    });
+  });
+
+  describe("transformations", () => {
+    it("should get keys", () => {
+      const obj = { name: "John", age: 30 };
+      const keys = pick(obj).record()?.keys().valueOf();
+      expect(keys).toEqual(["name", "age"]);
+    });
+
+    it("should get values", () => {
+      const obj = { name: "John", age: 30 };
+      const values = pick(obj).record()?.values().valueOf();
+      expect(values).toEqual(["John", 30]);
+    });
+  });
+
+  describe("chaining", () => {
+    it("should chain multiple validations", () => {
+      const obj = { name: "John", age: 30, city: "NYC" };
+      const result = pick(obj)
+        .record()
+        ?.notEmpty()
+        ?.hasKey("name")
+        ?.minKeys(2)
+        ?.maxKeys(10);
+      expect(result?.valueOf()).toEqual(obj);
+    });
+
+    it("should chain with keys transformation", () => {
+      const obj = { a: 1, b: 2, c: 3 };
+      const result = pick(obj).record()?.keys().minLength(2)?.valueOf();
+      expect(result).toEqual(["a", "b", "c"]);
+    });
+  });
+});
+
+describe("StringPick", () => {
+  describe("minLength", () => {
+    it("should validate minimum length", () => {
+      const result = pick("hello").string()?.minLength(3);
+      expect(result?.valueOf()).toBe("hello");
+    });
+
+    it("should return undefined if too short", () => {
+      const result = pick("hi").string()?.minLength(5);
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe("maxLength", () => {
+    it("should validate maximum length", () => {
+      const result = pick("hello").string()?.maxLength(10);
+      expect(result?.valueOf()).toBe("hello");
+    });
+
+    it("should return undefined if too long", () => {
+      const result = pick("hello world").string()?.maxLength(5);
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe("length", () => {
+    it("should validate exact length", () => {
+      const result = pick("hello").string()?.length(5);
+      expect(result?.valueOf()).toBe("hello");
+    });
+
+    it("should return undefined if length doesn't match", () => {
+      const result = pick("hello").string()?.length(3);
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe("matches", () => {
+    it("should validate regex pattern", () => {
+      const result = pick("hello123")
+        .string()
+        ?.matches(/^[a-z]+\d+$/);
+      expect(result?.valueOf()).toBe("hello123");
+    });
+
+    it("should accept string pattern", () => {
+      const result = pick("hello").string()?.matches("^[a-z]+$");
+      expect(result?.valueOf()).toBe("hello");
+    });
+
+    it("should return undefined if doesn't match", () => {
+      const result = pick("hello").string()?.matches(/^\d+$/);
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe("startsWith", () => {
+    it("should validate prefix", () => {
+      const result = pick("hello world").string()?.startsWith("hello");
+      expect(result?.valueOf()).toBe("hello world");
+    });
+
+    it("should return undefined if doesn't start with prefix", () => {
+      const result = pick("hello world").string()?.startsWith("world");
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe("endsWith", () => {
+    it("should validate suffix", () => {
+      const result = pick("hello world").string()?.endsWith("world");
+      expect(result?.valueOf()).toBe("hello world");
+    });
+
+    it("should return undefined if doesn't end with suffix", () => {
+      const result = pick("hello world").string()?.endsWith("hello");
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe("includes", () => {
+    it("should validate substring", () => {
+      const result = pick("hello world").string()?.includes("lo wo");
+      expect(result?.valueOf()).toBe("hello world");
+    });
+
+    it("should return undefined if doesn't include substring", () => {
+      const result = pick("hello world").string()?.includes("xyz");
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe("notEmpty", () => {
+    it("should validate non-empty string", () => {
+      const result = pick("hello").string()?.notEmpty();
+      expect(result?.valueOf()).toBe("hello");
+    });
+
+    it("should return undefined for empty string", () => {
+      const result = pick("").string()?.notEmpty();
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe("email", () => {
+    it("should validate email format", () => {
+      const result = pick("test@example.com").string()?.email();
+      expect(result?.valueOf()).toBe("test@example.com");
+    });
+
+    it("should return undefined for invalid email", () => {
+      expect(pick("invalid").string()?.email()).toBeUndefined();
+      expect(pick("@example.com").string()?.email()).toBeUndefined();
+      expect(pick("test@").string()?.email()).toBeUndefined();
+    });
+  });
+
+  describe("url", () => {
+    it("should validate URL format", () => {
+      const result = pick("https://example.com").string()?.url();
+      expect(result?.valueOf()).toBe("https://example.com");
+    });
+
+    it("should return undefined for invalid URL", () => {
+      expect(pick("not a url").string()?.url()).toBeUndefined();
+      expect(pick("example.com").string()?.url()).toBeUndefined();
+    });
+  });
+
+  describe("transformations", () => {
+    it("should transform to uppercase", () => {
+      const result = pick("hello").string()?.toUpperCase();
+      expect(result?.valueOf()).toBe("HELLO");
+    });
+
+    it("should transform to lowercase", () => {
+      const result = pick("HELLO").string()?.toLowerCase();
+      expect(result?.valueOf()).toBe("hello");
+    });
+
+    it("should trim whitespace", () => {
+      const result = pick("  hello  ").string()?.trim();
+      expect(result?.valueOf()).toBe("hello");
+    });
+  });
+
+  describe("chaining", () => {
+    it("should chain multiple validations", () => {
+      const result = pick("hello@example.com")
+        .string()
+        ?.minLength(5)
+        ?.maxLength(50)
+        ?.email();
+      expect(result?.valueOf()).toBe("hello@example.com");
+    });
+
+    it("should return undefined if any validation fails", () => {
+      const result = pick("hi").string()?.minLength(5)?.email();
+      expect(result).toBeUndefined();
+    });
+
+    it("should chain transformations and validations", () => {
+      const result = pick("  HELLO  ")
+        .string()
+        ?.trim()
+        ?.toLowerCase()
+        ?.minLength(3);
+      expect(result?.valueOf()).toBe("hello");
+    });
+  });
+});
+
+describe("NumberPick", () => {
+  describe("gt", () => {
+    it("should validate greater than", () => {
+      const result = pick(10).number()?.gt(5);
+      expect(result?.valueOf()).toBe(10);
+    });
+
+    it("should return undefined if not greater", () => {
+      expect(pick(5).number()?.gt(5)).toBeUndefined();
+      expect(pick(3).number()?.gt(5)).toBeUndefined();
+    });
+  });
+
+  describe("gte", () => {
+    it("should validate greater than or equal", () => {
+      expect(pick(10).number()?.gte(5)?.valueOf()).toBe(10);
+      expect(pick(5).number()?.gte(5)?.valueOf()).toBe(5);
+    });
+
+    it("should return undefined if less than", () => {
+      expect(pick(3).number()?.gte(5)).toBeUndefined();
+    });
+  });
+
+  describe("lt", () => {
+    it("should validate less than", () => {
+      const result = pick(3).number()?.lt(5);
+      expect(result?.valueOf()).toBe(3);
+    });
+
+    it("should return undefined if not less", () => {
+      expect(pick(5).number()?.lt(5)).toBeUndefined();
+      expect(pick(7).number()?.lt(5)).toBeUndefined();
+    });
+  });
+
+  describe("lte", () => {
+    it("should validate less than or equal", () => {
+      expect(pick(3).number()?.lte(5)?.valueOf()).toBe(3);
+      expect(pick(5).number()?.lte(5)?.valueOf()).toBe(5);
+    });
+
+    it("should return undefined if greater than", () => {
+      expect(pick(7).number()?.lte(5)).toBeUndefined();
+    });
+  });
+
+  describe("between", () => {
+    it("should validate range", () => {
+      expect(pick(5).number()?.between(1, 10)?.valueOf()).toBe(5);
+      expect(pick(1).number()?.between(1, 10)?.valueOf()).toBe(1);
+      expect(pick(10).number()?.between(1, 10)?.valueOf()).toBe(10);
+    });
+
+    it("should return undefined if outside range", () => {
+      expect(pick(0).number()?.between(1, 10)).toBeUndefined();
+      expect(pick(11).number()?.between(1, 10)).toBeUndefined();
+    });
+  });
+
+  describe("positive", () => {
+    it("should validate positive numbers", () => {
+      expect(pick(5).number()?.positive()?.valueOf()).toBe(5);
+      expect(pick(0.1).number()?.positive()?.valueOf()).toBe(0.1);
+    });
+
+    it("should return undefined for non-positive", () => {
+      expect(pick(0).number()?.positive()).toBeUndefined();
+      expect(pick(-5).number()?.positive()).toBeUndefined();
+    });
+  });
+
+  describe("negative", () => {
+    it("should validate negative numbers", () => {
+      expect(pick(-5).number()?.negative()?.valueOf()).toBe(-5);
+      expect(pick(-0.1).number()?.negative()?.valueOf()).toBe(-0.1);
+    });
+
+    it("should return undefined for non-negative", () => {
+      expect(pick(0).number()?.negative()).toBeUndefined();
+      expect(pick(5).number()?.negative()).toBeUndefined();
+    });
+  });
+
+  describe("integer", () => {
+    it("should validate integers", () => {
+      expect(pick(5).number()?.integer()?.valueOf()).toBe(5);
+      expect(pick(-10).number()?.integer()?.valueOf()).toBe(-10);
+    });
+
+    it("should return undefined for non-integers", () => {
+      expect(pick(3.14).number()?.integer()).toBeUndefined();
+      expect(pick(0.5).number()?.integer()).toBeUndefined();
+    });
+  });
+
+  describe("finite", () => {
+    it("should validate finite numbers", () => {
+      expect(pick(123).number()?.finite()?.valueOf()).toBe(123);
+      expect(pick(-456).number()?.finite()?.valueOf()).toBe(-456);
+    });
+
+    it("should return undefined for non-finite", () => {
+      expect(pick(Infinity).number()?.finite()).toBeUndefined();
+      expect(pick(-Infinity).number()?.finite()).toBeUndefined();
+      expect(pick(NaN).number()?.finite()).toBeUndefined();
+    });
+  });
+
+  describe("multipleOf", () => {
+    it("should validate multiples", () => {
+      expect(pick(10).number()?.multipleOf(5)?.valueOf()).toBe(10);
+      expect(pick(15).number()?.multipleOf(3)?.valueOf()).toBe(15);
+    });
+
+    it("should return undefined for non-multiples", () => {
+      expect(pick(10).number()?.multipleOf(3)).toBeUndefined();
+      expect(pick(7).number()?.multipleOf(2)).toBeUndefined();
+    });
+  });
+
+  describe("chaining", () => {
+    it("should chain multiple validations", () => {
+      const result = pick(50)
+        .number()
+        ?.positive()
+        ?.between(1, 100)
+        ?.multipleOf(10);
+      expect(result?.valueOf()).toBe(50);
+    });
+
+    it("should return undefined if any validation fails", () => {
+      const result = pick(55)
+        .number()
+        ?.positive()
+        ?.between(1, 100)
+        ?.multipleOf(10);
+      expect(result).toBeUndefined();
+    });
+
+    it("should work with integer validation", () => {
+      const result = pick(42).number()?.integer()?.gte(0)?.lte(100);
+      expect(result?.valueOf()).toBe(42);
     });
   });
 });
@@ -753,7 +1340,7 @@ describe("date", () => {
       const date = new Date("2024-01-01");
       const result = pick(date).date()?.number();
       expect(result?.valueOf()).toBe(date.getTime());
-      expectTypeOf(result).toEqualTypeOf<Pick<number> | undefined>();
+      expectTypeOf(result).toEqualTypeOf<NumberPick | undefined>();
     });
 
     it("should work after date range validation", () => {
@@ -765,7 +1352,7 @@ describe("date", () => {
         ?.number();
 
       expect(result?.valueOf()).toBe(date.getTime());
-      expectTypeOf(result).toEqualTypeOf<Pick<number> | undefined>();
+      expectTypeOf(result).toEqualTypeOf<NumberPick | undefined>();
     });
 
     it("should return undefined if date validation fails", () => {
