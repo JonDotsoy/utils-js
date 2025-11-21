@@ -288,14 +288,18 @@ Validates that the value is a string that matches the specified regular expressi
 
 ```typescript
 // Using RegExp object
-pick("hello123").regexp(/^[a-z]+\d+$/)?.valueOf(); // "hello123"
+pick("hello123")
+  .regexp(/^[a-z]+\d+$/)
+  ?.valueOf(); // "hello123"
 pick("hello").regexp(/^\d+$/); // undefined
 
 // Using string pattern with flags
 pick("HELLO").regexp("^hello$", "i")?.valueOf(); // "HELLO"
 
 // Email validation
-pick("user@example.com").regexp(/^[\w.-]+@[\w.-]+\.\w+$/)?.valueOf();
+pick("user@example.com")
+  .regexp(/^[\w.-]+@[\w.-]+\.\w+$/)
+  ?.valueOf();
 // "user@example.com"
 ```
 
@@ -597,31 +601,19 @@ const data = {
 };
 
 // Validate Date object
-const createdAt = pick(data)
-  .property("createdAt")
-  ?.date()
-  ?.valueOf();
+const createdAt = pick(data).property("createdAt")?.date()?.valueOf();
 console.log(createdAt); // Date object: 2024-01-01
 
 // Timestamps are not converted (returns undefined)
-const fromTimestamp = pick(data)
-  .property("timestamp")
-  ?.date()
-  ?.valueOf();
+const fromTimestamp = pick(data).property("timestamp")?.date()?.valueOf();
 console.log(fromTimestamp); // undefined (number, not Date)
 
 // Strings are not converted (returns undefined)
-const fromString = pick(data)
-  .property("dateString")
-  ?.date()
-  ?.valueOf();
+const fromString = pick(data).property("dateString")?.date()?.valueOf();
 console.log(fromString); // undefined (string, not Date)
 
 // Invalid Date returns undefined
-const invalid = pick(data)
-  .property("invalidDate")
-  ?.date()
-  ?.valueOf();
+const invalid = pick(data).property("invalidDate")?.date()?.valueOf();
 console.log(invalid); // undefined
 
 // Validate date range with after/before
@@ -660,19 +652,11 @@ const data = {
 };
 
 // Validate uppercase
-const code = pick(data)
-  .property("code")
-  ?.string()
-  ?.uppercase()
-  ?.valueOf();
+const code = pick(data).property("code")?.string()?.uppercase()?.valueOf();
 console.log(code); // "ABC123"
 
 // Validate lowercase
-const name = pick(data)
-  .property("name")
-  ?.string()
-  ?.lowercase()
-  ?.valueOf();
+const name = pick(data).property("name")?.string()?.lowercase()?.valueOf();
 console.log(name); // "john"
 
 // Mixed case fails both validations
@@ -729,36 +713,19 @@ const data = {
 };
 
 // Validate exact length
-const tags = pick(data)
-  .property("tags")
-  ?.array()
-  ?.length(2)
-  ?.valueOf();
+const tags = pick(data).property("tags")?.array()?.length(2)?.valueOf();
 console.log(tags); // ["javascript", "typescript"]
 
 // Validate minimum length
-const password = pick(data)
-  .property("password")
-  ?.string()
-  ?.min(8)
-  ?.valueOf();
+const password = pick(data).property("password")?.string()?.min(8)?.valueOf();
 console.log(password); // "secret123"
 
 // Validate maximum length
-const username = pick(data)
-  .property("username")
-  ?.string()
-  ?.max(20)
-  ?.valueOf();
+const username = pick(data).property("username")?.string()?.max(20)?.valueOf();
 console.log(username); // "john_doe"
 
 // Validate length range (chain min and max)
-const items = pick(data)
-  .property("items")
-  ?.array()
-  ?.min(3)
-  ?.max(10)
-  ?.valueOf();
+const items = pick(data).property("items")?.array()?.min(3)?.max(10)?.valueOf();
 console.log(items); // [1, 2, 3, 4, 5]
 
 // Validate string starts with prefix
@@ -802,19 +769,11 @@ const hasTypeScript = pick(data)
 console.log(hasTypeScript); // ["javascript", "typescript"]
 
 // Validate object has property
-const hasAge = pick(data)
-  .record()
-  ?.includes("age")
-  ?.valueOf();
+const hasAge = pick(data).record()?.includes("age")?.valueOf();
 console.log(hasAge); // { username: "john_doe", password: "secret123", ... }
 
 // Validate number range
-const age = pick(data)
-  .property("age")
-  ?.number()
-  ?.min(18)
-  ?.max(65)
-  ?.valueOf();
+const age = pick(data).property("age")?.number()?.min(18)?.max(65)?.valueOf();
 console.log(age); // 25
 ```
 
@@ -829,15 +788,10 @@ console.log(age); // 25
 Validates that the date is greater than or equal to the minimum date specified. Accepts Date objects, timestamps (numbers), or date strings.
 
 ```typescript
-pick(new Date("2024-06-15"))
-  .date()
-  ?.after(new Date("2024-01-01"))
-  ?.valueOf();
+pick(new Date("2024-06-15")).date()?.after(new Date("2024-01-01"))?.valueOf();
 // Date object: 2024-06-15
 
-pick(new Date("2023-12-31"))
-  .date()
-  ?.after(new Date("2024-01-01"));
+pick(new Date("2023-12-31")).date()?.after(new Date("2024-01-01"));
 // undefined
 
 // Using timestamps
@@ -853,22 +807,14 @@ pick(Date.now())
 Validates that the date is less than or equal to the maximum date specified. Accepts Date objects, timestamps (numbers), or date strings.
 
 ```typescript
-pick(new Date("2024-06-15"))
-  .date()
-  ?.before(new Date("2024-12-31"))
-  ?.valueOf();
+pick(new Date("2024-06-15")).date()?.before(new Date("2024-12-31"))?.valueOf();
 // Date object: 2024-06-15
 
-pick(new Date("2025-01-01"))
-  .date()
-  ?.before(new Date("2024-12-31"));
+pick(new Date("2025-01-01")).date()?.before(new Date("2024-12-31"));
 // undefined
 
 // Using timestamps
-pick(Date.now())
-  .date()
-  ?.before(Date.now())
-  ?.valueOf();
+pick(Date.now()).date()?.before(Date.now())?.valueOf();
 // Date object if not in the future
 ```
 

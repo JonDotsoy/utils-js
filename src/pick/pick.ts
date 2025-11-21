@@ -436,19 +436,19 @@ export class Pick<T> {
       if (isNaN(this.value.getTime())) return undefined;
       return new DatePick(this.value);
     }
-    
+
     if (typeof this.value === "number") {
       const date = new Date(this.value);
       if (isNaN(date.getTime())) return undefined;
       return new DatePick(this.value);
     }
-    
+
     if (typeof this.value === "string") {
       const date = new Date(this.value);
       if (isNaN(date.getTime())) return undefined;
       return new DatePick(this.value);
     }
-    
+
     return undefined;
   }
 
@@ -473,7 +473,7 @@ export class Pick<T> {
 /**
  * Clase especializada para trabajar con fechas (Date).
  * Extiende Pick<Date | number | string> con métodos específicos para validación de fechas.
- */ 
+ */
 export class DatePick extends Pick<Date | number | string> {
   #valueDate?: Date;
 
@@ -503,7 +503,7 @@ export class DatePick extends Pick<Date | number | string> {
   after(min: Date | number | string): undefined | DatePick {
     const date = this.getDate();
     if (!date) return undefined;
-    
+
     const minDate = new Date(min);
     if (isNaN(minDate.getTime())) return undefined;
     if (date.getTime() <= minDate.getTime()) return undefined;
@@ -519,7 +519,7 @@ export class DatePick extends Pick<Date | number | string> {
   before(max: Date | number | string): undefined | DatePick {
     const date = this.getDate();
     if (!date) return undefined;
-    
+
     const maxDate = new Date(max);
     if (isNaN(maxDate.getTime())) return undefined;
     if (date.getTime() >= maxDate.getTime()) return undefined;

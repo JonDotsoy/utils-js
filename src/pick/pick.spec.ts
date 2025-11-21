@@ -647,11 +647,8 @@ describe("date", () => {
 
     it("pick(1234).date().after(...).before(...).valueOf() === 1234", () => {
       const timestamp = 1234;
-      const result = pick(timestamp)
-        .date()
-        ?.after(0)
-        ?.before(10000);
-      
+      const result = pick(timestamp).date()?.after(0)?.before(10000);
+
       // El valor original se mantiene sin modificar después de las validaciones
       expect(result?.valueOf()).toBe(1234);
     });
@@ -766,7 +763,7 @@ describe("date", () => {
         ?.after(new Date(2020, 0, 1))
         ?.before(new Date(2025, 11, 31))
         ?.number();
-      
+
       expect(result?.valueOf()).toBe(date.getTime());
       expectTypeOf(result).toEqualTypeOf<Pick<number> | undefined>();
     });
@@ -777,18 +774,15 @@ describe("date", () => {
         .date()
         ?.after(new Date(2020, 0, 1))
         ?.number();
-      
+
       expect(result).toBeUndefined();
     });
 
     it("should allow chaining number validations", () => {
       const date = new Date("2024-06-15");
       const timestamp = date.getTime();
-      const result = pick(date)
-        .date()
-        ?.number()
-        ?.gt(0);
-      
+      const result = pick(date).date()?.number()?.gt(0);
+
       expect(result?.valueOf()).toBe(timestamp);
     });
   });
@@ -844,11 +838,8 @@ describe("date", () => {
     });
 
     it("should have correct types for between", () => {
-      const result = pick(new Date())
-        .date()
-        ?.between(new Date(), new Date());
+      const result = pick(new Date()).date()?.between(new Date(), new Date());
       expectTypeOf(result).toEqualTypeOf<DatePick | undefined>();
     });
   });
 });
-
