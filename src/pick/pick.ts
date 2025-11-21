@@ -1,3 +1,5 @@
+// Reglas: Pick o cualquier clase que erede de Pick nunca deben modificar el valor
+
 namespace Utils {
   export const isRecord = (value: any): value is Record<any, any> =>
     typeof value === "object" && value !== null;
@@ -43,7 +45,7 @@ export class Pick<T> {
    *
    * @param value - El valor a encapsular
    */
-  constructor(private readonly value: T) {}
+  constructor(readonly value: T) {}
 
   /**
    * Accede a una propiedad del objeto actual.
@@ -72,13 +74,18 @@ export class Pick<T> {
    *
    * @example
    * ```typescript
-   * pick("hello").isString()?.valueOf(); // "hello"
-   * pick(123).isString(); // undefined
+   * pick("hello").string()?.valueOf(); // "hello"
+   * pick(123).string(); // undefined
    * ```
    */
-  isString(): undefined | Pick<string> {
+  string(): undefined | Pick<string> {
     if (!Utils.isString(this.value)) return undefined;
     return new Pick(this.value);
+  }
+
+  /** @deprecated Use string() instead */
+  isString(): undefined | Pick<string> {
+    return this.string();
   }
 
   /**
@@ -88,12 +95,29 @@ export class Pick<T> {
    *
    * @example
    * ```typescript
-   * pick(123).isNumber()?.valueOf(); // 123
-   * pick("hello").isNumber(); // undefined
+   * pick(123).number()?.valueOf(); // 123
+   * pick("hello").number(); // undefined
    * ```
    */
-  isNumber(): undefined | Pick<number> {
+  number(): undefined | Pick<number> {
     if (!Utils.isNumber(this.value)) return undefined;
+    return new Pick(this.value);
+  }
+
+  /** @deprecated Use number() instead */
+  isNumber(): undefined | Pick<number> {
+    return this.number();
+  }
+
+  /**
+   * Valida que el número sea mayor que el valor especificado.
+   *
+   * @param min - Valor mínimo (exclusivo)
+   * @returns Una nueva instancia de Pick con el valor, o undefined si no cumple la condición
+   */
+  gt(min: number): undefined | Pick<number> {
+    if (!Utils.isNumber(this.value)) return undefined;
+    if (this.value <= min) return undefined;
     return new Pick(this.value);
   }
 
@@ -104,15 +128,20 @@ export class Pick<T> {
    *
    * @example
    * ```typescript
-   * pick(42).isInteger()?.valueOf(); // 42
-   * pick(3.14).isInteger(); // undefined
-   * pick("hello").isInteger(); // undefined
+   * pick(42).integer()?.valueOf(); // 42
+   * pick(3.14).integer(); // undefined
+   * pick("hello").integer(); // undefined
    * ```
    */
-  isInteger(): undefined | Pick<number> {
+  integer(): undefined | Pick<number> {
     if (!Utils.isNumber(this.value)) return undefined;
     if (!Number.isInteger(this.value)) return undefined;
     return new Pick(this.value);
+  }
+
+  /** @deprecated Use integer() instead */
+  isInteger(): undefined | Pick<number> {
+    return this.integer();
   }
 
   /**
@@ -122,13 +151,18 @@ export class Pick<T> {
    *
    * @example
    * ```typescript
-   * pick(123n).isBigInt()?.valueOf(); // 123n
-   * pick(123).isBigInt(); // undefined
+   * pick(123n).bigInt()?.valueOf(); // 123n
+   * pick(123).bigInt(); // undefined
    * ```
    */
-  isBigInt(): undefined | Pick<bigint> {
+  bigInt(): undefined | Pick<bigint> {
     if (typeof this.value !== "bigint") return undefined;
     return new Pick(this.value);
+  }
+
+  /** @deprecated Use bigInt() instead */
+  isBigInt(): undefined | Pick<bigint> {
+    return this.bigInt();
   }
 
   /**
@@ -138,13 +172,18 @@ export class Pick<T> {
    *
    * @example
    * ```typescript
-   * pick(true).isBoolean()?.valueOf(); // true
-   * pick(1).isBoolean(); // undefined
+   * pick(true).boolean()?.valueOf(); // true
+   * pick(1).boolean(); // undefined
    * ```
    */
-  isBoolean(): undefined | Pick<boolean> {
+  boolean(): undefined | Pick<boolean> {
     if (!Utils.isBoolean(this.value)) return undefined;
     return new Pick(this.value);
+  }
+
+  /** @deprecated Use boolean() instead */
+  isBoolean(): undefined | Pick<boolean> {
+    return this.boolean();
   }
 
   /**
@@ -155,11 +194,11 @@ export class Pick<T> {
    *
    * @example
    * ```typescript
-   * pick("hello").isNative()?.valueOf(); // "hello"
-   * pick([1, 2, 3]).isNative()?.valueOf(); // [1, 2, 3]
+   * pick("hello").native()?.valueOf(); // "hello"
+   * pick([1, 2, 3]).native()?.valueOf(); // [1, 2, 3]
    * ```
    */
-  isNative():
+  native():
     | undefined
     | Pick<string | number | boolean | Array<any> | Record<any, any>> {
     if (Utils.isString(this.value)) return new Pick(this.value);
@@ -170,6 +209,13 @@ export class Pick<T> {
     return undefined;
   }
 
+  /** @deprecated Use native() instead */
+  isNative():
+    | undefined
+    | Pick<string | number | boolean | Array<any> | Record<any, any>> {
+    return this.native();
+  }
+
   /**
    * Valida que el valor actual sea un array.
    *
@@ -177,13 +223,18 @@ export class Pick<T> {
    *
    * @example
    * ```typescript
-   * pick([1, 2, 3]).isArray()?.valueOf(); // [1, 2, 3]
-   * pick("hello").isArray(); // undefined
+   * pick([1, 2, 3]).array()?.valueOf(); // [1, 2, 3]
+   * pick("hello").array(); // undefined
    * ```
    */
-  isArray(): undefined | Pick<Array<unknown>> {
+  array(): undefined | Pick<Array<unknown>> {
     if (!Utils.isArray(this.value)) return undefined;
     return new Pick(this.value);
+  }
+
+  /** @deprecated Use array() instead */
+  isArray(): undefined | Pick<Array<unknown>> {
+    return this.array();
   }
 
   /**
@@ -193,13 +244,18 @@ export class Pick<T> {
    *
    * @example
    * ```typescript
-   * pick({ name: "John" }).isRecord()?.valueOf(); // { name: "John" }
-   * pick(null).isRecord(); // undefined
+   * pick({ name: "John" }).record()?.valueOf(); // { name: "John" }
+   * pick(null).record(); // undefined
    * ```
    */
-  isRecord(): undefined | Pick<Record<string, unknown>> {
+  record(): undefined | Pick<Record<string, unknown>> {
     if (!Utils.isRecord(this.value)) return undefined;
     return new Pick(this.value);
+  }
+
+  /** @deprecated Use record() instead */
+  isRecord(): undefined | Pick<Record<string, unknown>> {
+    return this.record();
   }
 
   /**
@@ -211,14 +267,19 @@ export class Pick<T> {
    *
    * @example
    * ```typescript
-   * pick("red").isEnumOf(["red", "green", "blue"])?.valueOf(); // "red"
-   * pick("yellow").isEnumOf(["red", "green", "blue"]); // undefined
+   * pick("red").enum(["red", "green", "blue"])?.valueOf(); // "red"
+   * pick("yellow").enum(["red", "green", "blue"]); // undefined
    * ```
    */
-  isEnumOf<E extends string>(values: E[]) {
+  enum<E extends string>(values: E[]) {
     if (!Utils.isString(this.value)) return undefined;
     if (!Utils.includes(values, this.value)) return undefined;
     return new Pick<E>(this.value);
+  }
+
+  /** @deprecated Use enum() instead */
+  isEnumOf<E extends string>(values: E[]) {
+    return this.enum(values);
   }
 
   /**
@@ -359,6 +420,24 @@ export class Pick<T> {
   }
 
   /**
+   * Valida que el valor actual sea una fecha (Date) válida.
+   *
+   * @returns Una nueva instancia de DatePick si es una fecha válida, o undefined si no lo es
+   *
+   * @example
+   * ```typescript
+   * pick(new Date()).date()?.valueOf(); // Date object
+   * pick(123).date(); // undefined
+   * pick("2024-01-01").date(); // undefined
+   * ```
+   */
+  date(): undefined | DatePick {
+    if (!(this.value instanceof Date)) return undefined;
+    if (isNaN(this.value.getTime())) return undefined;
+    return new DatePick(this.value);
+  }
+
+  /**
    * Obtiene el valor encapsulado actual.
    *
    * @returns El valor original encapsulado en esta instancia de Pick
@@ -374,6 +453,61 @@ export class Pick<T> {
   }
 
   static utils = Utils;
+}
+
+/**
+ * Clase especializada para trabajar con fechas (Date).
+ * Extiende Pick<Date> con métodos específicos para validación de fechas.
+ */
+export class DatePick extends Pick<Date> {
+  /**
+   * Valida que la fecha sea posterior a una fecha mínima.
+   *
+   * @param min - Fecha mínima (puede ser Date, timestamp o string)
+   * @returns Esta instancia si la fecha es posterior, o undefined si no cumple
+   */
+  after(min: Date | number | string): undefined | DatePick {
+    const minDate = new Date(min);
+    if (isNaN(minDate.getTime())) return undefined;
+    if (this.value.getTime() <= minDate.getTime()) return undefined;
+    return this;
+  }
+
+  /**
+   * Valida que la fecha sea anterior a una fecha máxima.
+   *
+   * @param max - Fecha máxima (puede ser Date, timestamp o string)
+   * @returns Esta instancia si la fecha es anterior, o undefined si no cumple
+   */
+  before(max: Date | number | string): undefined | DatePick {
+    const maxDate = new Date(max);
+    if (isNaN(maxDate.getTime())) return undefined;
+    if (this.value.getTime() >= maxDate.getTime()) return undefined;
+    return this;
+  }
+
+  /**
+   * Valida que la fecha esté dentro de un rango.
+   *
+   * @param min - Fecha mínima
+   * @param max - Fecha máxima
+   * @returns Esta instancia si la fecha está en el rango, o undefined si no cumple
+   */
+  between(
+    min: Date | number | string,
+    max: Date | number | string,
+  ): undefined | DatePick {
+    return this.after(min)?.before(max);
+  }
+
+  /**
+   * Convierte la fecha a timestamp (número).
+   *
+   * @returns Una nueva instancia de Pick con el timestamp
+   */
+  number(): Pick<number> {
+    return new Pick(this.value.getTime());
+  }
 }
 
 export const pick = <T = unknown>(value: T) => new Pick(value);
