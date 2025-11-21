@@ -582,15 +582,18 @@ describe("date", () => {
       expect(result?.valueOf()).toEqual(date);
     });
 
-    it("should return undefined for timestamps (numbers)", () => {
+    it("should validate timestamps (numbers)", () => {
       const timestamp = 1704067200000; // 2024-01-01
       const result = pick(timestamp).date();
-      expect(result).toBeUndefined();
+      expect(result).toBeInstanceOf(DatePick);
+      expect(result?.valueOf()).toBe(timestamp);
     });
 
-    it("should return undefined for date strings", () => {
-      const result = pick("2024-01-01").date();
-      expect(result).toBeUndefined();
+    it("should validate date strings", () => {
+      const dateString = "2024-01-01";
+      const result = pick(dateString).date();
+      expect(result).toBeInstanceOf(DatePick);
+      expect(result?.valueOf()).toBe(dateString);
     });
 
     it("should return undefined for invalid date strings", () => {
@@ -625,29 +628,32 @@ describe("date", () => {
     it("pick(124342).date().value === 124342", () => {
       const timestamp = 124342;
       const result = pick(timestamp).date();
-      // date() retorna undefined para números, pero si retornara algo, value debería ser el original
-      expect(result).toBeUndefined();
-      
-      // Si queremos probar que el valor se mantiene, usamos Pick directamente
-      const pickResult = pick(timestamp);
-      expect(pickResult.value).toBe(124342);
+      // date() ahora acepta números (timestamps), y el valor original se mantiene
+      expect(result?.value).toBe(124342);
     });
 
     it("pick(124342).date().valueOf() === 124342", () => {
       const timestamp = 124342;
       const result = pick(timestamp).date();
-      // date() retorna undefined para números
-      expect(result).toBeUndefined();
-      
-      // Si queremos probar valueOf con el valor original
-      const pickResult = pick(timestamp);
-      expect(pickResult.valueOf()).toBe(124342);
+      // date() ahora acepta números (timestamps), y valueOf retorna el valor original
+      expect(result?.valueOf()).toBe(124342);
     });
 
     it("pick(new Date()).date() instanceof DatePick", () => {
       const date = new Date();
       const result = pick(date).date();
       expect(result).toBeInstanceOf(DatePick);
+    });
+
+    it("pick(1234).date().after(...).before(...).valueOf() === 1234", () => {
+      const timestamp = 1234;
+      const result = pick(timestamp)
+        .date()
+        ?.after(0)
+        ?.before(10000);
+      
+      // El valor original se mantiene sin modificar después de las validaciones
+      expect(result?.valueOf()).toBe(1234);
     });
   });
 
@@ -797,15 +803,18 @@ describe("date", () => {
       expect(result?.valueOf()).toEqual(date);
     });
 
-    it("should return undefined for non-Date values", () => {
+    it("should work with timestamps", () => {
       const timestamp = Date.now();
       const result = pick(timestamp).date();
-      expect(result).toBeUndefined();
+      expect(result).toBeInstanceOf(DatePick);
+      expect(result?.valueOf()).toBe(timestamp);
     });
 
-    it("should return undefined for string input", () => {
-      const result = pick("2024-06-15").date();
-      expect(result).toBeUndefined();
+    it("should work with string input", () => {
+      const dateString = "2024-06-15";
+      const result = pick(dateString).date();
+      expect(result).toBeInstanceOf(DatePick);
+      expect(result?.valueOf()).toBe(dateString);
     });
 
     it("should return undefined if any validation fails", () => {

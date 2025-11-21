@@ -420,21 +420,36 @@ export class Pick<T> {
   }
 
   /**
-   * Valida que el valor actual sea una fecha (Date) válida.
+   * Valida que el valor actual sea una fecha válida (Date, timestamp o string).
    *
    * @returns Una nueva instancia de DatePick si es una fecha válida, o undefined si no lo es
    *
    * @example
    * ```typescript
    * pick(new Date()).date()?.valueOf(); // Date object
-   * pick(123).date(); // undefined
-   * pick("2024-01-01").date(); // undefined
+   * pick(1234567890000).date()?.valueOf(); // timestamp
+   * pick("2024-01-01").date()?.valueOf(); // "2024-01-01"
    * ```
    */
   date(): undefined | DatePick {
-    if (!(this.value instanceof Date)) return undefined;
-    if (isNaN(this.value.getTime())) return undefined;
-    return new DatePick(this.value);
+    if (this.value instanceof Date) {
+      if (isNaN(this.value.getTime())) return undefined;
+      return new DatePick(this.value);
+    }
+    
+    if (typeof this.value === "number") {
+      const date = new Date(this.value);
+      if (isNaN(date.getTime())) return undefined;
+      return new DatePick(this.value);
+    }
+    
+    if (typeof this.value === "string") {
+      const date = new Date(this.value);
+      if (isNaN(date.getTime())) return undefined;
+      return new DatePick(this.value);
+    }
+    
+    return undefined;
   }
 
   /**
@@ -457,9 +472,28 @@ export class Pick<T> {
 
 /**
  * Clase especializada para trabajar con fechas (Date).
- * Extiende Pick<Date> con métodos específicos para validación de fechas.
- */
-export class DatePick extends Pick<Date> {
+ * Extiende Pick<Date | number | string> con métodos específicos para validación de fechas.
+ */ 
+export class DatePick extends Pick<Date | number | string> {
+  #valueDate?: Date;
+
+  private getDate(): Date | undefined {
+    if (this.#valueDate !== undefined) {
+      return this.#valueDate;
+    }
+
+    if (this.value instanceof Date) {
+      this.#valueDate = this.value;
+      return this.#valueDate;
+    }
+
+    const date = new Date(this.value);
+    if (isNaN(date.getTime())) return undefined;
+
+    this.#valueDate = date;
+    return this.#valueDate;
+  }
+
   /**
    * Valida que la fecha sea posterior a una fecha mínima.
    *
@@ -467,9 +501,12 @@ export class DatePick extends Pick<Date> {
    * @returns Esta instancia si la fecha es posterior, o undefined si no cumple
    */
   after(min: Date | number | string): undefined | DatePick {
+    const date = this.getDate();
+    if (!date) return undefined;
+    
     const minDate = new Date(min);
     if (isNaN(minDate.getTime())) return undefined;
-    if (this.value.getTime() <= minDate.getTime()) return undefined;
+    if (date.getTime() <= minDate.getTime()) return undefined;
     return this;
   }
 
@@ -480,9 +517,12 @@ export class DatePick extends Pick<Date> {
    * @returns Esta instancia si la fecha es anterior, o undefined si no cumple
    */
   before(max: Date | number | string): undefined | DatePick {
+    const date = this.getDate();
+    if (!date) return undefined;
+    
     const maxDate = new Date(max);
     if (isNaN(maxDate.getTime())) return undefined;
-    if (this.value.getTime() >= maxDate.getTime()) return undefined;
+    if (date.getTime() >= maxDate.getTime()) return undefined;
     return this;
   }
 
@@ -506,7 +546,20 @@ export class DatePick extends Pick<Date> {
    * @returns Una nueva instancia de Pick con el timestamp
    */
   number(): Pick<number> {
-    return new Pick(this.value.getTime());
+    const date = this.getDate();
+    if (!date) return new Pick(this.value as number);
+    return new Pick(date.getTime());
+  }
+
+  /**
+   * Convierte el valor a un objeto Date.
+   *
+   * @returns Una nueva instancia de Pick con el objeto Date
+   */
+  toDate(): Pick<Date> | undefined {
+    const date = this.getDate();
+    if (!date) return undefined;
+    return new Pick(date);
   }
 }
 
