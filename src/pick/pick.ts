@@ -449,25 +449,31 @@ export class Pick<T> {
    * pick("2024-01-01").date()?.valueOf(); // "2024-01-01"
    * ```
    */
-  date(): undefined | DatePick {
+  date(): T extends Date
+    ? DatePick<Date>
+    : T extends string
+      ? DatePick<string>
+      : T extends number
+        ? DatePick<number>
+        : undefined {
     if (this.value instanceof Date) {
-      if (isNaN(this.value.getTime())) return undefined;
-      return new DatePick(this.value);
+      if (isNaN(this.value.getTime())) return undefined as any;
+      return new DatePick(this.value) as any;
     }
 
     if (typeof this.value === "number") {
       const date = new Date(this.value);
-      if (isNaN(date.getTime())) return undefined;
-      return new DatePick(this.value);
+      if (isNaN(date.getTime())) return undefined as any;
+      return new DatePick(this.value) as any;
     }
 
     if (typeof this.value === "string") {
       const date = new Date(this.value);
-      if (isNaN(date.getTime())) return undefined;
-      return new DatePick(this.value);
+      if (isNaN(date.getTime())) return undefined as any;
+      return new DatePick(this.value) as any;
     }
 
-    return undefined;
+    return undefined as any;
   }
 
   /**
@@ -497,6 +503,32 @@ export class Pick<T> {
   ): undefined | Pick<InstanceType<C>> {
     if (!(this.value instanceof constructor)) return undefined;
     return new Pick(this.value as InstanceType<C>);
+  }
+
+  /**
+   * Validates that the current value is a valid URL string or URL object and returns a URLPick.
+   *
+   * @returns A new URLPick instance with the URL object, or undefined if it's not a valid URL
+   *
+   * @example
+   * ```typescript
+   * pick("https://example.com").url()?.valueOf(); // URL object
+   * pick(new URL("https://example.com")).url()?.valueOf(); // URL object
+   * pick("not-a-url").url(); // undefined
+   * pick(123).url(); // undefined
+   * ```
+   */
+  url(): T extends URL
+    ? URLPick<URL>
+    : T extends string
+      ? URLPick<string>
+      : undefined {
+    if (this.value instanceof URL) {
+      return new URLPick<URL>(this.value) as any;
+    }
+    if (!Utils.isString(this.value)) return undefined as any;
+    if (!URL.canParse(this.value)) return undefined as any;
+    return new URLPick<string>(this.value) as any;
   }
 
   /**
@@ -1216,20 +1248,6 @@ export class StringPick extends Pick<string> {
   }
 
   /**
-   * Validates that the string is a valid URL.
-   *
-   * @returns This instance if it's a valid URL, or undefined if not
-   */
-  url(): undefined | StringPick {
-    try {
-      new URL(this.value);
-      return this;
-    } catch {
-      return undefined;
-    }
-  }
-
-  /**
    * Transforms the string to uppercase.
    *
    * @returns A new StringPick instance with the string in uppercase
@@ -1428,10 +1446,16 @@ export class NumberPick
 }
 
 /**
+ * Specialized class for working with URLs.
+ * Extends Pick<URL> without additional methods.
+ */
+export class URLPick<T extends URL | string> extends Pick<T> {}
+
+/**
  * Specialized class for working with dates (Date).
  * Extends Pick<Date | number | string> with specific methods for date validation.
  */
-export class DatePick extends Pick<Date | number | string> {
+export class DatePick<T extends Date | number | string> extends Pick<T> {
   #valueDate?: Date;
 
   private getDate(): Date | undefined {
@@ -1457,7 +1481,7 @@ export class DatePick extends Pick<Date | number | string> {
    * @param min - Minimum date (can be Date, timestamp, or string)
    * @returns This instance if the date is after, or undefined if it doesn't meet the condition
    */
-  after(min: Date | number | string): undefined | DatePick {
+  after(min: Date | number | string): undefined | DatePick<T> {
     const date = this.getDate();
     if (!date) return undefined;
 
@@ -1473,7 +1497,7 @@ export class DatePick extends Pick<Date | number | string> {
    * @param max - Maximum date (can be Date, timestamp, or string)
    * @returns This instance if the date is before, or undefined if it doesn't meet the condition
    */
-  before(max: Date | number | string): undefined | DatePick {
+  before(max: Date | number | string): undefined | DatePick<T> {
     const date = this.getDate();
     if (!date) return undefined;
 
@@ -1493,30 +1517,8 @@ export class DatePick extends Pick<Date | number | string> {
   between(
     min: Date | number | string,
     max: Date | number | string,
-  ): undefined | DatePick {
+  ): undefined | DatePick<T> {
     return this.after(min)?.before(max);
-  }
-
-  /**
-   * Converts the date to a timestamp (number).
-   *
-   * @returns A new NumberPick instance with the timestamp
-   */
-  number(): NumberPick {
-    const date = this.getDate();
-    if (!date) return new NumberPick(this.value as number);
-    return new NumberPick(date.getTime());
-  }
-
-  /**
-   * Converts the value to a Date object.
-   *
-   * @returns A new DatePick instance with the Date object
-   */
-  toDate(): DatePick | undefined {
-    const date = this.getDate();
-    if (!date) return undefined;
-    return new DatePick(date);
   }
 }
 

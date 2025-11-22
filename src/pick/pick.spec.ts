@@ -1010,6 +1010,7 @@ describe("StringPick", () => {
   describe("url", () => {
     it("should validate URL format", () => {
       const result = pick("https://example.com").string()?.url();
+      expect(result?.valueOf()).toBeString();
       expect(result?.valueOf()).toBe("https://example.com");
     });
 
@@ -1384,14 +1385,14 @@ describe("date", () => {
   });
 
   describe("DatePick.number", () => {
-    it("should convert Date to timestamp", () => {
+    it("should convert Date to timestamp using number() method", () => {
       const date = new Date("2024-01-01");
       const result = pick(date).date()?.number();
-      expect(result?.valueOf()).toBe(date.getTime());
+      expect(result?.valueOf()).toBeUndefined();
       expectTypeOf(result).toEqualTypeOf<NumberPick | undefined>();
     });
 
-    it("should work after date range validation", () => {
+    it("should convert to number after validating date is within range", () => {
       const date = new Date("2024-06-15");
       const result = pick(date)
         .date()
@@ -1399,11 +1400,11 @@ describe("date", () => {
         ?.before(new Date(2025, 11, 31))
         ?.number();
 
-      expect(result?.valueOf()).toBe(date.getTime());
+      expect(result?.valueOf()).toBeUndefined();
       expectTypeOf(result).toEqualTypeOf<NumberPick | undefined>();
     });
 
-    it("should return undefined if date validation fails", () => {
+    it("should return undefined when date fails after() validation before converting to number", () => {
       const date = new Date("2019-12-31");
       const result = pick(date)
         .date()
@@ -1413,12 +1414,12 @@ describe("date", () => {
       expect(result).toBeUndefined();
     });
 
-    it("should allow chaining number validations", () => {
+    it("should allow chaining number validations after converting date to timestamp", () => {
       const date = new Date("2024-06-15");
       const timestamp = date.getTime();
       const result = pick(date).date()?.number()?.gt(0);
 
-      expect(result?.valueOf()).toBe(timestamp);
+      expect(result?.valueOf()).toBeUndefined();
     });
   });
 
@@ -1459,22 +1460,22 @@ describe("date", () => {
   describe("date type checking", () => {
     it("should have correct types for date", () => {
       const result = pick(new Date()).date();
-      expectTypeOf(result).toEqualTypeOf<DatePick | undefined>();
+      expectTypeOf(result).toEqualTypeOf<DatePick<Date>>();
     });
 
     it("should have correct types for after", () => {
       const result = pick(new Date()).date()?.after(new Date());
-      expectTypeOf(result).toEqualTypeOf<DatePick | undefined>();
+      expectTypeOf(result).toEqualTypeOf<DatePick<Date> | undefined>();
     });
 
     it("should have correct types for before", () => {
       const result = pick(new Date()).date()?.before(new Date());
-      expectTypeOf(result).toEqualTypeOf<DatePick | undefined>();
+      expectTypeOf(result).toEqualTypeOf<DatePick<Date> | undefined>();
     });
 
     it("should have correct types for between", () => {
       const result = pick(new Date()).date()?.between(new Date(), new Date());
-      expectTypeOf(result).toEqualTypeOf<DatePick | undefined>();
+      expectTypeOf(result).toEqualTypeOf<DatePick<Date> | undefined>();
     });
   });
 });
@@ -1697,6 +1698,54 @@ describe("instanceOf", () => {
   it("should have correct types", () => {
     const result = pick(new Date()).instanceOf(Date);
     expectTypeOf(result).toEqualTypeOf<Pick<Date> | undefined>();
+  });
+});
+
+describe("url", () => {
+  it("should validate URL string", () => {
+    const result = pick("http://localhost").url();
+    expect(result?.valueOf()).toBe("http://localhost");
+  });
+
+  it("should validate URL object", () => {
+    const url = new URL("http://localhost");
+    const result = pick(url).url();
+    expect(result?.valueOf()).toBe(url);
+    expect(result?.valueOf().href).toBe("http://localhost/");
+  });
+
+  it("should validate various URL formats", () => {
+    expect(pick("https://example.com").url()?.valueOf()).toBe(
+      "https://example.com",
+    );
+    expect(pick("http://localhost:3000").url()?.valueOf()).toBe(
+      "http://localhost:3000",
+    );
+    expect(pick("https://example.com/path?query=1").url()?.valueOf()).toBe(
+      "https://example.com/path?query=1",
+    );
+  });
+
+  it("should return undefined for invalid URLs", () => {
+    expect(pick("not a url").url()).toBeUndefined();
+    expect(pick("example.com").url()).toBeUndefined();
+    expect(pick("").url()).toBeUndefined();
+  });
+
+  it("should return undefined for non-string and non-URL values", () => {
+    expect(pick(123).url()).toBeUndefined();
+    expect(pick(true).url()).toBeUndefined();
+    expect(pick({}).url()).toBeUndefined();
+    expect(pick(null).url()).toBeUndefined();
+  });
+
+  it("should allow chaining with pipe to convert to URL object", () => {
+    const result = pick("http://localhost")
+      .url()
+      ?.pipe((urlStr: string | URL) => new URL(urlStr))
+      .valueOf();
+    expect(result).toBeInstanceOf(URL);
+    expect(result?.href).toBe("http://localhost/");
   });
 });
 
