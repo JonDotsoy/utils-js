@@ -12,6 +12,23 @@ import { pick } from "@jondotsoy/utils-js/pick";
 
 `pick` provides a fluent API for safely accessing and validating object properties. It returns `undefined` when an operation fails, allowing elegant handling of cases where data doesn't meet expectations.
 
+## Specialized Classes
+
+The `pick` utility returns different specialized classes depending on the validation method used:
+
+- **`Pick<T>`** - Base class for all types
+- **`StringPick`** - For string values (returned by `.string()`)
+- **`NumberPick`** - For number values (returned by `.number()`)
+- **`IntegerPick`** - For integer values (returned by `.integer()`)
+- **`BigIntPick`** - For bigint values (returned by `.bigInt()`)
+- **`BooleanPick`** - For boolean values (returned by `.boolean()`)
+- **`ArrayPick<T>`** - For array values (returned by `.array()`)
+- **`RecordPick`** - For object values (returned by `.record()`)
+- **`DatePick<T>`** - For date values (returned by `.date()`)
+- **`URLPick<T>`** - For URL values (returned by `.url()`)
+
+Each specialized class provides type-specific validation methods while maintaining the ability to chain operations.
+
 ## API
 
 ### `pick(value)`
@@ -37,48 +54,58 @@ const name = pick(obj).property("user")?.property("name")?.valueOf();
 
 #### `.string()`
 
-Validates that the value is a string. Returns `undefined` if it's not.
+Validates that the value is a string. Returns a `StringPick` instance if valid, or `undefined` if it's not.
 
 ```typescript
 pick("hello").string()?.valueOf(); // "hello"
 pick(123).string(); // undefined
 ```
 
+**Deprecated alias:** `.isString()` - Use `.string()` instead
+
 #### `.number()`
 
-Validates that the value is a number. Returns `undefined` if it's not.
+Validates that the value is a number. Returns a `NumberPick` instance if valid, or `undefined` if it's not.
 
 ```typescript
 pick(123).number()?.valueOf(); // 123
 pick("123").number(); // undefined
 ```
 
+**Deprecated alias:** `.isNumber()` - Use `.number()` instead
+
 #### `.integer()`
 
-Validates that the value is an integer. Returns `undefined` if it's not.
+Validates that the value is an integer. Returns an `IntegerPick` instance if valid, or `undefined` if it's not.
 
 ```typescript
 pick(42).integer()?.valueOf(); // 42
 pick(3.14).integer(); // undefined
 ```
 
+**Deprecated alias:** `.isInteger()` - Use `.integer()` instead
+
 #### `.bigInt()`
 
-Validates that the value is a bigint. Returns `undefined` if it's not.
+Validates that the value is a bigint. Returns a `BigIntPick` instance if valid, or `undefined` if it's not.
 
 ```typescript
 pick(123n).bigInt()?.valueOf(); // 123n
 pick(123).bigInt(); // undefined
 ```
 
+**Deprecated alias:** `.isBigInt()` - Use `.bigInt()` instead
+
 #### `.boolean()`
 
-Validates that the value is a boolean. Returns `undefined` if it's not.
+Validates that the value is a boolean. Returns a `BooleanPick` instance if valid, or `undefined` if it's not.
 
 ```typescript
 pick(true).boolean()?.valueOf(); // true
 pick(1).boolean(); // undefined
 ```
+
+**Deprecated alias:** `.isBoolean()` - Use `.boolean()` instead
 
 #### `.symbol()`
 
@@ -173,25 +200,29 @@ pick(0).null(); // undefined
 
 #### `.array()`
 
-Validates that the value is an array. Returns `undefined` if it's not.
+Validates that the value is an array. Returns an `ArrayPick` instance if valid, or `undefined` if it's not.
 
 ```typescript
 pick([1, 2, 3]).array()?.valueOf(); // [1, 2, 3]
 pick("not array").array(); // undefined
 ```
 
+**Deprecated alias:** `.isArray()` - Use `.array()` instead
+
 #### `.record()`
 
-Validates that the value is an object. Returns `undefined` if it's not.
+Validates that the value is an object (Record). Returns a `RecordPick` instance if valid, or `undefined` if it's not.
 
 ```typescript
 pick({ key: "value" }).record()?.valueOf(); // { key: "value" }
 pick(null).record(); // undefined
 ```
 
+**Deprecated alias:** `.isRecord()` - Use `.record()` instead
+
 #### `.native()`
 
-Validates that the value is a native JavaScript type (string, number, boolean, array, or record). Returns `undefined` if it's not.
+Validates that the value is a native JavaScript type (string, number, boolean, array, or record). Returns a `Pick` instance with the appropriate type if valid, or `undefined` if it's not.
 
 ```typescript
 pick("text").native()?.valueOf(); // "text"
@@ -199,9 +230,11 @@ pick(42).native()?.valueOf(); // 42
 pick(null).native(); // undefined
 ```
 
+**Deprecated alias:** `.isNative()` - Use `.native()` instead
+
 #### `.enum(values)`
 
-Validates that the value is one of the specified values in the array. Returns `undefined` if it's not.
+Validates that the value is a string that belongs to a specific set of values (enum). Returns a `Pick` instance with the enum type if valid, or `undefined` if it's not.
 
 ```typescript
 const status = pick("active").enum(["active", "inactive", "pending"]);
@@ -209,6 +242,8 @@ status?.valueOf(); // "active"
 
 pick("unknown").enum(["active", "inactive"]); // undefined
 ```
+
+**Deprecated alias:** `.isEnumOf(values)` - Use `.enum(values)` instead
 
 #### `.startsWith(prefix)`
 
@@ -269,6 +304,47 @@ pick([1, 2, 3]).includes(5); // undefined
 pick({ name: "John", age: 30 }).includes("name")?.valueOf();
 // { name: "John", age: 30 }
 pick({ name: "John" }).includes("email"); // undefined
+```
+
+#### `.first()`
+
+Gets the first element of an array. Returns a new Pick instance with the first element, or `undefined` if the array is empty.
+
+```typescript
+pick([1, 2, 3]).array()?.first()?.valueOf(); // 1
+pick(["a", "b", "c"]).array()?.first()?.valueOf(); // "a"
+pick([]).array()?.first(); // undefined
+
+// Chain with other validations
+pick([1, 2, 3]).array()?.first()?.number()?.gt(0)?.valueOf(); // 1
+```
+
+#### `.last()`
+
+Gets the last element of an array. Returns a new Pick instance with the last element, or `undefined` if the array is empty.
+
+```typescript
+pick([1, 2, 3]).array()?.last()?.valueOf(); // 3
+pick(["a", "b", "c"]).array()?.last()?.valueOf(); // "c"
+pick([]).array()?.last(); // undefined
+
+// Chain with other validations
+pick([1, 2, 3]).array()?.last()?.number()?.lte(10)?.valueOf(); // 3
+```
+
+#### `.at(index)`
+
+Gets an element at a specific index. Supports negative indices (counting from the end). Returns a new Pick instance with the element, or `undefined` if the index doesn't exist.
+
+```typescript
+pick([1, 2, 3]).array()?.at(0)?.valueOf(); // 1
+pick([1, 2, 3]).array()?.at(1)?.valueOf(); // 2
+pick([1, 2, 3]).array()?.at(-1)?.valueOf(); // 3 (last element)
+pick([1, 2, 3]).array()?.at(-2)?.valueOf(); // 2 (second to last)
+pick([1, 2, 3]).array()?.at(10); // undefined
+
+// Chain with other validations
+pick(["a", "b", "c"]).array()?.at(1)?.string()?.valueOf(); // "b"
 ```
 
 #### `.length(length)`
@@ -336,6 +412,69 @@ pick("user@example.com")
   .regexp(/^[\w.-]+@[\w.-]+\.\w+$/)
   ?.valueOf();
 // "user@example.com"
+```
+
+#### `.matches(pattern)`
+
+Validates that the string matches a regular expression. This is an alias for `.regexp()` but only accepts RegExp or string patterns (without separate flags parameter).
+
+```typescript
+// Using RegExp object
+pick("hello123")
+  .string()
+  ?.matches(/^[a-z]+\d+$/)
+  ?.valueOf(); // "hello123"
+
+// Using string pattern
+pick("test").string()?.matches("^test$")?.valueOf(); // "test"
+
+pick("hello").string()?.matches(/^\d+$/); // undefined
+```
+
+#### `.notEmpty()`
+
+Validates that the string is not empty. Returns `undefined` if the string has length 0.
+
+```typescript
+pick("hello").string()?.notEmpty()?.valueOf(); // "hello"
+pick("").string()?.notEmpty(); // undefined
+pick(" ").string()?.notEmpty()?.valueOf(); // " " (whitespace is not empty)
+```
+
+#### `.toUpperCase()`
+
+Transforms the string to uppercase. Returns a new StringPick instance with the transformed value.
+
+```typescript
+pick("hello").string()?.toUpperCase().valueOf(); // "HELLO"
+pick("Hello World").string()?.toUpperCase().valueOf(); // "HELLO WORLD"
+
+// Chain with other validations
+pick("hello").string()?.toUpperCase().startsWith("HE")?.valueOf(); // "HELLO"
+```
+
+#### `.toLowerCase()`
+
+Transforms the string to lowercase. Returns a new StringPick instance with the transformed value.
+
+```typescript
+pick("HELLO").string()?.toLowerCase().valueOf(); // "hello"
+pick("Hello World").string()?.toLowerCase().valueOf(); // "hello world"
+
+// Chain with other validations
+pick("HELLO").string()?.toLowerCase().startsWith("he")?.valueOf(); // "hello"
+```
+
+#### `.trim()`
+
+Removes whitespace from the beginning and end of the string. Returns a new StringPick instance with the trimmed value.
+
+```typescript
+pick("  hello  ").string()?.trim().valueOf(); // "hello"
+pick("\n\tworld\t\n").string()?.trim().valueOf(); // "world"
+
+// Chain with other validations
+pick("  test  ").string()?.trim().length(4)?.valueOf(); // "test"
 ```
 
 #### `.pipe(transform)`
@@ -460,6 +599,68 @@ Validates that the value is strictly equal to the specified value. Returns `unde
 pick(5).eq(5)?.valueOf(); // 5
 pick("hello").eq("hello")?.valueOf(); // "hello"
 pick(5).eq(10); // undefined
+```
+
+#### `.positive()`
+
+Validates that the number is positive (greater than 0). Available for `NumberPick`, `IntegerPick`, and `BigIntPick`. Returns `undefined` if not positive.
+
+```typescript
+// NumberPick
+pick(5).number()?.positive()?.valueOf(); // 5
+pick(0).number()?.positive(); // undefined
+pick(-5).number()?.positive(); // undefined
+
+// IntegerPick
+pick(10).integer()?.positive()?.valueOf(); // 10
+
+// BigIntPick
+pick(100n).bigInt()?.positive()?.valueOf(); // 100n
+```
+
+#### `.negative()`
+
+Validates that the number is negative (less than 0). Available for `NumberPick`, `IntegerPick`, and `BigIntPick`. Returns `undefined` if not negative.
+
+```typescript
+// NumberPick
+pick(-5).number()?.negative()?.valueOf(); // -5
+pick(0).number()?.negative(); // undefined
+pick(5).number()?.negative(); // undefined
+
+// IntegerPick
+pick(-10).integer()?.negative()?.valueOf(); // -10
+
+// BigIntPick
+pick(-100n).bigInt()?.negative()?.valueOf(); // -100n
+```
+
+#### `.between(min, max)`
+
+Validates that the number is within a range (inclusive). Available for `NumberPick`, `IntegerPick`, and `BigIntPick`. Returns `undefined` if not in range.
+
+```typescript
+// NumberPick
+pick(5).number()?.between(1, 10)?.valueOf(); // 5
+pick(0).number()?.between(1, 10); // undefined
+pick(15).number()?.between(1, 10); // undefined
+
+// IntegerPick
+pick(7).integer()?.between(5, 10)?.valueOf(); // 7
+
+// BigIntPick
+pick(50n).bigInt()?.between(1n, 100n)?.valueOf(); // 50n
+```
+
+#### `.finite()`
+
+Validates that the number is finite (not Infinity or -Infinity). Only available for `NumberPick`. Returns `undefined` if not finite.
+
+```typescript
+pick(42).number()?.finite()?.valueOf(); // 42
+pick(Infinity).number()?.finite(); // undefined
+pick(-Infinity).number()?.finite(); // undefined
+pick(NaN).number()?.finite(); // undefined
 ```
 
 #### `.multipleOf(divisor)` / `.divisibleBy(divisor)`
@@ -758,6 +959,56 @@ const validAge = pick(data)
 console.log(validAge); // 25
 ```
 
+### Boolean validations
+
+```typescript
+const data = {
+  isActive: true,
+  isDeleted: false,
+  hasPermission: true,
+};
+
+// Validate true value
+const isActive = pick(data).property("isActive")?.boolean()?.true()?.valueOf();
+console.log(isActive); // true
+
+const isDeleted = pick(data)
+  .property("isDeleted")
+  ?.boolean()
+  ?.true()
+  ?.valueOf();
+console.log(isDeleted); // undefined (value is false)
+
+// Validate false value
+const notDeleted = pick(data)
+  .property("isDeleted")
+  ?.boolean()
+  ?.false()
+  ?.valueOf();
+console.log(notDeleted); // false
+
+// Invert boolean value
+const inverted = pick(data).property("isActive")?.boolean()?.not().valueOf();
+console.log(inverted); // false
+
+// Chain not with validations
+const invertedAndValidated = pick(data)
+  .property("isActive")
+  ?.boolean()
+  ?.not()
+  .false()
+  ?.valueOf();
+console.log(invertedAndValidated); // false
+
+// Use with pipe for transformations
+const boolToString = pick(data)
+  .property("isActive")
+  ?.boolean()
+  ?.pipe((b) => (b ? "yes" : "no"))
+  .valueOf();
+console.log(boolToString); // "yes"
+```
+
 ### Arithmetic validations
 
 ```typescript
@@ -961,6 +1212,70 @@ const titleLower = pick(data)
 console.log(titleLower); // undefined
 ```
 
+### Record (Object) validations
+
+```typescript
+const data = {
+  user: {
+    name: "John",
+    email: "john@example.com",
+    age: 30,
+  },
+  settings: {},
+};
+
+// Validate object has a specific key
+const user = pick(data).property("user")?.record()?.hasKey("name")?.valueOf();
+console.log(user); // { name: "John", email: "john@example.com", age: 30 }
+
+// Validate object has multiple keys
+const validUser = pick(data)
+  .property("user")
+  ?.record()
+  ?.hasKeys(["name", "email"])
+  ?.valueOf();
+console.log(validUser); // { name: "John", email: "john@example.com", age: 30 }
+
+// Validate object is not empty
+const settings = pick(data).property("settings")?.record()?.notEmpty();
+console.log(settings); // undefined (empty object)
+
+// Validate minimum number of keys
+const userWithMinKeys = pick(data)
+  .property("user")
+  ?.record()
+  ?.minKeys(2)
+  ?.valueOf();
+console.log(userWithMinKeys); // { name: "John", email: "john@example.com", age: 30 }
+
+// Validate maximum number of keys
+const userWithMaxKeys = pick(data)
+  .property("user")
+  ?.record()
+  ?.maxKeys(10)
+  ?.valueOf();
+console.log(userWithMaxKeys); // { name: "John", email: "john@example.com", age: 30 }
+
+// Get object keys
+const keys = pick(data).property("user")?.record()?.keys().valueOf();
+console.log(keys); // ["name", "email", "age"]
+
+// Get object values
+const values = pick(data).property("user")?.record()?.values().valueOf();
+console.log(values); // ["John", "john@example.com", 30]
+
+// Chain validations
+const validatedUser = pick(data)
+  .property("user")
+  ?.record()
+  ?.notEmpty()
+  ?.hasKeys(["name", "email"])
+  ?.minKeys(2)
+  ?.maxKeys(10)
+  ?.valueOf();
+console.log(validatedUser); // { name: "John", email: "john@example.com", age: 30 }
+```
+
 ### Null and undefined validation
 
 ```typescript
@@ -1075,17 +1390,17 @@ const age = pick(data).property("age")?.number()?.min(18)?.max(65)?.valueOf();
 console.log(age); // 25
 ```
 
-## NumericalPick Interface
+## ArithmeticMethods Interface
 
-`NumericalPick<T, Self>` is an interface that defines common arithmetic validation methods for numerical types. It's implemented by `NumberPick`, `IntegerPick`, and `BigIntPick` to ensure a consistent API across all numerical types.
+`ArithmeticMethods<T, Self>` is an interface that defines common arithmetic validation methods for numerical types. It's implemented by `NumberPick`, `IntegerPick`, and `BigIntPick` to ensure a consistent API across all numerical types.
 
-### Methods defined by NumericalPick
+### Methods defined by ArithmeticMethods
 
-- `gt(min)` - Greater than
-- `gte(min)` - Greater than or equal
-- `lt(max)` - Less than
-- `lte(max)` - Less than or equal
-- `between(min, max)` - Within range (inclusive)
+- `gt(min)` - Greater than (exclusive)
+- `gte(min)` - Greater than or equal (inclusive)
+- `lt(max)` - Less than (exclusive)
+- `lte(max)` - Less than or equal (inclusive)
+- `between(min, max)` - Within range (inclusive on both ends)
 - `positive()` - Greater than 0
 - `negative()` - Less than 0
 - `multipleOf(divisor)` - Is a multiple of divisor
@@ -1094,6 +1409,13 @@ console.log(age); // 25
 - `odd()` - Is an odd number
 
 All three numerical classes (`NumberPick`, `IntegerPick`, `BigIntPick`) implement this interface, providing a consistent API for numerical validations.
+
+### NumberPick Specific Methods
+
+In addition to the `ArithmeticMethods` interface, `NumberPick` also provides:
+
+- `integer()` - Validates that the number is an integer and returns an `IntegerPick` instance
+- `finite()` - Validates that the number is finite (not Infinity or -Infinity)
 
 ## DatePick
 
@@ -1153,40 +1475,33 @@ pick(new Date("2025-01-01"))
 // undefined
 ```
 
-#### `.toDate()`
+## URLPick
 
-Converts the value to a Date object. This is useful when you have a timestamp or date string and want to work with it as a Date object.
+`URLPick` is a specialized class that extends `Pick<URL | string>` for working with URLs. It's automatically returned by the `.url()` method.
 
-```typescript
-// Convert timestamp to Date
-pick(1704067200000).date()?.toDate()?.valueOf();
-// Date object
+### `.url()`
 
-// Convert string to Date
-pick("2024-01-01").date()?.toDate()?.valueOf();
-// Date object
-
-// Date objects remain unchanged
-pick(new Date()).date()?.toDate()?.valueOf();
-// Date object
-```
-
-#### `.number()`
-
-Converts the date to a timestamp (number). This is useful when you have a Date object and want to work with it as a timestamp.
+Validates that the value is a valid URL string or URL object and returns a URLPick instance.
 
 ```typescript
-// Convert Date to timestamp
-pick(new Date("2024-01-01")).date()?.number()?.valueOf();
-// 1704067200000 (timestamp)
+// Valid URL string
+pick("https://example.com").url()?.valueOf(); // URL object
+pick("https://example.com/path?query=value").url()?.valueOf(); // URL object
 
-// Timestamps remain unchanged
-pick(1704067200000).date()?.number()?.valueOf();
-// 1704067200000
+// Valid URL object
+pick(new URL("https://example.com")).url()?.valueOf(); // URL object
 
-// Can chain with number validations
-pick(new Date("2024-01-01")).date()?.number()?.gt(1700000000000)?.valueOf();
-// timestamp if greater than specified value
+// Invalid URLs
+pick("not-a-url").url(); // undefined
+pick(123).url(); // undefined
+pick("example.com").url(); // undefined (missing protocol)
+
+// Chain with other validations
+const validUrl = pick("https://example.com")
+  .url()
+  ?.pipe((url) => new URL(url))
+  .valueOf();
+console.log(validUrl); // URL object
 ```
 
 ## Utilities
@@ -1216,6 +1531,28 @@ if (pick.utils.hasOwnProperty(obj, "name")) {
 }
 ```
 
+## Deprecated Methods
+
+The following methods are deprecated and will be removed in a future version. Use the recommended alternatives instead:
+
+### Type Validation Methods
+
+- `.isString()` → Use `.string()` instead
+- `.isNumber()` → Use `.number()` instead
+- `.isInteger()` → Use `.integer()` instead
+- `.isBigInt()` → Use `.bigInt()` instead
+- `.isBoolean()` → Use `.boolean()` instead
+- `.isArray()` → Use `.array()` instead
+- `.isRecord()` → Use `.record()` instead
+- `.isNative()` → Use `.native()` instead
+- `.isEnumOf(values)` → Use `.enum(values)` instead
+
+### Array Methods
+
+- `.filter(predicate)` → Use `.pipe(arr => arr.filter(predicate))` instead
+
+The `.filter()` method is deprecated because the name can be confusing. Although it doesn't mutate the original value, the name suggests a mutation operation.
+
 ## Features
 
 - **Type safety**: Maintains type information in TypeScript
@@ -1223,3 +1560,5 @@ if (pick.utils.hasOwnProperty(obj, "name")) {
 - **Elegant error handling**: Returns `undefined` instead of throwing exceptions
 - **Immutable**: Doesn't modify original values
 - **Flexible**: Supports strings, numbers, arrays, objects, and symbols
+- **Specialized classes**: Different classes for different types with type-specific methods
+- **Consistent API**: Arithmetic methods work the same across NumberPick, IntegerPick, and BigIntPick
