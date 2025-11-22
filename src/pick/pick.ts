@@ -489,10 +489,108 @@ export class Pick<T> {
 }
 
 /**
+ * Interface for numerical types that support arithmetic validation methods.
+ * Implemented by NumberPick, IntegerPick, and BigIntPick.
+ *
+ * @template T - The numerical type (number or bigint)
+ * @template Self - The implementing class type for method chaining
+ */
+export interface ArithmeticMethods<T extends number | bigint, Self> {
+  /**
+   * Validates that the number is greater than the specified value.
+   *
+   * @param min - Minimum value (exclusive)
+   * @returns This instance if it meets the condition, or undefined if not
+   */
+  gt(min: T): undefined | Self;
+
+  /**
+   * Validates that the number is greater than or equal to the specified value.
+   *
+   * @param min - Minimum value (inclusive)
+   * @returns This instance if it meets the condition, or undefined if not
+   */
+  gte(min: T): undefined | Self;
+
+  /**
+   * Validates that the number is less than the specified value.
+   *
+   * @param max - Maximum value (exclusive)
+   * @returns This instance if it meets the condition, or undefined if not
+   */
+  lt(max: T): undefined | Self;
+
+  /**
+   * Validates that the number is less than or equal to the specified value.
+   *
+   * @param max - Maximum value (inclusive)
+   * @returns This instance if it meets the condition, or undefined if not
+   */
+  lte(max: T): undefined | Self;
+
+  /**
+   * Validates that the number is within a range.
+   *
+   * @param min - Minimum value (inclusive)
+   * @param max - Maximum value (inclusive)
+   * @returns This instance if it meets the condition, or undefined if not
+   */
+  between(min: T, max: T): undefined | Self;
+
+  /**
+   * Validates that the number is positive (greater than 0).
+   *
+   * @returns This instance if it's positive, or undefined if not
+   */
+  positive(): undefined | Self;
+
+  /**
+   * Validates that the number is negative (less than 0).
+   *
+   * @returns This instance if it's negative, or undefined if not
+   */
+  negative(): undefined | Self;
+
+  /**
+   * Validates that the number is a multiple of the specified value.
+   *
+   * @param divisor - The divisor
+   * @returns This instance if it's a multiple, or undefined if not
+   */
+  multipleOf(divisor: T): undefined | Self;
+
+  /**
+   * Validates that the number is divisible by the specified divisor.
+   * This is an alias for `multipleOf()` with more intuitive naming.
+   *
+   * @param divisor - The divisor to check
+   * @returns This instance if it's divisible by the divisor, or undefined if not
+   */
+  divisibleBy(divisor: T): undefined | Self;
+
+  /**
+   * Validates that the number is even.
+   *
+   * @returns This instance if it's even, or undefined if not
+   */
+  even(): undefined | Self;
+
+  /**
+   * Validates that the number is odd.
+   *
+   * @returns This instance if it's odd, or undefined if not
+   */
+  odd(): undefined | Self;
+}
+
+/**
  * Specialized class for working with integers.
  * Extends NumberPick with specific validations for integer numbers.
  */
-export class IntegerPick extends Pick<number> {
+export class IntegerPick
+  extends Pick<number>
+  implements ArithmeticMethods<number, IntegerPick>
+{
   /**
    * Validates that the integer is greater than the specified value.
    *
@@ -599,13 +697,34 @@ export class IntegerPick extends Pick<number> {
     if (this.value % 2 === 0) return undefined;
     return this;
   }
+
+  /**
+   * Validates that the integer is divisible by the specified divisor.
+   * This is an alias for `multipleOf()` with more intuitive naming.
+   *
+   * @param divisor - The divisor to check
+   * @returns This instance if it's divisible by the divisor, or undefined if not
+   *
+   * @example
+   * ```typescript
+   * pick(10).integer()?.divisibleBy(2)?.valueOf(); // 10
+   * pick(4).integer()?.divisibleBy(2)?.valueOf(); // 4
+   * pick(5).integer()?.divisibleBy(2); // undefined
+   * ```
+   */
+  divisibleBy(divisor: number): undefined | IntegerPick {
+    return this.multipleOf(divisor);
+  }
 }
 
 /**
  * Specialized class for working with bigints.
  * Extends Pick<bigint> with specific methods for bigint validation.
  */
-export class BigIntPick extends Pick<bigint> {
+export class BigIntPick
+  extends Pick<bigint>
+  implements ArithmeticMethods<bigint, BigIntPick>
+{
   /**
    * Validates that the bigint is greater than the specified value.
    *
@@ -679,6 +798,74 @@ export class BigIntPick extends Pick<bigint> {
    */
   negative(): undefined | BigIntPick {
     if (this.value >= 0n) return undefined;
+    return this;
+  }
+
+  /**
+   * Validates that the bigint is a multiple of the specified value.
+   *
+   * @param divisor - The divisor
+   * @returns This instance if it's a multiple, or undefined if not
+   *
+   * @example
+   * ```typescript
+   * pick(10n).bigInt()?.multipleOf(2n)?.valueOf(); // 10n
+   * pick(5n).bigInt()?.multipleOf(2n); // undefined
+   * ```
+   */
+  multipleOf(divisor: bigint): undefined | BigIntPick {
+    if (divisor === 0n) return undefined;
+    if (this.value % divisor !== 0n) return undefined;
+    return this;
+  }
+
+  /**
+   * Validates that the bigint is divisible by the specified divisor.
+   * This is an alias for `multipleOf()` with more intuitive naming.
+   *
+   * @param divisor - The divisor to check
+   * @returns This instance if it's divisible by the divisor, or undefined if not
+   *
+   * @example
+   * ```typescript
+   * pick(10n).bigInt()?.divisibleBy(2n)?.valueOf(); // 10n
+   * pick(4n).bigInt()?.divisibleBy(2n)?.valueOf(); // 4n
+   * pick(5n).bigInt()?.divisibleBy(2n); // undefined
+   * ```
+   */
+  divisibleBy(divisor: bigint): undefined | BigIntPick {
+    return this.multipleOf(divisor);
+  }
+
+  /**
+   * Validates that the bigint is even.
+   *
+   * @returns This instance if it's even, or undefined if not
+   *
+   * @example
+   * ```typescript
+   * pick(4n).bigInt()?.even()?.valueOf(); // 4n
+   * pick(5n).bigInt()?.even(); // undefined
+   * ```
+   */
+  even(): undefined | BigIntPick {
+    if (this.value % 2n !== 0n) return undefined;
+    return this;
+  }
+
+  /**
+   * Validates that the bigint is odd.
+   *
+   * @returns This instance if it's odd, or undefined if not
+   *
+   * @example
+   * ```typescript
+   * pick(5n).bigInt()?.odd()?.valueOf(); // 5n
+   * pick(4n).bigInt()?.odd(); // undefined
+   * ```
+   */
+  odd(): undefined | BigIntPick {
+    if (this.value % 2n === 0n) return undefined;
     return this;
   }
 }
@@ -1045,7 +1232,10 @@ export class StringPick extends Pick<string> {
  * Specialized class for working with numbers.
  * Extends Pick<number> with specific methods for number validation.
  */
-export class NumberPick extends Pick<number> {
+export class NumberPick
+  extends Pick<number>
+  implements ArithmeticMethods<number, NumberPick>
+{
   /**
    * Validates that the number is greater than the specified value.
    *
@@ -1150,6 +1340,60 @@ export class NumberPick extends Pick<number> {
    */
   multipleOf(divisor: number): undefined | NumberPick {
     if (this.value % divisor !== 0) return undefined;
+    return this;
+  }
+
+  /**
+   * Validates that the number is divisible by the specified divisor.
+   * This is an alias for `multipleOf()` with more intuitive naming.
+   *
+   * @param divisor - The divisor to check
+   * @returns This instance if it's divisible by the divisor, or undefined if not
+   *
+   * @example
+   * ```typescript
+   * pick(10).number()?.divisibleBy(2)?.valueOf(); // 10
+   * pick(4).number()?.divisibleBy(2)?.valueOf(); // 4
+   * pick(5).number()?.divisibleBy(2); // undefined
+   * ```
+   */
+  divisibleBy(divisor: number): undefined | NumberPick {
+    return this.multipleOf(divisor);
+  }
+
+  /**
+   * Validates that the number is even.
+   *
+   * @returns This instance if it's even, or undefined if not
+   *
+   * @example
+   * ```typescript
+   * pick(4).number()?.even()?.valueOf(); // 4
+   * pick(5).number()?.even(); // undefined
+   * pick(4.5).number()?.even(); // undefined (not an integer)
+   * ```
+   */
+  even(): undefined | NumberPick {
+    if (!Number.isInteger(this.value)) return undefined;
+    if (this.value % 2 !== 0) return undefined;
+    return this;
+  }
+
+  /**
+   * Validates that the number is odd.
+   *
+   * @returns This instance if it's odd, or undefined if not
+   *
+   * @example
+   * ```typescript
+   * pick(5).number()?.odd()?.valueOf(); // 5
+   * pick(4).number()?.odd(); // undefined
+   * pick(5.5).number()?.odd(); // undefined (not an integer)
+   * ```
+   */
+  odd(): undefined | NumberPick {
+    if (!Number.isInteger(this.value)) return undefined;
+    if (this.value % 2 === 0) return undefined;
     return this;
   }
 }
