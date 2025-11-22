@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.19.0...utils-js-v0.20.0) (2025-11-22)
+
+
+### Features
+
+* **pick:** add pick utility function ([32a2019](https://github.com/JonDotsoy/utils-js/commit/32a2019c8539eeaaff94ee137c577f879f3774e4))
+
 ## [0.19.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.18.1...utils-js-v0.19.0) (2025-11-03)
 
 
