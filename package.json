@@ -71,6 +71,14 @@
     "./workspace": {
       "import": "./libs/esm/workspace/workspace.js",
       "types": "./libs/types/workspace/workspace.d.ts"
+    },
+    "./meter": {
+      "import": "./libs/esm/meter/meter.js",
+      "types": "./libs/types/meter/meter.d.ts"
+    },
+    "./pick": {
+      "import": "./libs/esm/pick/pick.js",
+      "types": "./libs/types/pick/pick.d.ts"
     }
   },
   "devDependencies": {
