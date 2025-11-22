@@ -100,6 +100,27 @@ pick("invalid-email").email(); // undefined
 pick(123).email(); // undefined
 ```
 
+#### `.instanceOf(constructor)`
+
+Validates that the value is an instance of the specified class or constructor. Returns `undefined` if it's not an instance.
+
+```typescript
+// Built-in classes
+pick(new Date()).instanceOf(Date)?.valueOf(); // Date object
+pick(new Error("test")).instanceOf(Error)?.valueOf(); // Error object
+pick([1, 2, 3]).instanceOf(Array)?.valueOf(); // [1, 2, 3]
+pick(new Map()).instanceOf(Map)?.valueOf(); // Map object
+pick("hello").instanceOf(Date); // undefined
+
+// Custom classes
+class User {
+  constructor(public name: string) {}
+}
+const user = new User("John");
+pick(user).instanceOf(User)?.valueOf(); // User instance
+pick({ name: "John" }).instanceOf(User); // undefined (plain object, not User instance)
+```
+
 #### `.date()`
 
 Validates that the value is a valid date. Accepts Date objects, timestamps (numbers), or date strings. Returns a `DatePick` instance that allows date range validations. Returns `undefined` if the value cannot be converted to a valid date.
@@ -634,6 +655,80 @@ const timeout = pick(config)
   ?.valueOf();
 
 console.log(timeout); // 5000
+```
+
+### Instance validation with instanceOf
+
+```typescript
+// Validate built-in types
+const data = {
+  createdAt: new Date("2024-01-01"),
+  error: new Error("Something went wrong"),
+  tags: ["javascript", "typescript"],
+  metadata: new Map([["key", "value"]]),
+};
+
+// Validate Date instance
+const date = pick(data).property("createdAt")?.instanceOf(Date)?.valueOf();
+console.log(date); // Date object
+
+// Validate Error instance
+const error = pick(data).property("error")?.instanceOf(Error)?.valueOf();
+console.log(error); // Error object
+
+// Validate Array instance
+const tags = pick(data).property("tags")?.instanceOf(Array)?.valueOf();
+console.log(tags); // ["javascript", "typescript"]
+
+// Validate Map instance
+const metadata = pick(data).property("metadata")?.instanceOf(Map)?.valueOf();
+console.log(metadata); // Map object
+
+// Custom class validation
+class User {
+  constructor(
+    public name: string,
+    public email: string,
+  ) {}
+}
+
+class Admin extends User {
+  constructor(
+    name: string,
+    email: string,
+    public permissions: string[],
+  ) {}
+}
+
+const users = {
+  user1: new User("John", "john@example.com"),
+  user2: new Admin("Alice", "alice@example.com", ["read", "write"]),
+  user3: { name: "Bob", email: "bob@example.com" }, // Plain object
+};
+
+// Validate User instance
+const user1 = pick(users).property("user1")?.instanceOf(User)?.valueOf();
+console.log(user1); // User instance
+
+// Admin is also an instance of User (inheritance)
+const user2 = pick(users).property("user2")?.instanceOf(User)?.valueOf();
+console.log(user2); // Admin instance (extends User)
+
+// Plain object is not a User instance
+const user3 = pick(users).property("user3")?.instanceOf(User)?.valueOf();
+console.log(user3); // undefined
+
+// Validate specific Admin instance
+const admin = pick(users).property("user2")?.instanceOf(Admin)?.valueOf();
+console.log(admin); // Admin instance
+
+// Chain with other validations
+const validDate = pick(data)
+  .property("createdAt")
+  ?.instanceOf(Date)
+  ?.pipe((date) => date.getFullYear())
+  .valueOf();
+console.log(validDate); // 2024
 ```
 
 ### Comparison validations

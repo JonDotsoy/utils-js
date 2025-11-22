@@ -471,6 +471,35 @@ export class Pick<T> {
   }
 
   /**
+   * Validates that the current value is an instance of the specified class or constructor.
+   *
+   * @template C - The constructor type
+   * @param constructor - The class or constructor function to check against
+   * @returns A new Pick instance with the value typed as an instance of C, or undefined if it's not an instance
+   *
+   * @example
+   * ```typescript
+   * pick(new Date()).instanceOf(Date)?.valueOf(); // Date object
+   * pick(new Error("test")).instanceOf(Error)?.valueOf(); // Error object
+   * pick([1, 2, 3]).instanceOf(Array)?.valueOf(); // [1, 2, 3]
+   * pick("hello").instanceOf(Date); // undefined
+   *
+   * // Custom classes
+   * class User {
+   *   constructor(public name: string) {}
+   * }
+   * const user = new User("John");
+   * pick(user).instanceOf(User)?.valueOf(); // User instance
+   * ```
+   */
+  instanceOf<C extends new (...args: any[]) => any>(
+    constructor: C,
+  ): undefined | Pick<InstanceType<C>> {
+    if (!(this.value instanceof constructor)) return undefined;
+    return new Pick(this.value as InstanceType<C>);
+  }
+
+  /**
    * Gets the current encapsulated value.
    *
    * @returns The original value encapsulated in this Pick instance
