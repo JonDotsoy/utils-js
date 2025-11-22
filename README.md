@@ -258,27 +258,31 @@ const name = pick(data).property("user")?.property("name")?.valueOf();
 // name = "Alice"
 
 // Type validation
-pick("hello").isString()?.valueOf(); // "hello"
-pick(123).isNumber()?.valueOf(); // 123
-pick([1, 2, 3]).isArray()?.valueOf(); // [1, 2, 3]
+pick("hello").string()?.valueOf(); // "hello"
+pick(123).number()?.valueOf(); // 123
+pick([1, 2, 3]).array()?.valueOf(); // [1, 2, 3]
 
 // Returns undefined on validation failure
-pick(123).isString(); // undefined
-pick("text").isNumber(); // undefined
+pick(123).string(); // undefined
+pick("text").number(); // undefined
 ```
 
 ### Methods
 
 **Type Validators:**
 
-- `.isString()` - Validates the value is a string
-- `.isNumber()` - Validates the value is a number
-- `.isInteger()` - Validates the value is an integer
-- `.isBigInt()` - Validates the value is a bigint
-- `.isBoolean()` - Validates the value is a boolean
-- `.isArray()` - Validates the value is an array
-- `.isRecord()` - Validates the value is an object
-- `.isNative()` - Validates the value is a native JS type (string, number, boolean, array, or object)
+- `.string()` - Validates the value is a string
+- `.number()` - Validates the value is a number
+- `.integer()` - Validates the value is an integer
+- `.bigInt()` - Validates the value is a bigint
+- `.boolean()` - Validates the value is a boolean
+- `.array()` - Validates the value is an array
+- `.record()` - Validates the value is an object
+- `.native()` - Validates the value is a native JS type (string, number, boolean, array, or object)
+- `.date()` - Validates the value is a valid Date object (returns DatePick)
+- `.undefined()` - Validates the value is undefined
+- `.null()` - Validates the value is null
+- `.symbol()` - Validates the value is a symbol
 
 **Navigation & Transformation:**
 
@@ -288,8 +292,57 @@ pick("text").isNumber(); // undefined
 - `.filter(filter)` - Filters array elements
 - `.every(validator)` - Validates all array elements
 - `.oneOf(validators)` - Tries multiple validators
-- `.isEnumOf(values)` - Validates value is in a set of allowed values
+- `.enum(values)` - Validates value is in a set of allowed values
 - `.valueOf()` - Returns the current value
+
+**String Validators:**
+
+- `.startsWith(prefix)` - Validates string starts with prefix
+- `.endsWith(suffix)` - Validates string ends with suffix
+- `.includes(search)` - Validates string/array/record contains element
+- `.length(length)` - Validates exact length
+- `.min(minValue)` - Validates minimum length/value
+- `.max(maxValue)` - Validates maximum length/value
+- `.regexp(pattern, flags?)` - Validates string matches regex
+- `.uppercase()` - Validates all alphabetic characters are uppercase
+- `.lowercase()` - Validates all alphabetic characters are lowercase
+- `.email()` - Validates email format
+- `.url()` - Validates URL format
+- `.trim()` - Removes whitespace from start and end
+- `.toUpperCase()` - Transforms to uppercase
+- `.toLowerCase()` - Transforms to lowercase
+
+**Number Validators:**
+
+- `.gt(other)` - Validates greater than
+- `.gte(other)` - Validates greater than or equal
+- `.lt(other)` - Validates less than
+- `.lte(other)` - Validates less than or equal
+- `.eq(other)` - Validates strict equality
+- `.between(min, max)` - Validates within range
+- `.positive()` - Validates positive number
+- `.negative()` - Validates negative number
+- `.multipleOf(divisor)` - Validates multiple of divisor
+- `.even()` - Validates even number
+- `.odd()` - Validates odd number
+
+**Array Validators:**
+
+- `.minLength(min)` - Validates minimum array length
+- `.maxLength(max)` - Validates maximum array length
+- `.notEmpty()` - Validates array is not empty
+- `.first()` - Gets first element
+- `.last()` - Gets last element
+- `.at(index)` - Gets element at index
+
+**Record Validators:**
+
+- `.hasKey(key)` - Validates object has key
+- `.hasKeys(keys)` - Validates object has all keys
+- `.keys()` - Gets object keys as ArrayPick
+- `.values()` - Gets object values as ArrayPick
+- `.minKeys(min)` - Validates minimum number of keys
+- `.maxKeys(max)` - Validates maximum number of keys
 
 **Advanced Examples:**
 
@@ -297,14 +350,14 @@ pick("text").isNumber(); // undefined
 // Enum validation
 const status = pick({ status: "active" })
   .property("status")
-  ?.isEnumOf(["active", "inactive", "pending"])
+  ?.enum(["active", "inactive", "pending"])
   ?.valueOf();
 // status = "active"
 
 // Transformation pipeline
 const port = pick({ port: "3000" })
   .property("port")
-  ?.isString()
+  ?.string()
   ?.pipe((str) => parseInt(str, 10))
   .valueOf();
 // port = 3000
@@ -312,14 +365,14 @@ const port = pick({ port: "3000" })
 // Array validation
 const tags = pick({ tags: ["typescript", "javascript"] })
   .property("tags")
-  ?.every((v) => v.isString())
+  ?.every((v) => v.string())
   ?.valueOf();
 // tags = ["typescript", "javascript"]
 
 // Flexible type validation
 const timeout = pick({ timeout: 5000 })
   .property("timeout")
-  ?.oneOf([(v) => v.isString(), (v) => v.isNumber()])
+  ?.oneOf([(v) => v.string(), (v) => v.number()])
   ?.valueOf();
 // timeout = 5000
 
@@ -332,6 +385,70 @@ const activeUsers = pick(users)
   .filter((user: any) => user.active)
   ?.valueOf();
 // activeUsers = [{ name: "Alice", active: true }]
+
+// String validation with regex
+const email = pick({ email: "user@example.com" })
+  .property("email")
+  ?.string()
+  ?.regexp(/^[\w.-]+@[\w.-]+\.\w+$/)
+  ?.valueOf();
+// email = "user@example.com"
+
+// Date validation with range
+const validDate = pick({ createdAt: new Date("2024-06-15") })
+  .property("createdAt")
+  ?.date()
+  ?.after(new Date("2024-01-01"))
+  ?.before(new Date("2024-12-31"))
+  ?.valueOf();
+// validDate = Date object if within range
+
+// Number range validation
+const age = pick({ age: 25 })
+  .property("age")
+  ?.number()
+  ?.gte(18)
+  ?.lte(65)
+  ?.valueOf();
+// age = 25
+
+// String length and case validation
+const username = pick({ username: "john_doe" })
+  .property("username")
+  ?.string()
+  ?.min(3)
+  ?.max(20)
+  ?.lowercase()
+  ?.valueOf();
+// username = "john_doe"
+```
+
+### DatePick
+
+`DatePick` is a specialized class for date validation, automatically returned by `.date()`:
+
+**Methods:**
+
+- `.after(minDate)` - Validates date is after minimum date
+- `.before(maxDate)` - Validates date is before maximum date
+- `.between(minDate, maxDate)` - Validates date is within range
+
+**Example:**
+
+```ts
+const data = { createdAt: new Date("2024-01-01") };
+
+// Validate Date object (does not convert timestamps or strings)
+const date = pick(data).property("createdAt")?.date()?.valueOf();
+// date = Date object
+
+// Validate date range
+const inRange = pick(data)
+  .property("createdAt")
+  ?.date()
+  ?.between(new Date(2024, 0, 1), new Date(2024, 11, 31))
+  ?.valueOf();
+// inRange = Date object if in 2024
 ```
 
 **Utilities:**
