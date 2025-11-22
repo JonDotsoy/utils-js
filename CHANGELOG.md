@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.0.0...utils-js-v1.0.1) (2025-11-22)
+
+
+### Bug Fixes
+
+* **pick:** add email validation and expand date type support ([51d336c](https://github.com/JonDotsoy/utils-js/commit/51d336c3c008fc001a19bf5dd553f3847633ecf0))
+
 ## [1.0.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v0.20.0...utils-js-v1.0.0) (2025-11-22)
 
 
