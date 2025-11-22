@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.1.0...utils-js-v1.2.0) (2025-11-22)
+
+
+### Features
+
+* **pick:** add url() method and improve date type safety ([1ee5e21](https://github.com/JonDotsoy/utils-js/commit/1ee5e213e264e8efc17c619ffd48478c4404d62d))
+
 ## [1.1.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.0.2...utils-js-v1.1.0) (2025-11-22)
 
 
