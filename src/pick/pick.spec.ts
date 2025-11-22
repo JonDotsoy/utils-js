@@ -629,6 +629,64 @@ describe("pick", () => {
       }
     });
   });
+
+  describe("error", () => {
+    it("should validate Error instances", () => {
+      const error = new Error("test error");
+      const result = pick(error).error();
+      expect(result?.valueOf()).toBe(error);
+    });
+
+    it("should validate TypeError instances", () => {
+      const error = new TypeError("type error");
+      const result = pick(error).error();
+      expect(result?.valueOf()).toBe(error);
+    });
+
+    it("should validate RangeError instances", () => {
+      const error = new RangeError("range error");
+      const result = pick(error).error();
+      expect(result?.valueOf()).toBe(error);
+    });
+
+    it("should validate custom Error subclasses", () => {
+      class CustomError extends Error {
+        constructor(message: string) {
+          super(message);
+          this.name = "CustomError";
+        }
+      }
+      const error = new CustomError("custom error");
+      const result = pick(error).error();
+      expect(result?.valueOf()).toBe(error);
+    });
+
+    it("should return undefined for non-Error values", () => {
+      expect(pick("error").error()).toBeUndefined();
+      expect(pick(123).error()).toBeUndefined();
+      expect(pick(true).error()).toBeUndefined();
+      expect(pick({}).error()).toBeUndefined();
+      expect(pick(null).error()).toBeUndefined();
+      expect(pick({ message: "error" }).error()).toBeUndefined();
+    });
+
+    it("should allow chaining after error validation", () => {
+      const error = new Error("test");
+      const result = pick(error)
+        .error()
+        ?.pipe((err) => err.message)
+        .valueOf();
+      expect(result).toBe("test");
+    });
+
+    it("should have correct types", () => {
+      const result = pick(new Error("test")).error();
+      expectTypeOf(result).toEqualTypeOf<Pick<Error> | undefined>();
+      if (result) {
+        expectTypeOf(result.valueOf()).toEqualTypeOf<Error>();
+      }
+    });
+  });
 });
 
 describe("IntegerPick", () => {

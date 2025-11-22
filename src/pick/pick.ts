@@ -532,6 +532,24 @@ export class Pick<T> {
   }
 
   /**
+   * Validates that the current value is an Error instance.
+   * This is an alias for `this.instanceOf(Error)`.
+   *
+   * @returns A new Pick instance with the value typed as Error, or undefined if it's not an Error
+   *
+   * @example
+   * ```typescript
+   * pick(new Error("test")).error()?.valueOf(); // Error object
+   * pick(new TypeError("test")).error()?.valueOf(); // TypeError object (extends Error)
+   * pick("not an error").error(); // undefined
+   * pick(123).error(); // undefined
+   * ```
+   */
+  error(): undefined | Pick<Error> {
+    return this.instanceOf(Error);
+  }
+
+  /**
    * Gets the current encapsulated value.
    *
    * @returns The original value encapsulated in this Pick instance

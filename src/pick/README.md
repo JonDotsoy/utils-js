@@ -148,6 +148,37 @@ pick(user).instanceOf(User)?.valueOf(); // User instance
 pick({ name: "John" }).instanceOf(User); // undefined (plain object, not User instance)
 ```
 
+#### `.error()`
+
+Validates that the value is an Error instance. This is an alias for `this.instanceOf(Error)`. Returns `undefined` if it's not an Error.
+
+```typescript
+// Standard Error
+pick(new Error("test")).error()?.valueOf(); // Error object
+pick(new TypeError("test")).error()?.valueOf(); // TypeError object
+pick(new RangeError("test")).error()?.valueOf(); // RangeError object
+
+// Custom Error subclasses
+class CustomError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "CustomError";
+  }
+}
+pick(new CustomError("test")).error()?.valueOf(); // CustomError object
+
+// Invalid values
+pick("error").error(); // undefined
+pick({ message: "error" }).error(); // undefined
+pick(123).error(); // undefined
+
+// Chain with other operations
+pick(new Error("test"))
+  .error()
+  ?.pipe((err) => err.message)
+  .valueOf(); // "test"
+```
+
 #### `.date()`
 
 Validates that the value is a valid date. Accepts Date objects, timestamps (numbers), or date strings. Returns a `DatePick` instance that allows date range validations. Returns `undefined` if the value cannot be converted to a valid date.
@@ -930,6 +961,65 @@ const validDate = pick(data)
   ?.pipe((date) => date.getFullYear())
   .valueOf();
 console.log(validDate); // 2024
+```
+
+### Error validation
+
+```typescript
+const data = {
+  error: new Error("Something went wrong"),
+  typeError: new TypeError("Invalid type"),
+  customError: new RangeError("Out of range"),
+  notAnError: { message: "This is not an error" },
+};
+
+// Validate Error instance using .error() method
+const error = pick(data).property("error")?.error()?.valueOf();
+console.log(error); // Error object
+
+// Works with Error subclasses
+const typeError = pick(data).property("typeError")?.error()?.valueOf();
+console.log(typeError); // TypeError object
+
+const rangeError = pick(data).property("customError")?.error()?.valueOf();
+console.log(rangeError); // RangeError object
+
+// Returns undefined for non-Error values
+const notAnError = pick(data).property("notAnError")?.error()?.valueOf();
+console.log(notAnError); // undefined
+
+// Custom Error subclasses
+class ValidationError extends Error {
+  constructor(
+    message: string,
+    public field: string,
+  ) {
+    super(message);
+    this.name = "ValidationError";
+  }
+}
+
+const validationError = new ValidationError("Invalid email", "email");
+const validated = pick(validationError).error()?.valueOf();
+console.log(validated); // ValidationError object
+
+// Chain with other operations
+const errorMessage = pick(data)
+  .property("error")
+  ?.error()
+  ?.pipe((err) => err.message)
+  .valueOf();
+console.log(errorMessage); // "Something went wrong"
+
+// Use in error handling
+function processResult(result: unknown) {
+  const error = pick(result).error();
+  if (error) {
+    console.error("Error occurred:", error.valueOf().message);
+    return null;
+  }
+  return result;
+}
 ```
 
 ### Comparison validations
