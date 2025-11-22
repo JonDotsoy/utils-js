@@ -441,6 +441,63 @@ pick("hello").eq("hello")?.valueOf(); // "hello"
 pick(5).eq(10); // undefined
 ```
 
+#### `.multipleOf(divisor)` / `.divisibleBy(divisor)`
+
+Validates that the number is divisible by the specified divisor. Both methods are equivalent - `divisibleBy` is an alias for `multipleOf` with more intuitive naming. Available for `NumberPick`, `IntegerPick`, and `BigIntPick`. Returns `undefined` if not divisible or divisor is 0.
+
+```typescript
+// NumberPick
+pick(10).number()?.multipleOf(5)?.valueOf(); // 10
+pick(10).number()?.divisibleBy(2)?.valueOf(); // 10
+pick(7).number()?.divisibleBy(3); // undefined
+
+// IntegerPick
+pick(12).integer()?.divisibleBy(3)?.valueOf(); // 12
+pick(12).integer()?.divisibleBy(5); // undefined
+
+// BigIntPick
+pick(100n).bigInt()?.divisibleBy(10n)?.valueOf(); // 100n
+pick(100n).bigInt()?.multipleOf(7n); // undefined
+```
+
+#### `.even()`
+
+Validates that the number is even. Available for `NumberPick`, `IntegerPick`, and `BigIntPick`. For `NumberPick`, also validates that the number is an integer. Returns `undefined` if not even.
+
+```typescript
+// NumberPick
+pick(4).number()?.even()?.valueOf(); // 4
+pick(5).number()?.even(); // undefined
+pick(4.5).number()?.even(); // undefined (not an integer)
+
+// IntegerPick
+pick(10).integer()?.even()?.valueOf(); // 10
+pick(7).integer()?.even(); // undefined
+
+// BigIntPick
+pick(100n).bigInt()?.even()?.valueOf(); // 100n
+pick(99n).bigInt()?.even(); // undefined
+```
+
+#### `.odd()`
+
+Validates that the number is odd. Available for `NumberPick`, `IntegerPick`, and `BigIntPick`. For `NumberPick`, also validates that the number is an integer. Returns `undefined` if not odd.
+
+```typescript
+// NumberPick
+pick(5).number()?.odd()?.valueOf(); // 5
+pick(4).number()?.odd(); // undefined
+pick(5.5).number()?.odd(); // undefined (not an integer)
+
+// IntegerPick
+pick(7).integer()?.odd()?.valueOf(); // 7
+pick(10).integer()?.odd(); // undefined
+
+// BigIntPick
+pick(99n).bigInt()?.odd()?.valueOf(); // 99n
+pick(100n).bigInt()?.odd(); // undefined
+```
+
 #### `.valueOf()`
 
 Returns the current value.
@@ -604,6 +661,78 @@ const validAge = pick(data)
   ?.lte(65)
   ?.valueOf();
 console.log(validAge); // 25
+```
+
+### Arithmetic validations
+
+```typescript
+const data = {
+  quantity: 10,
+  price: 99.99,
+  itemsPerBox: 12,
+  userId: 12345n,
+};
+
+// Validate divisibility
+const evenQuantity = pick(data)
+  .property("quantity")
+  ?.number()
+  ?.divisibleBy(2)
+  ?.valueOf();
+console.log(evenQuantity); // 10
+
+// Validate even/odd numbers
+const evenItems = pick(data)
+  .property("itemsPerBox")
+  ?.integer()
+  ?.even()
+  ?.valueOf();
+console.log(evenItems); // 12
+
+const oddQuantity = pick(data)
+  .property("quantity")
+  ?.integer()
+  ?.odd()
+  ?.valueOf();
+console.log(oddQuantity); // undefined (10 is not odd)
+
+// Check if number is multiple of another
+const multipleOfFive = pick(data)
+  .property("quantity")
+  ?.number()
+  ?.multipleOf(5)
+  ?.valueOf();
+console.log(multipleOfFive); // 10
+
+// BigInt arithmetic validations
+const evenUserId = pick(data).property("userId")?.bigInt()?.even()?.valueOf();
+console.log(evenUserId); // undefined (12345 is odd)
+
+const oddUserId = pick(data).property("userId")?.bigInt()?.odd()?.valueOf();
+console.log(oddUserId); // 12345n
+
+const divisibleById = pick(data)
+  .property("userId")
+  ?.bigInt()
+  ?.divisibleBy(5n)
+  ?.valueOf();
+console.log(divisibleById); // 12345n
+
+// Chain arithmetic validations
+const validQuantity = pick(data)
+  .property("quantity")
+  ?.integer()
+  ?.positive()
+  ?.even()
+  ?.divisibleBy(5)
+  ?.valueOf();
+console.log(validQuantity); // 10
+
+// Validate price is not an integer (for decimal prices)
+const decimalPrice = pick(data).property("price")?.number()?.valueOf();
+const isInteger = pick(data).property("price")?.integer()?.valueOf();
+console.log(decimalPrice); // 99.99
+console.log(isInteger); // undefined (99.99 is not an integer)
 ```
 
 ### Regular expression validation
@@ -850,6 +979,26 @@ console.log(hasAge); // { username: "john_doe", password: "secret123", ... }
 const age = pick(data).property("age")?.number()?.min(18)?.max(65)?.valueOf();
 console.log(age); // 25
 ```
+
+## NumericalPick Interface
+
+`NumericalPick<T, Self>` is an interface that defines common arithmetic validation methods for numerical types. It's implemented by `NumberPick`, `IntegerPick`, and `BigIntPick` to ensure a consistent API across all numerical types.
+
+### Methods defined by NumericalPick
+
+- `gt(min)` - Greater than
+- `gte(min)` - Greater than or equal
+- `lt(max)` - Less than
+- `lte(max)` - Less than or equal
+- `between(min, max)` - Within range (inclusive)
+- `positive()` - Greater than 0
+- `negative()` - Less than 0
+- `multipleOf(divisor)` - Is a multiple of divisor
+- `divisibleBy(divisor)` - Is divisible by divisor (alias for multipleOf)
+- `even()` - Is an even number
+- `odd()` - Is an odd number
+
+All three numerical classes (`NumberPick`, `IntegerPick`, `BigIntPick`) implement this interface, providing a consistent API for numerical validations.
 
 ## DatePick
 
