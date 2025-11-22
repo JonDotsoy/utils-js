@@ -1,4 +1,4 @@
-// Reglas: Pick o cualquier clase que erede de Pick nunca deben modificar el valor
+// Rules: Pick or any class that inherits from Pick should never modify the value
 
 namespace Utils {
   export const isRecord = (value: any): value is Record<any, any> =>
@@ -24,10 +24,10 @@ namespace Utils {
 }
 
 /**
- * Clase utilitaria para navegar y validar estructuras de datos de forma segura.
- * Proporciona métodos encadenables para acceder a propiedades y validar tipos.
+ * Utility class for safely navigating and validating data structures.
+ * Provides chainable methods for accessing properties and validating types.
  *
- * @template T - El tipo del valor encapsulado
+ * @template T - The type of the encapsulated value
  *
  * @example
  * ```typescript
@@ -41,18 +41,18 @@ namespace Utils {
  */
 export class Pick<T> {
   /**
-   * Crea una nueva instancia de Pick con el valor proporcionado.
+   * Creates a new Pick instance with the provided value.
    *
-   * @param value - El valor a encapsular
+   * @param value - The value to encapsulate
    */
   constructor(readonly value: T) {}
 
   /**
-   * Accede a una propiedad del objeto actual.
+   * Accesses a property of the current object.
    *
-   * @template K - El tipo de la clave de la propiedad
-   * @param key - La clave de la propiedad a acceder
-   * @returns Una nueva instancia de Pick con el valor de la propiedad, o undefined si no existe
+   * @template K - The type of the property key
+   * @param key - The key of the property to access
+   * @returns A new Pick instance with the property value, or undefined if it doesn't exist
    *
    * @example
    * ```typescript
@@ -68,9 +68,9 @@ export class Pick<T> {
   }
 
   /**
-   * Valida que el valor actual sea un string.
+   * Validates that the current value is a string.
    *
-   * @returns Una nueva instancia de StringPick con el valor tipado como string, o undefined si no es un string
+   * @returns A new StringPick instance with the value typed as string, or undefined if it's not a string
    *
    * @example
    * ```typescript
@@ -89,9 +89,9 @@ export class Pick<T> {
   }
 
   /**
-   * Valida que el valor actual sea un number.
+   * Validates that the current value is a number.
    *
-   * @returns Una nueva instancia de NumberPick con el valor tipado como number, o undefined si no es un number
+   * @returns A new NumberPick instance with the value typed as number, or undefined if it's not a number
    *
    * @example
    * ```typescript
@@ -110,9 +110,9 @@ export class Pick<T> {
   }
 
   /**
-   * Valida que el valor actual sea un número entero.
+   * Validates that the current value is an integer.
    *
-   * @returns Una nueva instancia de IntegerPick con el valor tipado como number, o undefined si no es un entero
+   * @returns A new IntegerPick instance with the value typed as number, or undefined if it's not an integer
    *
    * @example
    * ```typescript
@@ -133,9 +133,9 @@ export class Pick<T> {
   }
 
   /**
-   * Valida que el valor actual sea un bigint.
+   * Validates that the current value is a bigint.
    *
-   * @returns Una nueva instancia de BigIntPick con el valor tipado como bigint, o undefined si no es un bigint
+   * @returns A new BigIntPick instance with the value typed as bigint, or undefined if it's not a bigint
    *
    * @example
    * ```typescript
@@ -154,9 +154,9 @@ export class Pick<T> {
   }
 
   /**
-   * Valida que el valor actual sea un boolean.
+   * Validates that the current value is a boolean.
    *
-   * @returns Una nueva instancia de BooleanPick con el valor tipado como boolean, o undefined si no es un boolean
+   * @returns A new BooleanPick instance with the value typed as boolean, or undefined if it's not a boolean
    *
    * @example
    * ```typescript
@@ -175,10 +175,10 @@ export class Pick<T> {
   }
 
   /**
-   * Valida que el valor actual sea un tipo nativo de JavaScript.
-   * Los tipos nativos incluyen: string, number, boolean, Array y Object.
+   * Validates that the current value is a native JavaScript type.
+   * Native types include: string, number, boolean, Array, and Object.
    *
-   * @returns Una nueva instancia de Pick con el valor tipado como tipo nativo, o undefined si no es un tipo nativo
+   * @returns A new Pick instance with the value typed as a native type, or undefined if it's not a native type
    *
    * @example
    * ```typescript
@@ -205,9 +205,9 @@ export class Pick<T> {
   }
 
   /**
-   * Valida que el valor actual sea un array.
+   * Validates that the current value is an array.
    *
-   * @returns Una nueva instancia de ArrayPick con el valor tipado como Array, o undefined si no es un array
+   * @returns A new ArrayPick instance with the value typed as Array, or undefined if it's not an array
    *
    * @example
    * ```typescript
@@ -226,9 +226,9 @@ export class Pick<T> {
   }
 
   /**
-   * Valida que el valor actual sea un objeto (Record).
+   * Validates that the current value is an object (Record).
    *
-   * @returns Una nueva instancia de RecordPick con el valor tipado como Record, o undefined si no es un objeto
+   * @returns A new RecordPick instance with the value typed as Record, or undefined if it's not an object
    *
    * @example
    * ```typescript
@@ -247,11 +247,11 @@ export class Pick<T> {
   }
 
   /**
-   * Valida que el valor actual sea un string que pertenece a un conjunto específico de valores (enum).
+   * Validates that the current value is a string that belongs to a specific set of values (enum).
    *
-   * @template E - El tipo de los valores del enum
-   * @param values - Array de valores válidos del enum
-   * @returns Una nueva instancia de Pick con el valor tipado como E, o undefined si no pertenece al enum
+   * @template E - The type of the enum values
+   * @param values - Array of valid enum values
+   * @returns A new Pick instance with the value typed as E, or undefined if it doesn't belong to the enum
    *
    * @example
    * ```typescript
@@ -271,11 +271,11 @@ export class Pick<T> {
   }
 
   /**
-   * Aplica una función de transformación al valor actual.
+   * Applies a transformation function to the current value.
    *
-   * @template E - El tipo del valor resultante
-   * @param transform - Función que transforma el valor actual
-   * @returns El resultado de aplicar la función de transformación
+   * @template E - The type of the resulting value
+   * @param transform - Function that transforms the current value
+   * @returns The result of applying the transformation function
    *
    * @example
    * ```typescript
@@ -288,11 +288,11 @@ export class Pick<T> {
   }
 
   /**
-   * Busca el primer elemento en un array que cumpla con la condición especificada.
+   * Finds the first element in an array that meets the specified condition.
    *
-   * @param filter - Función que evalúa cada elemento del array
-   * @param thisArg - Valor opcional para usar como `this` al ejecutar la función filter
-   * @returns Una nueva instancia de Pick con el elemento encontrado, o undefined si no se encuentra o no es un array
+   * @param filter - Function that evaluates each element of the array
+   * @param thisArg - Optional value to use as `this` when executing the filter function
+   * @returns A new Pick instance with the found element, or undefined if not found or not an array
    *
    * @example
    * ```typescript
@@ -310,15 +310,23 @@ export class Pick<T> {
   }
 
   /**
-   * Filtra los elementos de un array que cumplen con la condición especificada.
+   * Filters array elements that meet the specified condition.
    *
-   * @param filter - Función que evalúa cada elemento del array
-   * @param thisArg - Valor opcional para usar como `this` al ejecutar la función filter
-   * @returns Una nueva instancia de Pick con el array filtrado, o undefined si no es un array
+   * @deprecated This method is deprecated because the name can be confusing.
+   * Although it doesn't mutate the original value, the name suggests a mutation operation.
+   * Use `pipe()` with native `filter()` instead: `.pipe(arr => arr.filter(...))`
+   *
+   * @param filter - Function that evaluates each element of the array
+   * @param thisArg - Optional value to use as `this` when executing the filter function
+   * @returns A new Pick instance with the filtered array, or undefined if it's not an array
    *
    * @example
    * ```typescript
+   * // Deprecated:
    * pick([1, 2, 3, 4]).filter(n => n > 2)?.valueOf(); // [3, 4]
+   *
+   * // Recommended:
+   * pick([1, 2, 3, 4]).pipe(arr => arr.filter(n => n > 2)).valueOf(); // [3, 4]
    * ```
    */
   filter(
@@ -330,11 +338,11 @@ export class Pick<T> {
   }
 
   /**
-   * Valida que todos los elementos de un array cumplan con una condición de validación.
+   * Validates that all elements of an array meet a validation condition.
    *
-   * @template R - El tipo del valor resultante después de la validación
-   * @param validator - Función de validación que se aplica a cada elemento del array
-   * @returns Una nueva instancia de Pick con el array tipado como R[], o undefined si no es un array o algún elemento falla la validación
+   * @template R - The type of the resulting value after validation
+   * @param validator - Validation function applied to each element of the array
+   * @returns A new Pick instance with the array typed as R[], or undefined if it's not an array or any element fails validation
    *
    * @example
    * ```typescript
@@ -363,12 +371,12 @@ export class Pick<T> {
   }
 
   /**
-   * Intenta aplicar una de las funciones de validación proporcionadas.
-   * Retorna el resultado de la primera función que no devuelva undefined.
+   * Attempts to apply one of the provided validation functions.
+   * Returns the result of the first function that doesn't return undefined.
    *
-   * @template Validators - Array de funciones de validación
-   * @param validators - Array de funciones de validación a intentar
-   * @returns El resultado de la primera validación exitosa, o undefined si todas fallan
+   * @template Validators - Array of validation functions
+   * @param validators - Array of validation functions to try
+   * @returns The result of the first successful validation, or undefined if all fail
    *
    * @example
    * ```typescript
@@ -408,9 +416,31 @@ export class Pick<T> {
   }
 
   /**
-   * Valida que el valor actual sea una fecha válida (Date, timestamp o string).
+   * Validates that the current value is a valid email.
+   * This is an alias for `this.string()?.email()`.
    *
-   * @returns Una nueva instancia de DatePick si es una fecha válida, o undefined si no lo es
+   * @remarks
+   * This method uses a simplified regular expression to validate emails.
+   * It doesn't cover all RFC 5322 specifications (which is extremely complex),
+   * but validates most common and practical email formats.
+   *
+   * @returns A new StringPick instance if it's a valid email, or undefined if it's not
+   *
+   * @example
+   * ```typescript
+   * pick("user@example.com").email()?.valueOf(); // "user@example.com"
+   * pick("invalid-email").email(); // undefined
+   * pick(123).email(); // undefined
+   * ```
+   */
+  email(): undefined | StringPick {
+    return this.string()?.email();
+  }
+
+  /**
+   * Validates that the current value is a valid date (Date, timestamp, or string).
+   *
+   * @returns A new DatePick instance if it's a valid date, or undefined if it's not
    *
    * @example
    * ```typescript
@@ -441,9 +471,9 @@ export class Pick<T> {
   }
 
   /**
-   * Obtiene el valor encapsulado actual.
+   * Gets the current encapsulated value.
    *
-   * @returns El valor original encapsulado en esta instancia de Pick
+   * @returns The original value encapsulated in this Pick instance
    *
    * @example
    * ```typescript
@@ -459,15 +489,15 @@ export class Pick<T> {
 }
 
 /**
- * Clase especializada para trabajar con enteros.
- * Extiende NumberPick con validaciones específicas para números enteros.
+ * Specialized class for working with integers.
+ * Extends NumberPick with specific validations for integer numbers.
  */
 export class IntegerPick extends Pick<number> {
   /**
-   * Valida que el entero sea mayor que el valor especificado.
+   * Validates that the integer is greater than the specified value.
    *
-   * @param min - Valor mínimo (exclusivo)
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param min - Minimum value (exclusive)
+   * @returns This instance if it meets the condition, or undefined if not
    */
   gt(min: number): undefined | IntegerPick {
     if (this.value <= min) return undefined;
@@ -475,10 +505,10 @@ export class IntegerPick extends Pick<number> {
   }
 
   /**
-   * Valida que el entero sea mayor o igual que el valor especificado.
+   * Validates that the integer is greater than or equal to the specified value.
    *
-   * @param min - Valor mínimo (inclusivo)
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param min - Minimum value (inclusive)
+   * @returns This instance if it meets the condition, or undefined if not
    */
   gte(min: number): undefined | IntegerPick {
     if (this.value < min) return undefined;
@@ -486,10 +516,10 @@ export class IntegerPick extends Pick<number> {
   }
 
   /**
-   * Valida que el entero sea menor que el valor especificado.
+   * Validates that the integer is less than the specified value.
    *
-   * @param max - Valor máximo (exclusivo)
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param max - Maximum value (exclusive)
+   * @returns This instance if it meets the condition, or undefined if not
    */
   lt(max: number): undefined | IntegerPick {
     if (this.value >= max) return undefined;
@@ -497,10 +527,10 @@ export class IntegerPick extends Pick<number> {
   }
 
   /**
-   * Valida que el entero sea menor o igual que el valor especificado.
+   * Validates that the integer is less than or equal to the specified value.
    *
-   * @param max - Valor máximo (inclusivo)
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param max - Maximum value (inclusive)
+   * @returns This instance if it meets the condition, or undefined if not
    */
   lte(max: number): undefined | IntegerPick {
     if (this.value > max) return undefined;
@@ -508,11 +538,11 @@ export class IntegerPick extends Pick<number> {
   }
 
   /**
-   * Valida que el entero esté dentro de un rango.
+   * Validates that the integer is within a range.
    *
-   * @param min - Valor mínimo (inclusivo)
-   * @param max - Valor máximo (inclusivo)
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param min - Minimum value (inclusive)
+   * @param max - Maximum value (inclusive)
+   * @returns This instance if it meets the condition, or undefined if not
    */
   between(min: number, max: number): undefined | IntegerPick {
     if (this.value < min || this.value > max) return undefined;
@@ -520,9 +550,9 @@ export class IntegerPick extends Pick<number> {
   }
 
   /**
-   * Valida que el entero sea positivo (mayor que 0).
+   * Validates that the integer is positive (greater than 0).
    *
-   * @returns Esta instancia si es positivo, o undefined si no
+   * @returns This instance if it's positive, or undefined if not
    */
   positive(): undefined | IntegerPick {
     if (this.value <= 0) return undefined;
@@ -530,9 +560,9 @@ export class IntegerPick extends Pick<number> {
   }
 
   /**
-   * Valida que el entero sea negativo (menor que 0).
+   * Validates that the integer is negative (less than 0).
    *
-   * @returns Esta instancia si es negativo, o undefined si no
+   * @returns This instance if it's negative, or undefined if not
    */
   negative(): undefined | IntegerPick {
     if (this.value >= 0) return undefined;
@@ -540,10 +570,10 @@ export class IntegerPick extends Pick<number> {
   }
 
   /**
-   * Valida que el entero sea un múltiplo del valor especificado.
+   * Validates that the integer is a multiple of the specified value.
    *
-   * @param divisor - El divisor
-   * @returns Esta instancia si es múltiplo, o undefined si no
+   * @param divisor - The divisor
+   * @returns This instance if it's a multiple, or undefined if not
    */
   multipleOf(divisor: number): undefined | IntegerPick {
     if (this.value % divisor !== 0) return undefined;
@@ -551,9 +581,9 @@ export class IntegerPick extends Pick<number> {
   }
 
   /**
-   * Valida que el entero sea par.
+   * Validates that the integer is even.
    *
-   * @returns Esta instancia si es par, o undefined si no
+   * @returns This instance if it's even, or undefined if not
    */
   even(): undefined | IntegerPick {
     if (this.value % 2 !== 0) return undefined;
@@ -561,9 +591,9 @@ export class IntegerPick extends Pick<number> {
   }
 
   /**
-   * Valida que el entero sea impar.
+   * Validates that the integer is odd.
    *
-   * @returns Esta instancia si es impar, o undefined si no
+   * @returns This instance if it's odd, or undefined if not
    */
   odd(): undefined | IntegerPick {
     if (this.value % 2 === 0) return undefined;
@@ -572,15 +602,15 @@ export class IntegerPick extends Pick<number> {
 }
 
 /**
- * Clase especializada para trabajar con bigints.
- * Extiende Pick<bigint> con métodos específicos para validación de bigints.
+ * Specialized class for working with bigints.
+ * Extends Pick<bigint> with specific methods for bigint validation.
  */
 export class BigIntPick extends Pick<bigint> {
   /**
-   * Valida que el bigint sea mayor que el valor especificado.
+   * Validates that the bigint is greater than the specified value.
    *
-   * @param min - Valor mínimo (exclusivo)
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param min - Minimum value (exclusive)
+   * @returns This instance if it meets the condition, or undefined if not
    */
   gt(min: bigint): undefined | BigIntPick {
     if (this.value <= min) return undefined;
@@ -588,10 +618,10 @@ export class BigIntPick extends Pick<bigint> {
   }
 
   /**
-   * Valida que el bigint sea mayor o igual que el valor especificado.
+   * Validates that the bigint is greater than or equal to the specified value.
    *
-   * @param min - Valor mínimo (inclusivo)
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param min - Minimum value (inclusive)
+   * @returns This instance if it meets the condition, or undefined if not
    */
   gte(min: bigint): undefined | BigIntPick {
     if (this.value < min) return undefined;
@@ -599,10 +629,10 @@ export class BigIntPick extends Pick<bigint> {
   }
 
   /**
-   * Valida que el bigint sea menor que el valor especificado.
+   * Validates that the bigint is less than the specified value.
    *
-   * @param max - Valor máximo (exclusivo)
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param max - Maximum value (exclusive)
+   * @returns This instance if it meets the condition, or undefined if not
    */
   lt(max: bigint): undefined | BigIntPick {
     if (this.value >= max) return undefined;
@@ -610,10 +640,10 @@ export class BigIntPick extends Pick<bigint> {
   }
 
   /**
-   * Valida que el bigint sea menor o igual que el valor especificado.
+   * Validates that the bigint is less than or equal to the specified value.
    *
-   * @param max - Valor máximo (inclusivo)
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param max - Maximum value (inclusive)
+   * @returns This instance if it meets the condition, or undefined if not
    */
   lte(max: bigint): undefined | BigIntPick {
     if (this.value > max) return undefined;
@@ -621,11 +651,11 @@ export class BigIntPick extends Pick<bigint> {
   }
 
   /**
-   * Valida que el bigint esté dentro de un rango.
+   * Validates that the bigint is within a range.
    *
-   * @param min - Valor mínimo (inclusivo)
-   * @param max - Valor máximo (inclusivo)
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param min - Minimum value (inclusive)
+   * @param max - Maximum value (inclusive)
+   * @returns This instance if it meets the condition, or undefined if not
    */
   between(min: bigint, max: bigint): undefined | BigIntPick {
     if (this.value < min || this.value > max) return undefined;
@@ -633,9 +663,9 @@ export class BigIntPick extends Pick<bigint> {
   }
 
   /**
-   * Valida que el bigint sea positivo (mayor que 0n).
+   * Validates that the bigint is positive (greater than 0n).
    *
-   * @returns Esta instancia si es positivo, o undefined si no
+   * @returns This instance if it's positive, or undefined if not
    */
   positive(): undefined | BigIntPick {
     if (this.value <= 0n) return undefined;
@@ -643,9 +673,9 @@ export class BigIntPick extends Pick<bigint> {
   }
 
   /**
-   * Valida que el bigint sea negativo (menor que 0n).
+   * Validates that the bigint is negative (less than 0n).
    *
-   * @returns Esta instancia si es negativo, o undefined si no
+   * @returns This instance if it's negative, or undefined if not
    */
   negative(): undefined | BigIntPick {
     if (this.value >= 0n) return undefined;
@@ -654,14 +684,14 @@ export class BigIntPick extends Pick<bigint> {
 }
 
 /**
- * Clase especializada para trabajar con booleanos.
- * Extiende Pick<boolean> con métodos específicos para validación de booleanos.
+ * Specialized class for working with booleans.
+ * Extends Pick<boolean> with specific methods for boolean validation.
  */
 export class BooleanPick extends Pick<boolean> {
   /**
-   * Valida que el valor sea true.
+   * Validates that the value is true.
    *
-   * @returns Esta instancia si es true, o undefined si no
+   * @returns This instance if it's true, or undefined if not
    */
   true(): undefined | BooleanPick {
     if (this.value !== true) return undefined;
@@ -669,9 +699,9 @@ export class BooleanPick extends Pick<boolean> {
   }
 
   /**
-   * Valida que el valor sea false.
+   * Validates that the value is false.
    *
-   * @returns Esta instancia si es false, o undefined si no
+   * @returns This instance if it's false, or undefined if not
    */
   false(): undefined | BooleanPick {
     if (this.value !== false) return undefined;
@@ -679,9 +709,9 @@ export class BooleanPick extends Pick<boolean> {
   }
 
   /**
-   * Invierte el valor booleano.
+   * Inverts the boolean value.
    *
-   * @returns Una nueva instancia de BooleanPick con el valor invertido
+   * @returns A new BooleanPick instance with the inverted value
    */
   not(): BooleanPick {
     return new BooleanPick(!this.value);
@@ -689,15 +719,15 @@ export class BooleanPick extends Pick<boolean> {
 }
 
 /**
- * Clase especializada para trabajar con arrays.
- * Extiende Pick<Array<T>> con métodos específicos para validación y manipulación de arrays.
+ * Specialized class for working with arrays.
+ * Extends Pick<Array<T>> with specific methods for array validation and manipulation.
  */
 export class ArrayPick<T = unknown> extends Pick<Array<T>> {
   /**
-   * Valida que el array tenga una longitud mínima.
+   * Validates that the array has a minimum length.
    *
-   * @param min - Longitud mínima (inclusiva)
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param min - Minimum length (inclusive)
+   * @returns This instance if it meets the condition, or undefined if not
    */
   minLength(min: number): undefined | ArrayPick<T> {
     if (this.value.length < min) return undefined;
@@ -705,10 +735,10 @@ export class ArrayPick<T = unknown> extends Pick<Array<T>> {
   }
 
   /**
-   * Valida que el array tenga una longitud máxima.
+   * Validates that the array has a maximum length.
    *
-   * @param max - Longitud máxima (inclusiva)
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param max - Maximum length (inclusive)
+   * @returns This instance if it meets the condition, or undefined if not
    */
   maxLength(max: number): undefined | ArrayPick<T> {
     if (this.value.length > max) return undefined;
@@ -716,10 +746,10 @@ export class ArrayPick<T = unknown> extends Pick<Array<T>> {
   }
 
   /**
-   * Valida que el array tenga una longitud exacta.
+   * Validates that the array has an exact length.
    *
-   * @param length - Longitud exacta
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param length - Exact length
+   * @returns This instance if it meets the condition, or undefined if not
    */
   length(length: number): undefined | ArrayPick<T> {
     if (this.value.length !== length) return undefined;
@@ -727,9 +757,9 @@ export class ArrayPick<T = unknown> extends Pick<Array<T>> {
   }
 
   /**
-   * Valida que el array no esté vacío.
+   * Validates that the array is not empty.
    *
-   * @returns Esta instancia si no está vacío, o undefined si está vacío
+   * @returns This instance if it's not empty, or undefined if it's empty
    */
   notEmpty(): undefined | ArrayPick<T> {
     if (this.value.length === 0) return undefined;
@@ -737,10 +767,10 @@ export class ArrayPick<T = unknown> extends Pick<Array<T>> {
   }
 
   /**
-   * Valida que el array contenga un elemento específico.
+   * Validates that the array contains a specific element.
    *
-   * @param item - Elemento a buscar
-   * @returns Esta instancia si contiene el elemento, o undefined si no
+   * @param item - Element to search for
+   * @returns This instance if it contains the element, or undefined if not
    */
   includes(item: T): undefined | ArrayPick<T> {
     if (!this.value.includes(item)) return undefined;
@@ -748,9 +778,9 @@ export class ArrayPick<T = unknown> extends Pick<Array<T>> {
   }
 
   /**
-   * Obtiene el primer elemento del array.
+   * Gets the first element of the array.
    *
-   * @returns Una nueva instancia de Pick con el primer elemento, o undefined si está vacío
+   * @returns A new Pick instance with the first element, or undefined if it's empty
    */
   first(): Pick<T> | undefined {
     if (this.value.length === 0) return undefined;
@@ -758,9 +788,9 @@ export class ArrayPick<T = unknown> extends Pick<Array<T>> {
   }
 
   /**
-   * Obtiene el último elemento del array.
+   * Gets the last element of the array.
    *
-   * @returns Una nueva instancia de Pick con el último elemento, o undefined si está vacío
+   * @returns A new Pick instance with the last element, or undefined if it's empty
    */
   last(): Pick<T> | undefined {
     if (this.value.length === 0) return undefined;
@@ -768,10 +798,10 @@ export class ArrayPick<T = unknown> extends Pick<Array<T>> {
   }
 
   /**
-   * Obtiene un elemento en un índice específico.
+   * Gets an element at a specific index.
    *
-   * @param index - Índice del elemento
-   * @returns Una nueva instancia de Pick con el elemento, o undefined si el índice no existe
+   * @param index - Index of the element
+   * @returns A new Pick instance with the element, or undefined if the index doesn't exist
    */
   at(index: number): Pick<T> | undefined {
     const item = this.value.at(index);
@@ -781,15 +811,15 @@ export class ArrayPick<T = unknown> extends Pick<Array<T>> {
 }
 
 /**
- * Clase especializada para trabajar con objetos (Records).
- * Extiende Pick<Record<string, unknown>> con métodos específicos para validación de objetos.
+ * Specialized class for working with objects (Records).
+ * Extends Pick<Record<string, unknown>> with specific methods for object validation.
  */
 export class RecordPick extends Pick<Record<string, unknown>> {
   /**
-   * Valida que el objeto tenga una clave específica.
+   * Validates that the object has a specific key.
    *
-   * @param key - Clave a buscar
-   * @returns Esta instancia si tiene la clave, o undefined si no
+   * @param key - Key to search for
+   * @returns This instance if it has the key, or undefined if not
    */
   hasKey(key: string): undefined | RecordPick {
     if (!(key in this.value)) return undefined;
@@ -797,10 +827,10 @@ export class RecordPick extends Pick<Record<string, unknown>> {
   }
 
   /**
-   * Valida que el objeto tenga todas las claves especificadas.
+   * Validates that the object has all the specified keys.
    *
-   * @param keys - Array de claves a buscar
-   * @returns Esta instancia si tiene todas las claves, o undefined si falta alguna
+   * @param keys - Array of keys to search for
+   * @returns This instance if it has all the keys, or undefined if any is missing
    */
   hasKeys(keys: string[]): undefined | RecordPick {
     for (const key of keys) {
@@ -810,9 +840,9 @@ export class RecordPick extends Pick<Record<string, unknown>> {
   }
 
   /**
-   * Valida que el objeto no esté vacío.
+   * Validates that the object is not empty.
    *
-   * @returns Esta instancia si no está vacío, o undefined si está vacío
+   * @returns This instance if it's not empty, or undefined if it's empty
    */
   notEmpty(): undefined | RecordPick {
     if (Object.keys(this.value).length === 0) return undefined;
@@ -820,28 +850,28 @@ export class RecordPick extends Pick<Record<string, unknown>> {
   }
 
   /**
-   * Obtiene las claves del objeto.
+   * Gets the keys of the object.
    *
-   * @returns Una nueva instancia de ArrayPick con las claves
+   * @returns A new ArrayPick instance with the keys
    */
   keys(): ArrayPick<string> {
     return new ArrayPick(Object.keys(this.value));
   }
 
   /**
-   * Obtiene los valores del objeto.
+   * Gets the values of the object.
    *
-   * @returns Una nueva instancia de ArrayPick con los valores
+   * @returns A new ArrayPick instance with the values
    */
   values(): ArrayPick<unknown> {
     return new ArrayPick(Object.values(this.value));
   }
 
   /**
-   * Valida que el objeto tenga un número mínimo de claves.
+   * Validates that the object has a minimum number of keys.
    *
-   * @param min - Número mínimo de claves
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param min - Minimum number of keys
+   * @returns This instance if it meets the condition, or undefined if not
    */
   minKeys(min: number): undefined | RecordPick {
     if (Object.keys(this.value).length < min) return undefined;
@@ -849,10 +879,10 @@ export class RecordPick extends Pick<Record<string, unknown>> {
   }
 
   /**
-   * Valida que el objeto tenga un número máximo de claves.
+   * Validates that the object has a maximum number of keys.
    *
-   * @param max - Número máximo de claves
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param max - Maximum number of keys
+   * @returns This instance if it meets the condition, or undefined if not
    */
   maxKeys(max: number): undefined | RecordPick {
     if (Object.keys(this.value).length > max) return undefined;
@@ -861,15 +891,15 @@ export class RecordPick extends Pick<Record<string, unknown>> {
 }
 
 /**
- * Clase especializada para trabajar con strings.
- * Extiende Pick<string> con métodos específicos para validación y manipulación de strings.
+ * Specialized class for working with strings.
+ * Extends Pick<string> with specific methods for string validation and manipulation.
  */
 export class StringPick extends Pick<string> {
   /**
-   * Valida que el string tenga una longitud mínima.
+   * Validates that the string has a minimum length.
    *
-   * @param min - Longitud mínima (inclusiva)
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param min - Minimum length (inclusive)
+   * @returns This instance if it meets the condition, or undefined if not
    */
   minLength(min: number): undefined | StringPick {
     if (this.value.length < min) return undefined;
@@ -877,10 +907,10 @@ export class StringPick extends Pick<string> {
   }
 
   /**
-   * Valida que el string tenga una longitud máxima.
+   * Validates that the string has a maximum length.
    *
-   * @param max - Longitud máxima (inclusiva)
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param max - Maximum length (inclusive)
+   * @returns This instance if it meets the condition, or undefined if not
    */
   maxLength(max: number): undefined | StringPick {
     if (this.value.length > max) return undefined;
@@ -888,10 +918,10 @@ export class StringPick extends Pick<string> {
   }
 
   /**
-   * Valida que el string tenga una longitud exacta.
+   * Validates that the string has an exact length.
    *
-   * @param length - Longitud exacta
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param length - Exact length
+   * @returns This instance if it meets the condition, or undefined if not
    */
   length(length: number): undefined | StringPick {
     if (this.value.length !== length) return undefined;
@@ -899,10 +929,10 @@ export class StringPick extends Pick<string> {
   }
 
   /**
-   * Valida que el string coincida con una expresión regular.
+   * Validates that the string matches a regular expression.
    *
-   * @param pattern - Expresión regular o string
-   * @returns Esta instancia si coincide, o undefined si no
+   * @param pattern - Regular expression or string
+   * @returns This instance if it matches, or undefined if not
    */
   matches(pattern: RegExp | string): undefined | StringPick {
     const regex = typeof pattern === "string" ? new RegExp(pattern) : pattern;
@@ -911,10 +941,10 @@ export class StringPick extends Pick<string> {
   }
 
   /**
-   * Valida que el string comience con un prefijo específico.
+   * Validates that the string starts with a specific prefix.
    *
-   * @param prefix - Prefijo a buscar
-   * @returns Esta instancia si comienza con el prefijo, o undefined si no
+   * @param prefix - Prefix to search for
+   * @returns This instance if it starts with the prefix, or undefined if not
    */
   startsWith(prefix: string): undefined | StringPick {
     if (!this.value.startsWith(prefix)) return undefined;
@@ -922,10 +952,10 @@ export class StringPick extends Pick<string> {
   }
 
   /**
-   * Valida que el string termine con un sufijo específico.
+   * Validates that the string ends with a specific suffix.
    *
-   * @param suffix - Sufijo a buscar
-   * @returns Esta instancia si termina con el sufijo, o undefined si no
+   * @param suffix - Suffix to search for
+   * @returns This instance if it ends with the suffix, or undefined if not
    */
   endsWith(suffix: string): undefined | StringPick {
     if (!this.value.endsWith(suffix)) return undefined;
@@ -933,10 +963,10 @@ export class StringPick extends Pick<string> {
   }
 
   /**
-   * Valida que el string contenga un substring específico.
+   * Validates that the string contains a specific substring.
    *
-   * @param substring - Substring a buscar
-   * @returns Esta instancia si contiene el substring, o undefined si no
+   * @param substring - Substring to search for
+   * @returns This instance if it contains the substring, or undefined if not
    */
   includes(substring: string): undefined | StringPick {
     if (!this.value.includes(substring)) return undefined;
@@ -944,9 +974,9 @@ export class StringPick extends Pick<string> {
   }
 
   /**
-   * Valida que el string no esté vacío.
+   * Validates that the string is not empty.
    *
-   * @returns Esta instancia si no está vacío, o undefined si está vacío
+   * @returns This instance if it's not empty, or undefined if it's empty
    */
   notEmpty(): undefined | StringPick {
     if (this.value.length === 0) return undefined;
@@ -954,20 +984,25 @@ export class StringPick extends Pick<string> {
   }
 
   /**
-   * Valida que el string sea un email válido.
+   * Validates that the string is a valid email.
    *
-   * @returns Esta instancia si es un email válido, o undefined si no
+   * @remarks
+   * This method uses a simplified regular expression to validate emails.
+   * It doesn't cover all RFC 5322 specifications (which is extremely complex),
+   * but validates most common and practical email formats.
+   *
+   * @returns This instance if it's a valid email, or undefined if not
    */
   email(): undefined | StringPick {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(this.value)) return undefined;
     return this;
   }
 
   /**
-   * Valida que el string sea una URL válida.
+   * Validates that the string is a valid URL.
    *
-   * @returns Esta instancia si es una URL válida, o undefined si no
+   * @returns This instance if it's a valid URL, or undefined if not
    */
   url(): undefined | StringPick {
     try {
@@ -979,27 +1014,27 @@ export class StringPick extends Pick<string> {
   }
 
   /**
-   * Transforma el string a mayúsculas.
+   * Transforms the string to uppercase.
    *
-   * @returns Una nueva instancia de StringPick con el string en mayúsculas
+   * @returns A new StringPick instance with the string in uppercase
    */
   toUpperCase(): StringPick {
     return new StringPick(this.value.toUpperCase());
   }
 
   /**
-   * Transforma el string a minúsculas.
+   * Transforms the string to lowercase.
    *
-   * @returns Una nueva instancia de StringPick con el string en minúsculas
+   * @returns A new StringPick instance with the string in lowercase
    */
   toLowerCase(): StringPick {
     return new StringPick(this.value.toLowerCase());
   }
 
   /**
-   * Elimina espacios en blanco al inicio y final del string.
+   * Removes whitespace from the beginning and end of the string.
    *
-   * @returns Una nueva instancia de StringPick con el string sin espacios
+   * @returns A new StringPick instance with the trimmed string
    */
   trim(): StringPick {
     return new StringPick(this.value.trim());
@@ -1007,15 +1042,15 @@ export class StringPick extends Pick<string> {
 }
 
 /**
- * Clase especializada para trabajar con números.
- * Extiende Pick<number> con métodos específicos para validación de números.
+ * Specialized class for working with numbers.
+ * Extends Pick<number> with specific methods for number validation.
  */
 export class NumberPick extends Pick<number> {
   /**
-   * Valida que el número sea mayor que el valor especificado.
+   * Validates that the number is greater than the specified value.
    *
-   * @param min - Valor mínimo (exclusivo)
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param min - Minimum value (exclusive)
+   * @returns This instance if it meets the condition, or undefined if not
    */
   gt(min: number): undefined | NumberPick {
     if (this.value <= min) return undefined;
@@ -1023,10 +1058,10 @@ export class NumberPick extends Pick<number> {
   }
 
   /**
-   * Valida que el número sea mayor o igual que el valor especificado.
+   * Validates that the number is greater than or equal to the specified value.
    *
-   * @param min - Valor mínimo (inclusivo)
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param min - Minimum value (inclusive)
+   * @returns This instance if it meets the condition, or undefined if not
    */
   gte(min: number): undefined | NumberPick {
     if (this.value < min) return undefined;
@@ -1034,10 +1069,10 @@ export class NumberPick extends Pick<number> {
   }
 
   /**
-   * Valida que el número sea menor que el valor especificado.
+   * Validates that the number is less than the specified value.
    *
-   * @param max - Valor máximo (exclusivo)
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param max - Maximum value (exclusive)
+   * @returns This instance if it meets the condition, or undefined if not
    */
   lt(max: number): undefined | NumberPick {
     if (this.value >= max) return undefined;
@@ -1045,10 +1080,10 @@ export class NumberPick extends Pick<number> {
   }
 
   /**
-   * Valida que el número sea menor o igual que el valor especificado.
+   * Validates that the number is less than or equal to the specified value.
    *
-   * @param max - Valor máximo (inclusivo)
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param max - Maximum value (inclusive)
+   * @returns This instance if it meets the condition, or undefined if not
    */
   lte(max: number): undefined | NumberPick {
     if (this.value > max) return undefined;
@@ -1056,11 +1091,11 @@ export class NumberPick extends Pick<number> {
   }
 
   /**
-   * Valida que el número esté dentro de un rango.
+   * Validates that the number is within a range.
    *
-   * @param min - Valor mínimo (inclusivo)
-   * @param max - Valor máximo (inclusivo)
-   * @returns Esta instancia si cumple, o undefined si no
+   * @param min - Minimum value (inclusive)
+   * @param max - Maximum value (inclusive)
+   * @returns This instance if it meets the condition, or undefined if not
    */
   between(min: number, max: number): undefined | NumberPick {
     if (this.value < min || this.value > max) return undefined;
@@ -1068,9 +1103,9 @@ export class NumberPick extends Pick<number> {
   }
 
   /**
-   * Valida que el número sea positivo (mayor que 0).
+   * Validates that the number is positive (greater than 0).
    *
-   * @returns Esta instancia si es positivo, o undefined si no
+   * @returns This instance if it's positive, or undefined if not
    */
   positive(): undefined | NumberPick {
     if (this.value <= 0) return undefined;
@@ -1078,9 +1113,9 @@ export class NumberPick extends Pick<number> {
   }
 
   /**
-   * Valida que el número sea negativo (menor que 0).
+   * Validates that the number is negative (less than 0).
    *
-   * @returns Esta instancia si es negativo, o undefined si no
+   * @returns This instance if it's negative, or undefined if not
    */
   negative(): undefined | NumberPick {
     if (this.value >= 0) return undefined;
@@ -1088,9 +1123,9 @@ export class NumberPick extends Pick<number> {
   }
 
   /**
-   * Valida que el número sea un entero.
+   * Validates that the number is an integer.
    *
-   * @returns Una nueva instancia de IntegerPick si es entero, o undefined si no
+   * @returns A new IntegerPick instance if it's an integer, or undefined if not
    */
   integer(): undefined | IntegerPick {
     if (!Number.isInteger(this.value)) return undefined;
@@ -1098,9 +1133,9 @@ export class NumberPick extends Pick<number> {
   }
 
   /**
-   * Valida que el número sea finito.
+   * Validates that the number is finite.
    *
-   * @returns Esta instancia si es finito, o undefined si no
+   * @returns This instance if it's finite, or undefined if not
    */
   finite(): undefined | NumberPick {
     if (!Number.isFinite(this.value)) return undefined;
@@ -1108,10 +1143,10 @@ export class NumberPick extends Pick<number> {
   }
 
   /**
-   * Valida que el número sea un múltiplo del valor especificado.
+   * Validates that the number is a multiple of the specified value.
    *
-   * @param divisor - El divisor
-   * @returns Esta instancia si es múltiplo, o undefined si no
+   * @param divisor - The divisor
+   * @returns This instance if it's a multiple, or undefined if not
    */
   multipleOf(divisor: number): undefined | NumberPick {
     if (this.value % divisor !== 0) return undefined;
@@ -1120,8 +1155,8 @@ export class NumberPick extends Pick<number> {
 }
 
 /**
- * Clase especializada para trabajar con fechas (Date).
- * Extiende Pick<Date | number | string> con métodos específicos para validación de fechas.
+ * Specialized class for working with dates (Date).
+ * Extends Pick<Date | number | string> with specific methods for date validation.
  */
 export class DatePick extends Pick<Date | number | string> {
   #valueDate?: Date;
@@ -1144,10 +1179,10 @@ export class DatePick extends Pick<Date | number | string> {
   }
 
   /**
-   * Valida que la fecha sea posterior a una fecha mínima.
+   * Validates that the date is after a minimum date.
    *
-   * @param min - Fecha mínima (puede ser Date, timestamp o string)
-   * @returns Esta instancia si la fecha es posterior, o undefined si no cumple
+   * @param min - Minimum date (can be Date, timestamp, or string)
+   * @returns This instance if the date is after, or undefined if it doesn't meet the condition
    */
   after(min: Date | number | string): undefined | DatePick {
     const date = this.getDate();
@@ -1160,10 +1195,10 @@ export class DatePick extends Pick<Date | number | string> {
   }
 
   /**
-   * Valida que la fecha sea anterior a una fecha máxima.
+   * Validates that the date is before a maximum date.
    *
-   * @param max - Fecha máxima (puede ser Date, timestamp o string)
-   * @returns Esta instancia si la fecha es anterior, o undefined si no cumple
+   * @param max - Maximum date (can be Date, timestamp, or string)
+   * @returns This instance if the date is before, or undefined if it doesn't meet the condition
    */
   before(max: Date | number | string): undefined | DatePick {
     const date = this.getDate();
@@ -1176,11 +1211,11 @@ export class DatePick extends Pick<Date | number | string> {
   }
 
   /**
-   * Valida que la fecha esté dentro de un rango.
+   * Validates that the date is within a range.
    *
-   * @param min - Fecha mínima
-   * @param max - Fecha máxima
-   * @returns Esta instancia si la fecha está en el rango, o undefined si no cumple
+   * @param min - Minimum date
+   * @param max - Maximum date
+   * @returns This instance if the date is in range, or undefined if it doesn't meet the condition
    */
   between(
     min: Date | number | string,
@@ -1190,9 +1225,9 @@ export class DatePick extends Pick<Date | number | string> {
   }
 
   /**
-   * Convierte la fecha a timestamp (número).
+   * Converts the date to a timestamp (number).
    *
-   * @returns Una nueva instancia de NumberPick con el timestamp
+   * @returns A new NumberPick instance with the timestamp
    */
   number(): NumberPick {
     const date = this.getDate();
@@ -1201,9 +1236,9 @@ export class DatePick extends Pick<Date | number | string> {
   }
 
   /**
-   * Convierte el valor a un objeto Date.
+   * Converts the value to a Date object.
    *
-   * @returns Una nueva instancia de DatePick con el objeto Date
+   * @returns A new DatePick instance with the Date object
    */
   toDate(): DatePick | undefined {
     const date = this.getDate();

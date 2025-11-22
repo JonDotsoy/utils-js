@@ -90,22 +90,36 @@ pick(sym).symbol()?.valueOf(); // Symbol(test)
 pick("not a symbol").symbol(); // undefined
 ```
 
+#### `.email()`
+
+Validates that the value is a valid email address. This is an alias for `this.string()?.email()`. Returns `undefined` if it's not a valid email.
+
+```typescript
+pick("user@example.com").email()?.valueOf(); // "user@example.com"
+pick("invalid-email").email(); // undefined
+pick(123).email(); // undefined
+```
+
 #### `.date()`
 
-Validates that the value is a valid Date object. Does not convert numbers or strings to dates. Excludes invalid Date objects (NaN). Returns a `DatePick` instance that allows date range validations. Returns `undefined` if the value is not a valid Date.
+Validates that the value is a valid date. Accepts Date objects, timestamps (numbers), or date strings. Returns a `DatePick` instance that allows date range validations. Returns `undefined` if the value cannot be converted to a valid date.
 
 ```typescript
 // Valid Date object
 pick(new Date()).date()?.valueOf(); // Date object
 pick(new Date("2024-01-01")).date()?.valueOf(); // Date object
 
-// Invalid Date
-pick(new Date("invalid")).date(); // undefined
+// Valid timestamp (number)
+pick(Date.now()).date()?.valueOf(); // timestamp number
+pick(1234567890000).date()?.valueOf(); // 1234567890000
 
-// Non-Date values (not converted)
-pick(Date.now()).date(); // undefined (number, not Date)
-pick(1234567890000).date(); // undefined (number, not Date)
-pick("2024-01-01").date(); // undefined (string, not Date)
+// Valid date string
+pick("2024-01-01").date()?.valueOf(); // "2024-01-01"
+
+// Invalid dates
+pick(new Date("invalid")).date(); // undefined
+pick("not a date").date(); // undefined
+pick(NaN).date(); // undefined
 
 // Date range validation
 pick(new Date("2024-06-15"))
@@ -336,15 +350,23 @@ const user = pick(users)
 // user = { name: "Bob", age: 30 }
 ```
 
-#### `.filter(filter, thisArg?)`
+#### `.filter(filter, thisArg?)` ⚠️ DEPRECATED
+
+> **Deprecated**: This method is deprecated because the name can be confusing. Although it doesn't mutate the original value, the name suggests a mutation operation. Use `.pipe()` with native `filter()` instead.
 
 Filters array elements based on the predicate. Returns `undefined` if the value is not an array.
 
 ```typescript
-const numbers = [1, 2, 3, 4, 5];
-const filtered = pick(numbers)
+// ❌ Deprecated:
+const filtered = pick([1, 2, 3, 4, 5])
   .filter((n) => n > 3)
   ?.valueOf();
+// filtered = [4, 5]
+
+// ✅ Recommended:
+const filtered = pick([1, 2, 3, 4, 5])
+  .pipe((arr) => arr.filter((n) => n > 3))
+  .valueOf();
 // filtered = [4, 5]
 ```
 
@@ -467,6 +489,34 @@ const port = pick(config)
 console.log(port); // 3000
 ```
 
+### Email validation
+
+```typescript
+const user = {
+  email: "user@example.com",
+  name: "John Doe",
+};
+
+// Direct email validation
+const email = pick(user).property("email")?.email()?.valueOf();
+console.log(email); // "user@example.com"
+
+// Email validation with transformation
+const normalizedEmail = pick(user)
+  .property("email")
+  ?.email()
+  ?.pipe((email) => email.toLowerCase())
+  .valueOf();
+console.log(normalizedEmail); // "user@example.com"
+
+// Invalid email returns undefined
+const invalidEmail = pick({ email: "not-an-email" })
+  .property("email")
+  ?.email()
+  ?.valueOf();
+console.log(invalidEmail); // undefined
+```
+
 ### Array filtering
 
 ```typescript
@@ -481,8 +531,8 @@ const data = {
 const activeUsers = pick(data)
   .property("users")
   ?.array()
-  ?.filter((user: any) => user.active)
-  ?.valueOf();
+  ?.pipe((users) => users.filter((user: any) => user.active))
+  .valueOf();
 
 console.log(activeUsers);
 // [{ name: "Alice", active: true }, { name: "Charlie", active: true }]
@@ -604,13 +654,13 @@ const data = {
 const createdAt = pick(data).property("createdAt")?.date()?.valueOf();
 console.log(createdAt); // Date object: 2024-01-01
 
-// Timestamps are not converted (returns undefined)
+// Validate timestamp (number) - returns the original timestamp
 const fromTimestamp = pick(data).property("timestamp")?.date()?.valueOf();
-console.log(fromTimestamp); // undefined (number, not Date)
+console.log(fromTimestamp); // 1704067200000 (timestamp number)
 
-// Strings are not converted (returns undefined)
+// Validate date string - returns the original string
 const fromString = pick(data).property("dateString")?.date()?.valueOf();
-console.log(fromString); // undefined (string, not Date)
+console.log(fromString); // "2024-12-25" (string)
 
 // Invalid Date returns undefined
 const invalid = pick(data).property("invalidDate")?.date()?.valueOf();
@@ -640,6 +690,22 @@ const inRange = pick(data)
   ?.between(new Date(2024, 0, 1), new Date(2024, 11, 31))
   ?.valueOf();
 console.log(inRange); // Date object if in 2024
+
+// Convert timestamp to Date object using toDate()
+const timestampAsDate = pick(data)
+  .property("timestamp")
+  ?.date()
+  ?.toDate()
+  ?.valueOf();
+console.log(timestampAsDate); // Date object
+
+// Convert string to Date object using toDate()
+const stringAsDate = pick(data)
+  .property("dateString")
+  ?.date()
+  ?.toDate()
+  ?.valueOf();
+console.log(stringAsDate); // Date object
 ```
 
 ### Case validation
@@ -699,6 +765,14 @@ const optionalValue = pick(data)
   ?.oneOf([(v) => v.number(), (v) => v.null()])
   ?.valueOf();
 console.log(optionalValue); // null
+
+// Chaining with pipe for transformations
+const processedValue = pick(data)
+  .property("name")
+  ?.string()
+  ?.pipe((name) => name.toUpperCase())
+  .valueOf();
+console.log(processedValue); // "JOHN"
 ```
 
 ### String and array length validation
@@ -779,7 +853,7 @@ console.log(age); // 25
 
 ## DatePick
 
-`DatePick` is a specialized class that extends `Pick<Date>` with date-specific validation methods. It's automatically returned by the `.date()` method.
+`DatePick` is a specialized class that extends `Pick<Date | number | string>` with date-specific validation methods. It's automatically returned by the `.date()` method and preserves the original value type (Date, timestamp number, or date string).
 
 ### DatePick Methods
 
@@ -833,6 +907,42 @@ pick(new Date("2025-01-01"))
   .date()
   ?.between(new Date("2024-01-01"), new Date("2024-12-31"));
 // undefined
+```
+
+#### `.toDate()`
+
+Converts the value to a Date object. This is useful when you have a timestamp or date string and want to work with it as a Date object.
+
+```typescript
+// Convert timestamp to Date
+pick(1704067200000).date()?.toDate()?.valueOf();
+// Date object
+
+// Convert string to Date
+pick("2024-01-01").date()?.toDate()?.valueOf();
+// Date object
+
+// Date objects remain unchanged
+pick(new Date()).date()?.toDate()?.valueOf();
+// Date object
+```
+
+#### `.number()`
+
+Converts the date to a timestamp (number). This is useful when you have a Date object and want to work with it as a timestamp.
+
+```typescript
+// Convert Date to timestamp
+pick(new Date("2024-01-01")).date()?.number()?.valueOf();
+// 1704067200000 (timestamp)
+
+// Timestamps remain unchanged
+pick(1704067200000).date()?.number()?.valueOf();
+// 1704067200000
+
+// Can chain with number validations
+pick(new Date("2024-01-01")).date()?.number()?.gt(1700000000000)?.valueOf();
+// timestamp if greater than specified value
 ```
 
 ## Utilities

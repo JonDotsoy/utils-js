@@ -581,6 +581,54 @@ describe("pick", () => {
       }
     });
   });
+
+  describe("email", () => {
+    it("should validate email format", () => {
+      const result = pick("user@example.com").email();
+      expect(result?.valueOf()).toBe("user@example.com");
+    });
+
+    it("should validate complex email addresses", () => {
+      expect(pick("test.user+tag@example.co.uk").email()?.valueOf()).toBe(
+        "test.user+tag@example.co.uk",
+      );
+      expect(pick("user_name@sub-domain.example.com").email()?.valueOf()).toBe(
+        "user_name@sub-domain.example.com",
+      );
+    });
+
+    it("should return undefined for invalid emails", () => {
+      expect(pick("invalid").email()).toBeUndefined();
+      expect(pick("@example.com").email()).toBeUndefined();
+      expect(pick("test@").email()).toBeUndefined();
+      expect(pick("test@domain").email()).toBeUndefined();
+      expect(pick("test @domain.com").email()).toBeUndefined();
+      expect(pick("test@domain .com").email()).toBeUndefined();
+    });
+
+    it("should return undefined for non-strings", () => {
+      expect(pick(123).email()).toBeUndefined();
+      expect(pick(true).email()).toBeUndefined();
+      expect(pick({}).email()).toBeUndefined();
+      expect(pick(null).email()).toBeUndefined();
+    });
+
+    it("should allow chaining after email validation", () => {
+      const result = pick("user@example.com")
+        .email()
+        ?.pipe((email) => email.toLowerCase())
+        .valueOf();
+      expect(result).toBe("user@example.com");
+    });
+
+    it("should have correct types", () => {
+      const result = pick("test@example.com").email();
+      expectTypeOf(result).toEqualTypeOf<StringPick | undefined>();
+      if (result) {
+        expectTypeOf(result.valueOf()).toEqualTypeOf<string>();
+      }
+    });
+  });
 });
 
 describe("IntegerPick", () => {
