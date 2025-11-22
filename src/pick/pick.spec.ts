@@ -1478,3 +1478,275 @@ describe("date", () => {
     });
   });
 });
+describe("divisibleBy", () => {
+  describe("NumberPick", () => {
+    it("should validate divisible numbers", () => {
+      expect(pick(10).number()?.divisibleBy(5)?.valueOf()).toBe(10);
+      expect(pick(15).number()?.divisibleBy(3)?.valueOf()).toBe(15);
+      expect(pick(100).number()?.divisibleBy(10)?.valueOf()).toBe(100);
+    });
+
+    it("should return undefined for non-divisible numbers", () => {
+      expect(pick(10).number()?.divisibleBy(3)).toBeUndefined();
+      expect(pick(7).number()?.divisibleBy(2)).toBeUndefined();
+    });
+
+    it("should return undefined for division by zero", () => {
+      expect(pick(10).number()?.divisibleBy(0)).toBeUndefined();
+    });
+
+    it("should work with decimal divisors", () => {
+      expect(pick(10).number()?.divisibleBy(2.5)?.valueOf()).toBe(10);
+      expect(pick(7.5).number()?.divisibleBy(2.5)?.valueOf()).toBe(7.5);
+    });
+  });
+
+  describe("IntegerPick", () => {
+    it("should validate divisible integers", () => {
+      expect(pick(12).integer()?.divisibleBy(3)?.valueOf()).toBe(12);
+      expect(pick(20).integer()?.divisibleBy(5)?.valueOf()).toBe(20);
+    });
+
+    it("should return undefined for non-divisible integers", () => {
+      expect(pick(10).integer()?.divisibleBy(3)).toBeUndefined();
+      expect(pick(7).integer()?.divisibleBy(2)).toBeUndefined();
+    });
+  });
+
+  describe("BigIntPick", () => {
+    it("should validate divisible bigints", () => {
+      expect(pick(100n).bigInt()?.divisibleBy(10n)?.valueOf()).toBe(100n);
+      expect(pick(12345n).bigInt()?.divisibleBy(5n)?.valueOf()).toBe(12345n);
+    });
+
+    it("should return undefined for non-divisible bigints", () => {
+      expect(pick(10n).bigInt()?.divisibleBy(3n)).toBeUndefined();
+      expect(pick(7n).bigInt()?.divisibleBy(2n)).toBeUndefined();
+    });
+
+    it("should return undefined for division by zero", () => {
+      expect(pick(10n).bigInt()?.divisibleBy(0n)).toBeUndefined();
+    });
+  });
+});
+
+describe("even", () => {
+  describe("NumberPick", () => {
+    it("should validate even numbers", () => {
+      expect(pick(2).number()?.even()?.valueOf()).toBe(2);
+      expect(pick(10).number()?.even()?.valueOf()).toBe(10);
+      expect(pick(0).number()?.even()?.valueOf()).toBe(0);
+      expect(pick(-4).number()?.even()?.valueOf()).toBe(-4);
+    });
+
+    it("should return undefined for odd numbers", () => {
+      expect(pick(1).number()?.even()).toBeUndefined();
+      expect(pick(5).number()?.even()).toBeUndefined();
+      expect(pick(-3).number()?.even()).toBeUndefined();
+    });
+
+    it("should return undefined for non-integer numbers", () => {
+      expect(pick(2.5).number()?.even()).toBeUndefined();
+      expect(pick(3.14).number()?.even()).toBeUndefined();
+    });
+  });
+
+  describe("IntegerPick", () => {
+    it("should validate even integers", () => {
+      expect(pick(4).integer()?.even()?.valueOf()).toBe(4);
+      expect(pick(100).integer()?.even()?.valueOf()).toBe(100);
+    });
+
+    it("should return undefined for odd integers", () => {
+      expect(pick(3).integer()?.even()).toBeUndefined();
+      expect(pick(99).integer()?.even()).toBeUndefined();
+    });
+  });
+
+  describe("BigIntPick", () => {
+    it("should validate even bigints", () => {
+      expect(pick(4n).bigInt()?.even()?.valueOf()).toBe(4n);
+      expect(pick(100n).bigInt()?.even()?.valueOf()).toBe(100n);
+      expect(pick(0n).bigInt()?.even()?.valueOf()).toBe(0n);
+    });
+
+    it("should return undefined for odd bigints", () => {
+      expect(pick(3n).bigInt()?.even()).toBeUndefined();
+      expect(pick(99n).bigInt()?.even()).toBeUndefined();
+    });
+  });
+});
+
+describe("odd", () => {
+  describe("NumberPick", () => {
+    it("should validate odd numbers", () => {
+      expect(pick(1).number()?.odd()?.valueOf()).toBe(1);
+      expect(pick(5).number()?.odd()?.valueOf()).toBe(5);
+      expect(pick(-3).number()?.odd()?.valueOf()).toBe(-3);
+    });
+
+    it("should return undefined for even numbers", () => {
+      expect(pick(2).number()?.odd()).toBeUndefined();
+      expect(pick(10).number()?.odd()).toBeUndefined();
+      expect(pick(0).number()?.odd()).toBeUndefined();
+      expect(pick(-4).number()?.odd()).toBeUndefined();
+    });
+
+    it("should return undefined for non-integer numbers", () => {
+      expect(pick(1.5).number()?.odd()).toBeUndefined();
+      expect(pick(3.14).number()?.odd()).toBeUndefined();
+    });
+  });
+
+  describe("IntegerPick", () => {
+    it("should validate odd integers", () => {
+      expect(pick(3).integer()?.odd()?.valueOf()).toBe(3);
+      expect(pick(99).integer()?.odd()?.valueOf()).toBe(99);
+    });
+
+    it("should return undefined for even integers", () => {
+      expect(pick(4).integer()?.odd()).toBeUndefined();
+      expect(pick(100).integer()?.odd()).toBeUndefined();
+    });
+  });
+
+  describe("BigIntPick", () => {
+    it("should validate odd bigints", () => {
+      expect(pick(3n).bigInt()?.odd()?.valueOf()).toBe(3n);
+      expect(pick(99n).bigInt()?.odd()?.valueOf()).toBe(99n);
+    });
+
+    it("should return undefined for even bigints", () => {
+      expect(pick(4n).bigInt()?.odd()).toBeUndefined();
+      expect(pick(100n).bigInt()?.odd()).toBeUndefined();
+      expect(pick(0n).bigInt()?.odd()).toBeUndefined();
+    });
+  });
+});
+
+describe("instanceOf", () => {
+  it("should validate Date instances", () => {
+    const date = new Date();
+    expect(pick(date).instanceOf(Date)?.valueOf()).toBe(date);
+  });
+
+  it("should validate Error instances", () => {
+    const error = new Error("test");
+    expect(pick(error).instanceOf(Error)?.valueOf()).toBe(error);
+  });
+
+  it("should validate Array instances", () => {
+    const arr = [1, 2, 3];
+    expect(pick(arr).instanceOf(Array)?.valueOf()).toBe(arr);
+  });
+
+  it("should validate Map instances", () => {
+    const map = new Map();
+    expect(pick(map).instanceOf(Map)?.valueOf()).toBe(map);
+  });
+
+  it("should validate Set instances", () => {
+    const set = new Set([1, 2, 3]);
+    expect(pick(set).instanceOf(Set)?.valueOf()).toBe(set);
+  });
+
+  it("should return undefined for non-instances", () => {
+    expect(pick("string").instanceOf(Date)).toBeUndefined();
+    expect(pick(123).instanceOf(Error)).toBeUndefined();
+    expect(pick({}).instanceOf(Array)).toBeUndefined();
+  });
+
+  it("should work with custom classes", () => {
+    class User {
+      constructor(public name: string) {}
+    }
+
+    const user = new User("John");
+    expect(pick(user).instanceOf(User)?.valueOf()).toBe(user);
+    expect(pick({ name: "John" }).instanceOf(User)).toBeUndefined();
+  });
+
+  it("should work with inheritance", () => {
+    class Animal {
+      constructor(public name: string) {}
+    }
+
+    class Dog extends Animal {
+      constructor(
+        name: string,
+        public breed: string,
+      ) {
+        super(name);
+      }
+    }
+
+    const dog = new Dog("Rex", "Labrador");
+    expect(pick(dog).instanceOf(Dog)?.valueOf()).toBe(dog);
+    expect(pick(dog).instanceOf(Animal)?.valueOf()).toBe(dog);
+  });
+
+  it("should chain with other methods", () => {
+    const date = new Date("2024-01-01");
+    const year = pick(date)
+      .instanceOf(Date)
+      ?.pipe((d) => d.getFullYear())
+      .valueOf();
+    expect(year).toBe(2024);
+  });
+
+  it("should have correct types", () => {
+    const result = pick(new Date()).instanceOf(Date);
+    expectTypeOf(result).toEqualTypeOf<Pick<Date> | undefined>();
+  });
+});
+
+describe("NumericalPick interface", () => {
+  it("should have consistent API across NumberPick, IntegerPick, and BigIntPick", () => {
+    // NumberPick
+    expect(pick(10).number()?.gt(5)?.valueOf()).toBe(10);
+    expect(pick(10).number()?.positive()?.valueOf()).toBe(10);
+    expect(pick(10).number()?.even()?.valueOf()).toBe(10);
+    expect(pick(10).number()?.divisibleBy(5)?.valueOf()).toBe(10);
+
+    // IntegerPick
+    expect(pick(10).integer()?.gt(5)?.valueOf()).toBe(10);
+    expect(pick(10).integer()?.positive()?.valueOf()).toBe(10);
+    expect(pick(10).integer()?.even()?.valueOf()).toBe(10);
+    expect(pick(10).integer()?.divisibleBy(5)?.valueOf()).toBe(10);
+
+    // BigIntPick
+    expect(pick(10n).bigInt()?.gt(5n)?.valueOf()).toBe(10n);
+    expect(pick(10n).bigInt()?.positive()?.valueOf()).toBe(10n);
+    expect(pick(10n).bigInt()?.even()?.valueOf()).toBe(10n);
+    expect(pick(10n).bigInt()?.divisibleBy(5n)?.valueOf()).toBe(10n);
+  });
+
+  it("should chain multiple numerical validations", () => {
+    // NumberPick
+    const num = pick(20)
+      .number()
+      ?.positive()
+      ?.even()
+      ?.divisibleBy(5)
+      ?.between(10, 30);
+    expect(num?.valueOf()).toBe(20);
+
+    // IntegerPick
+    const int = pick(20)
+      .integer()
+      ?.positive()
+      ?.even()
+      ?.divisibleBy(5)
+      ?.between(10, 30);
+    expect(int?.valueOf()).toBe(20);
+
+    // BigIntPick
+    const bigInt = pick(20n)
+      .bigInt()
+      ?.positive()
+      ?.even()
+      ?.divisibleBy(5n)
+      ?.between(10n, 30n);
+    expect(bigInt?.valueOf()).toBe(20n);
+  });
+});
