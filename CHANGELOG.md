@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.0.2...utils-js-v1.1.0) (2025-11-22)
+
+
+### Features
+
+* **pick:** add instanceOf method for class and constructor validation ([22d66cb](https://github.com/JonDotsoy/utils-js/commit/22d66cb413a5b3c538f74765fd4b784578fbabd4))
+
 ## [1.0.2](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.0.1...utils-js-v1.0.2) (2025-11-22)
 
 
