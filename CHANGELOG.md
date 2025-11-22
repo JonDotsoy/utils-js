@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.0.1...utils-js-v1.0.2) (2025-11-22)
+
+
+### Bug Fixes
+
+* **pick:** add ArithmeticMethods interface and divisibleBy/even/odd methods ([263a65a](https://github.com/JonDotsoy/utils-js/commit/263a65a767233f81c0031f2a45166767adca77b7))
+
 ## [1.0.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.0.0...utils-js-v1.0.1) (2025-11-22)
 
 
