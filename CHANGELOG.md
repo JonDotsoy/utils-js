@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.2.0...utils-js-v1.3.0) (2025-11-25)
+
+
+### Features
+
+* **pick:** add error() method for Error instance validation ([67e3328](https://github.com/JonDotsoy/utils-js/commit/67e33288a214dc8bacf4b3a81cf18e26bae23a94))
+
+
+### Bug Fixes
+
+* **pick:** improve date() method return type safety and add valueOf() test ([c9d5d79](https://github.com/JonDotsoy/utils-js/commit/c9d5d7971076c7c84bdf89f3f0b938f5e1f38b67))
+* **pick:** improve url() method return type safety ([9919dd6](https://github.com/JonDotsoy/utils-js/commit/9919dd660973c2365aba472cbc3cde010c217571))
+
 ## [1.2.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.1.0...utils-js-v1.2.0) (2025-11-22)
 
 
