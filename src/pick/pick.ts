@@ -450,12 +450,12 @@ export class Pick<T> {
    * ```
    */
   date(): T extends Date
-    ? DatePick<Date>
+    ? undefined | DatePick<Date>
     : T extends string
-      ? DatePick<string>
+      ? undefined | DatePick<string>
       : T extends number
-        ? DatePick<number>
-        : undefined {
+        ? undefined | DatePick<number>
+        : undefined | DatePick<Date | string | number> {
     if (this.value instanceof Date) {
       if (isNaN(this.value.getTime())) return undefined as any;
       return new DatePick(this.value) as any;

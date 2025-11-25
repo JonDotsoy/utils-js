@@ -1346,6 +1346,13 @@ describe("date", () => {
       // El valor original se mantiene sin modificar después de las validaciones
       expect(result?.valueOf()).toBe(1234);
     });
+
+    it("pick(obj).property('foo').date().valueOf()", () => {
+      const obj = { foo: new Date("2024-01-01") };
+      const result = pick(obj).property("foo")?.date()?.valueOf();
+      expect(result).toEqual(new Date("2024-01-01"));
+      expectTypeOf(result).toEqualTypeOf<Date | string | number | undefined>();
+    });
   });
 
   describe("DatePick.after", () => {
@@ -1518,7 +1525,7 @@ describe("date", () => {
   describe("date type checking", () => {
     it("should have correct types for date", () => {
       const result = pick(new Date()).date();
-      expectTypeOf(result).toEqualTypeOf<DatePick<Date>>();
+      expectTypeOf(result).toEqualTypeOf<undefined | DatePick<Date>>();
     });
 
     it("should have correct types for after", () => {
