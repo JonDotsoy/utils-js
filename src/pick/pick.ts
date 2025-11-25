@@ -519,10 +519,10 @@ export class Pick<T> {
    * ```
    */
   url(): T extends URL
-    ? URLPick<URL>
+    ? undefined | URLPick<URL>
     : T extends string
-      ? URLPick<string>
-      : undefined {
+      ? undefined | URLPick<string>
+      : undefined | URLPick<string | URL> {
     if (this.value instanceof URL) {
       return new URLPick<URL>(this.value) as any;
     }
