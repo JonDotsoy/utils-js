@@ -449,13 +449,9 @@ export class Pick<T> {
    * pick("2024-01-01").date()?.valueOf(); // "2024-01-01"
    * ```
    */
-  date(): T extends Date
-    ? undefined | DatePick<Date>
-    : T extends string
-      ? undefined | DatePick<string>
-      : T extends number
-        ? undefined | DatePick<number>
-        : undefined | DatePick<Date | string | number> {
+  date():
+    | undefined
+    | DatePick<T extends Date | string | number ? T : Date | string | number> {
     if (this.value instanceof Date) {
       if (isNaN(this.value.getTime())) return undefined as any;
       return new DatePick(this.value) as any;
@@ -518,11 +514,7 @@ export class Pick<T> {
    * pick(123).url(); // undefined
    * ```
    */
-  url(): T extends URL
-    ? undefined | URLPick<URL>
-    : T extends string
-      ? undefined | URLPick<string>
-      : undefined | URLPick<string | URL> {
+  url(): undefined | URLPick<T extends string | URL ? T : string | URL> {
     if (this.value instanceof URL) {
       return new URLPick<URL>(this.value) as any;
     }
@@ -545,8 +537,8 @@ export class Pick<T> {
    * pick(123).error(); // undefined
    * ```
    */
-  error(): undefined | Pick<Error> {
-    return this.instanceOf(Error);
+  error(): undefined | Pick<T extends Error ? T : Error> {
+    return this.instanceOf(Error) as Pick<T extends Error ? T : Error>;
   }
 
   /**
