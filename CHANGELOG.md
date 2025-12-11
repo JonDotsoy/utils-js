@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.3.0...utils-js-v1.4.0) (2025-12-11)
+
+
+### Features
+
+* **pick:** add numeric() method for number and numeric string validation ([f45d5ba](https://github.com/JonDotsoy/utils-js/commit/f45d5ba7e19a9849f2ed5409b828f83fb7e6fee2))
+
+
+### Bug Fixes
+
+* **pick:** improve NumericPick return type safety ([27184bc](https://github.com/JonDotsoy/utils-js/commit/27184bc6f23c5dddef9d096fc13b9178164e54f5))
+
 ## [1.3.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.2.0...utils-js-v1.3.0) (2025-11-25)
 
 
