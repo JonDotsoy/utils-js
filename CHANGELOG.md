@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.4.0...utils-js-v1.4.1) (2025-12-11)
+
+
+### Miscellaneous Chores
+
+* release 1.4.1 ([6696853](https://github.com/JonDotsoy/utils-js/commit/66968532d43f7d173f58b1f41038f9f7058da951))
+
 ## [1.4.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.3.0...utils-js-v1.4.0) (2025-12-11)
 
 
