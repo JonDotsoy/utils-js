@@ -9,6 +9,7 @@ import {
   RecordPick,
   StringPick,
   NumberPick,
+  NumericPick,
   DatePick,
 } from "./pick";
 
@@ -1811,6 +1812,217 @@ describe("url", () => {
       .valueOf();
     expect(result).toBeInstanceOf(URL);
     expect(result?.href).toBe("http://localhost/");
+  });
+});
+
+describe("numeric", () => {
+  describe("StringPick.numeric", () => {
+    it("should validate numeric strings (integers)", () => {
+      expect(pick("1234").string()?.numeric()?.valueOf()).toBe("1234");
+      expect(pick("0").string()?.numeric()?.valueOf()).toBe("0");
+      expect(pick("999999").string()?.numeric()?.valueOf()).toBe("999999");
+    });
+
+    it("should validate numeric strings (decimals)", () => {
+      expect(pick("123.4123").string()?.numeric()?.valueOf()).toBe("123.4123");
+      expect(pick("123.423").string()?.numeric()?.valueOf()).toBe("123.423");
+      expect(pick("0.5").string()?.numeric()?.valueOf()).toBe("0.5");
+      expect(pick("999.999").string()?.numeric()?.valueOf()).toBe("999.999");
+    });
+
+    it("should validate numeric strings with signs", () => {
+      expect(pick("-123").string()?.numeric()?.valueOf()).toBe("-123");
+      expect(pick("+123").string()?.numeric()?.valueOf()).toBe("+123");
+      expect(pick("-123.456").string()?.numeric()?.valueOf()).toBe("-123.456");
+      expect(pick("+0.5").string()?.numeric()?.valueOf()).toBe("+0.5");
+    });
+
+    it("should return undefined for non-numeric strings", () => {
+      expect(pick("abc").string()?.numeric()).toBeUndefined();
+      expect(pick("12a34").string()?.numeric()).toBeUndefined();
+      expect(pick("12.34.56").string()?.numeric()).toBeUndefined();
+      expect(pick("").string()?.numeric()).toBeUndefined();
+      expect(pick("--123").string()?.numeric()).toBeUndefined(); // Doble signo
+      expect(pick("+-123").string()?.numeric()).toBeUndefined(); // Signos mixtos
+      expect(pick("123-").string()?.numeric()).toBeUndefined(); // Signo al final
+    });
+
+    it("should chain with other string validations", () => {
+      const result = pick("123.456").string()?.numeric()?.gt(123);
+      expect(result?.valueOf()).toBe("123.456");
+    });
+
+    it("should have correct types", () => {
+      const result = pick("1234").string()?.numeric();
+      expectTypeOf(result).toEqualTypeOf<NumericPick<string> | undefined>();
+      if (result) {
+        expectTypeOf(result.valueOf()).toEqualTypeOf<string>();
+      }
+    });
+  });
+
+  describe("Pick.numeric", () => {
+    it("should validate number values", () => {
+      expect(pick(1234).numeric()?.valueOf()).toBe(1234);
+      expect(pick(123.456).numeric()?.valueOf()).toBe(123.456);
+      expect(pick(0).numeric()?.valueOf()).toBe(0);
+    });
+
+    it("should validate numeric string values", () => {
+      expect(pick("1234").numeric()?.valueOf()).toBe("1234");
+      expect(pick("123.4123").numeric()?.valueOf()).toBe("123.4123");
+      expect(pick("123.423").numeric()?.valueOf()).toBe("123.423");
+    });
+
+    it("should return undefined for non-numeric values", () => {
+      expect(pick("abc").numeric()).toBeUndefined();
+      expect(pick(true).numeric()).toBeUndefined();
+      expect(pick({}).numeric()).toBeUndefined();
+      expect(pick([]).numeric()).toBeUndefined();
+      expect(pick(null).numeric()).toBeUndefined();
+    });
+
+    it("should have correct types", () => {
+      const result = pick("1234").numeric();
+      expectTypeOf(result).toEqualTypeOf<NumericPick<string> | undefined>();
+      if (result) {
+        expectTypeOf(result.valueOf()).toEqualTypeOf<string>();
+      }
+    });
+
+    it("should work with property access", () => {
+      const obj = { value: "123.456" };
+      const result = pick(obj).property("value")?.numeric()?.valueOf();
+      expect(result).toBe("123.456");
+    });
+
+    it("should work with number property", () => {
+      const obj = { value: 123.456 };
+      const result = pick(obj).property("value")?.numeric()?.valueOf();
+      expect(result).toBe(123.456);
+    });
+  });
+
+  describe("NumericPick arithmetic methods", () => {
+    it("should validate gt with number", () => {
+      expect(pick(10).numeric()?.gt(5)?.valueOf()).toBe(10);
+      expect(pick(5).numeric()?.gt(5)).toBeUndefined();
+      expect(pick(3).numeric()?.gt(5)).toBeUndefined();
+    });
+
+    it("should validate gt with numeric string", () => {
+      expect(pick("10").numeric()?.gt(5)?.valueOf()).toBe("10");
+      expect(pick("5").numeric()?.gt(5)).toBeUndefined();
+      expect(pick("3").numeric()?.gt(5)).toBeUndefined();
+    });
+
+    it("should validate gte", () => {
+      expect(pick(10).numeric()?.gte(5)?.valueOf()).toBe(10);
+      expect(pick(5).numeric()?.gte(5)?.valueOf()).toBe(5);
+      expect(pick("10").numeric()?.gte(5)?.valueOf()).toBe("10");
+      expect(pick("5").numeric()?.gte(5)?.valueOf()).toBe("5");
+      expect(pick(3).numeric()?.gte(5)).toBeUndefined();
+    });
+
+    it("should validate lt", () => {
+      expect(pick(3).numeric()?.lt(5)?.valueOf()).toBe(3);
+      expect(pick("3").numeric()?.lt(5)?.valueOf()).toBe("3");
+      expect(pick(5).numeric()?.lt(5)).toBeUndefined();
+      expect(pick(7).numeric()?.lt(5)).toBeUndefined();
+    });
+
+    it("should validate lte", () => {
+      expect(pick(3).numeric()?.lte(5)?.valueOf()).toBe(3);
+      expect(pick(5).numeric()?.lte(5)?.valueOf()).toBe(5);
+      expect(pick("3").numeric()?.lte(5)?.valueOf()).toBe("3");
+      expect(pick("5").numeric()?.lte(5)?.valueOf()).toBe("5");
+      expect(pick(7).numeric()?.lte(5)).toBeUndefined();
+    });
+
+    it("should validate between", () => {
+      expect(pick(5).numeric()?.between(1, 10)?.valueOf()).toBe(5);
+      expect(pick("5").numeric()?.between(1, 10)?.valueOf()).toBe("5");
+      expect(pick(1).numeric()?.between(1, 10)?.valueOf()).toBe(1);
+      expect(pick(10).numeric()?.between(1, 10)?.valueOf()).toBe(10);
+      expect(pick(0).numeric()?.between(1, 10)).toBeUndefined();
+      expect(pick(11).numeric()?.between(1, 10)).toBeUndefined();
+    });
+
+    it("should validate positive", () => {
+      expect(pick(5).numeric()?.positive()?.valueOf()).toBe(5);
+      expect(pick("5").numeric()?.positive()?.valueOf()).toBe("5");
+      expect(pick(0.1).numeric()?.positive()?.valueOf()).toBe(0.1);
+      expect(pick(0).numeric()?.positive()).toBeUndefined();
+      expect(pick(-5).numeric()?.positive()).toBeUndefined();
+    });
+
+    it("should validate negative", () => {
+      expect(pick(-5).numeric()?.negative()?.valueOf()).toBe(-5);
+      expect(pick("-5").numeric()?.negative()?.valueOf()).toBe("-5");
+      expect(pick(-0.1).numeric()?.negative()?.valueOf()).toBe(-0.1);
+      expect(pick(0).numeric()?.negative()).toBeUndefined();
+      expect(pick(5).numeric()?.negative()).toBeUndefined();
+    });
+
+    it("should validate multipleOf", () => {
+      expect(pick(10).numeric()?.multipleOf(5)?.valueOf()).toBe(10);
+      expect(pick("10").numeric()?.multipleOf(5)?.valueOf()).toBe("10");
+      expect(pick(15).numeric()?.multipleOf(3)?.valueOf()).toBe(15);
+      expect(pick(10).numeric()?.multipleOf(3)).toBeUndefined();
+      expect(pick(7).numeric()?.multipleOf(2)).toBeUndefined();
+    });
+
+    it("should validate divisibleBy", () => {
+      expect(pick(10).numeric()?.divisibleBy(5)?.valueOf()).toBe(10);
+      expect(pick("10").numeric()?.divisibleBy(5)?.valueOf()).toBe("10");
+      expect(pick(15).numeric()?.divisibleBy(3)?.valueOf()).toBe(15);
+      expect(pick(10).numeric()?.divisibleBy(3)).toBeUndefined();
+    });
+
+    it("should validate even", () => {
+      expect(pick(10).numeric()?.even()?.valueOf()).toBe(10);
+      expect(pick("10").numeric()?.even()?.valueOf()).toBe("10");
+      expect(pick(0).numeric()?.even()?.valueOf()).toBe(0);
+      expect(pick(-4).numeric()?.even()?.valueOf()).toBe(-4);
+      expect(pick(11).numeric()?.even()).toBeUndefined();
+      expect(pick(3.14).numeric()?.even()).toBeUndefined();
+    });
+
+    it("should validate odd", () => {
+      expect(pick(11).numeric()?.odd()?.valueOf()).toBe(11);
+      expect(pick("11").numeric()?.odd()?.valueOf()).toBe("11");
+      expect(pick(-3).numeric()?.odd()?.valueOf()).toBe(-3);
+      expect(pick(10).numeric()?.odd()).toBeUndefined();
+      expect(pick(0).numeric()?.odd()).toBeUndefined();
+      expect(pick(3.14).numeric()?.odd()).toBeUndefined();
+    });
+
+    it("should chain multiple validations", () => {
+      const result = pick(50)
+        .numeric()
+        ?.positive()
+        ?.between(1, 100)
+        ?.multipleOf(10);
+      expect(result?.valueOf()).toBe(50);
+    });
+
+    it("should chain with string values", () => {
+      const result = pick("50")
+        .numeric()
+        ?.positive()
+        ?.between(1, 100)
+        ?.multipleOf(10);
+      expect(result?.valueOf()).toBe("50");
+    });
+
+    it("should return undefined if any validation fails", () => {
+      const result = pick(55)
+        .numeric()
+        ?.positive()
+        ?.between(1, 100)
+        ?.multipleOf(10);
+      expect(result).toBeUndefined();
+    });
   });
 });
 

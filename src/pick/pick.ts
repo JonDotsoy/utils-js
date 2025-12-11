@@ -24,6 +24,34 @@ namespace Utils {
 }
 
 /**
+ * Creates a memoized version of a callback function that executes only once.
+ * The result is cached and returned on subsequent calls without re-executing the callback.
+ *
+ * @template T - The return type of the callback function
+ * @param cb - The callback function to be executed once
+ * @returns A function that returns the cached result of the callback
+ *
+ * @example
+ * ```typescript
+ * const expensiveOperation = memoize(() => {
+ *   console.log("Computing...");
+ *   return 42;
+ * });
+ *
+ * expensiveOperation(); // Logs "Computing..." and returns 42
+ * expensiveOperation(); // Returns 42 without logging (uses cached value)
+ * ```
+ */
+const memoize = <T>(cb: () => T) => {
+  let store: { current: T } | null = null;
+  return () => {
+    if (store) return store.current;
+    store = { current: cb() };
+    return store.current;
+  };
+};
+
+/**
  * Utility class for safely navigating and validating data structures.
  * Provides chainable methods for accessing properties and validating types.
  *
@@ -435,6 +463,35 @@ export class Pick<T> {
    */
   email(): undefined | StringPick {
     return this.string()?.email();
+  }
+
+  /**
+   * Validates that the current value is numeric (either a number or a string representing a number).
+   * Accepts both integers and decimal numbers.
+   *
+   * @returns A new NumericPick instance with the value typed as number or string, or undefined if it's not numeric
+   *
+   * @example
+   * ```typescript
+   * pick(1234).numeric()?.valueOf(); // 1234
+   * pick("1234").numeric()?.valueOf(); // "1234"
+   * pick("123.456").numeric()?.valueOf(); // "123.456"
+   * pick("abc").numeric(); // undefined
+   * pick(1234).numeric()?.gt(1000)?.valueOf(); // 1234
+   * pick("50").numeric()?.between(0, 100)?.valueOf(); // "50"
+   * ```
+   */
+  numeric():
+    | undefined
+    | NumericPick<T extends string | number ? T : string | number> {
+    const result = this.oneOf([
+      (v) => v.number(),
+      (v) => v.string()?.numeric(),
+    ]);
+    if (result === undefined) return undefined;
+    return new NumericPick<T extends string | number ? T : string | number>(
+      result.valueOf() as any,
+    );
   }
 
   /**
@@ -1258,6 +1315,28 @@ export class StringPick extends Pick<string> {
   }
 
   /**
+   * Validates that the string represents a numeric value (integer or decimal).
+   * Supports optional leading + or - sign.
+   * This is an alias for `this.matches(/^[+-]?\d+(\.\d+)?$/)`.
+   *
+   * @returns This instance if it's a numeric string, or undefined if not
+   *
+   * @example
+   * ```typescript
+   * pick("1234").string()?.numeric()?.valueOf(); // "1234"
+   * pick("123.456").string()?.numeric()?.valueOf(); // "123.456"
+   * pick("-123").string()?.numeric()?.valueOf(); // "-123"
+   * pick("+123.45").string()?.numeric()?.valueOf(); // "+123.45"
+   * pick("abc").string()?.numeric(); // undefined
+   * ```
+   */
+  numeric(): undefined | NumericPick<string> {
+    let v = this.matches(/^[+-]?\d+(\.\d+)?$/);
+    if (v === undefined) return undefined;
+    return new NumericPick<string>(v.value);
+  }
+
+  /**
    * Transforms the string to uppercase.
    *
    * @returns A new StringPick instance with the string in uppercase
@@ -1282,6 +1361,147 @@ export class StringPick extends Pick<string> {
    */
   trim(): StringPick {
     return new StringPick(this.value.trim());
+  }
+}
+
+/**
+ * Specialized class for working with numeric values (number or numeric string).
+ * Extends Pick<number | string> with arithmetic validation methods.
+ */
+export class NumericPick<T extends number | string = number | string>
+  extends Pick<T>
+  implements ArithmeticMethods<number, NumericPick<T>>
+{
+  /**
+   * Memoized function that converts the value to a number for comparison.
+   * The conversion is cached to avoid repeated parsing of string values.
+   * @private
+   */
+  private toNumber = memoize(() => {
+    return typeof this.value === "string" ? parseFloat(this.value) : this.value;
+  });
+
+  /**
+   * Validates that the numeric value is greater than the specified value.
+   *
+   * @param min - Minimum value (exclusive)
+   * @returns This instance if it meets the condition, or undefined if not
+   */
+  gt(min: number): undefined | NumericPick {
+    if (this.toNumber() <= min) return undefined;
+    return this;
+  }
+
+  /**
+   * Validates that the numeric value is greater than or equal to the specified value.
+   *
+   * @param min - Minimum value (inclusive)
+   * @returns This instance if it meets the condition, or undefined if not
+   */
+  gte(min: number): undefined | NumericPick {
+    if (this.toNumber() < min) return undefined;
+    return this;
+  }
+
+  /**
+   * Validates that the numeric value is less than the specified value.
+   *
+   * @param max - Maximum value (exclusive)
+   * @returns This instance if it meets the condition, or undefined if not
+   */
+  lt(max: number): undefined | NumericPick {
+    if (this.toNumber() >= max) return undefined;
+    return this;
+  }
+
+  /**
+   * Validates that the numeric value is less than or equal to the specified value.
+   *
+   * @param max - Maximum value (inclusive)
+   * @returns This instance if it meets the condition, or undefined if not
+   */
+  lte(max: number): undefined | NumericPick {
+    if (this.toNumber() > max) return undefined;
+    return this;
+  }
+
+  /**
+   * Validates that the numeric value is within a range.
+   *
+   * @param min - Minimum value (inclusive)
+   * @param max - Maximum value (inclusive)
+   * @returns This instance if it meets the condition, or undefined if not
+   */
+  between(min: number, max: number): undefined | NumericPick {
+    const num = this.toNumber();
+    if (num < min || num > max) return undefined;
+    return this;
+  }
+
+  /**
+   * Validates that the numeric value is positive (greater than 0).
+   *
+   * @returns This instance if it's positive, or undefined if not
+   */
+  positive(): undefined | NumericPick {
+    if (this.toNumber() <= 0) return undefined;
+    return this;
+  }
+
+  /**
+   * Validates that the numeric value is negative (less than 0).
+   *
+   * @returns This instance if it's negative, or undefined if not
+   */
+  negative(): undefined | NumericPick {
+    if (this.toNumber() >= 0) return undefined;
+    return this;
+  }
+
+  /**
+   * Validates that the numeric value is a multiple of the specified value.
+   *
+   * @param divisor - The divisor
+   * @returns This instance if it's a multiple, or undefined if not
+   */
+  multipleOf(divisor: number): undefined | NumericPick {
+    if (this.toNumber() % divisor !== 0) return undefined;
+    return this;
+  }
+
+  /**
+   * Validates that the numeric value is divisible by the specified divisor.
+   * This is an alias for `multipleOf()` with more intuitive naming.
+   *
+   * @param divisor - The divisor to check
+   * @returns This instance if it's divisible by the divisor, or undefined if not
+   */
+  divisibleBy(divisor: number): undefined | NumericPick {
+    return this.multipleOf(divisor);
+  }
+
+  /**
+   * Validates that the numeric value is even.
+   *
+   * @returns This instance if it's even, or undefined if not
+   */
+  even(): undefined | NumericPick {
+    const num = this.toNumber();
+    if (!Number.isInteger(num)) return undefined;
+    if (num % 2 !== 0) return undefined;
+    return this;
+  }
+
+  /**
+   * Validates that the numeric value is odd.
+   *
+   * @returns This instance if it's odd, or undefined if not
+   */
+  odd(): undefined | NumericPick {
+    const num = this.toNumber();
+    if (!Number.isInteger(num)) return undefined;
+    if (num % 2 === 0) return undefined;
+    return this;
   }
 }
 
