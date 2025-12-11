@@ -1377,7 +1377,7 @@ export class NumericPick<T extends number | string = number | string>
    * The conversion is cached to avoid repeated parsing of string values.
    * @private
    */
-  private toNumber = memoize(() => {
+  private toNumber = memoize((): number => {
     return typeof this.value === "string" ? parseFloat(this.value) : this.value;
   });
 
@@ -1387,7 +1387,7 @@ export class NumericPick<T extends number | string = number | string>
    * @param min - Minimum value (exclusive)
    * @returns This instance if it meets the condition, or undefined if not
    */
-  gt(min: number): undefined | NumericPick {
+  gt(min: number): undefined | NumericPick<T> {
     if (this.toNumber() <= min) return undefined;
     return this;
   }
@@ -1398,7 +1398,7 @@ export class NumericPick<T extends number | string = number | string>
    * @param min - Minimum value (inclusive)
    * @returns This instance if it meets the condition, or undefined if not
    */
-  gte(min: number): undefined | NumericPick {
+  gte(min: number): undefined | NumericPick<T> {
     if (this.toNumber() < min) return undefined;
     return this;
   }
@@ -1409,7 +1409,7 @@ export class NumericPick<T extends number | string = number | string>
    * @param max - Maximum value (exclusive)
    * @returns This instance if it meets the condition, or undefined if not
    */
-  lt(max: number): undefined | NumericPick {
+  lt(max: number): undefined | NumericPick<T> {
     if (this.toNumber() >= max) return undefined;
     return this;
   }
@@ -1420,7 +1420,7 @@ export class NumericPick<T extends number | string = number | string>
    * @param max - Maximum value (inclusive)
    * @returns This instance if it meets the condition, or undefined if not
    */
-  lte(max: number): undefined | NumericPick {
+  lte(max: number): undefined | NumericPick<T> {
     if (this.toNumber() > max) return undefined;
     return this;
   }
@@ -1432,7 +1432,7 @@ export class NumericPick<T extends number | string = number | string>
    * @param max - Maximum value (inclusive)
    * @returns This instance if it meets the condition, or undefined if not
    */
-  between(min: number, max: number): undefined | NumericPick {
+  between(min: number, max: number): undefined | NumericPick<T> {
     const num = this.toNumber();
     if (num < min || num > max) return undefined;
     return this;
@@ -1443,7 +1443,7 @@ export class NumericPick<T extends number | string = number | string>
    *
    * @returns This instance if it's positive, or undefined if not
    */
-  positive(): undefined | NumericPick {
+  positive(): undefined | NumericPick<T> {
     if (this.toNumber() <= 0) return undefined;
     return this;
   }
@@ -1453,7 +1453,7 @@ export class NumericPick<T extends number | string = number | string>
    *
    * @returns This instance if it's negative, or undefined if not
    */
-  negative(): undefined | NumericPick {
+  negative(): undefined | NumericPick<T> {
     if (this.toNumber() >= 0) return undefined;
     return this;
   }
@@ -1464,7 +1464,7 @@ export class NumericPick<T extends number | string = number | string>
    * @param divisor - The divisor
    * @returns This instance if it's a multiple, or undefined if not
    */
-  multipleOf(divisor: number): undefined | NumericPick {
+  multipleOf(divisor: number): undefined | NumericPick<T> {
     if (this.toNumber() % divisor !== 0) return undefined;
     return this;
   }
@@ -1476,7 +1476,7 @@ export class NumericPick<T extends number | string = number | string>
    * @param divisor - The divisor to check
    * @returns This instance if it's divisible by the divisor, or undefined if not
    */
-  divisibleBy(divisor: number): undefined | NumericPick {
+  divisibleBy(divisor: number): undefined | NumericPick<T> {
     return this.multipleOf(divisor);
   }
 
@@ -1485,7 +1485,7 @@ export class NumericPick<T extends number | string = number | string>
    *
    * @returns This instance if it's even, or undefined if not
    */
-  even(): undefined | NumericPick {
+  even(): undefined | NumericPick<T> {
     const num = this.toNumber();
     if (!Number.isInteger(num)) return undefined;
     if (num % 2 !== 0) return undefined;
@@ -1497,7 +1497,7 @@ export class NumericPick<T extends number | string = number | string>
    *
    * @returns This instance if it's odd, or undefined if not
    */
-  odd(): undefined | NumericPick {
+  odd(): undefined | NumericPick<T> {
     const num = this.toNumber();
     if (!Number.isInteger(num)) return undefined;
     if (num % 2 === 0) return undefined;
