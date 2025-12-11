@@ -709,6 +709,14 @@ export interface ArithmeticMethods<T extends number | bigint, Self> {
    * @returns This instance if it's odd, or undefined if not
    */
   odd(): undefined | Self;
+
+  /**
+   * Validates that the number is an absolute value (integer without decimals).
+   * For example, "123" passes but "123.42" does not.
+   *
+   * @returns This instance if it's an absolute value, or undefined if not
+   */
+  absolute(): undefined | Self;
 }
 
 /**
@@ -842,6 +850,22 @@ export class IntegerPick
    */
   divisibleBy(divisor: number): undefined | IntegerPick {
     return this.multipleOf(divisor);
+  }
+
+  /**
+   * Validates that the integer is an absolute value (integer without decimals).
+   * Since IntegerPick already validates integers, this always returns the instance.
+   *
+   * @returns This instance (always succeeds for integers)
+   *
+   * @example
+   * ```typescript
+   * pick(123).integer()?.absolute()?.valueOf(); // 123
+   * pick(123.42).integer(); // undefined (not an integer)
+   * ```
+   */
+  absolute(): undefined | IntegerPick {
+    return this;
   }
 }
 
@@ -994,6 +1018,21 @@ export class BigIntPick
    */
   odd(): undefined | BigIntPick {
     if (this.value % 2n === 0n) return undefined;
+    return this;
+  }
+
+  /**
+   * Validates that the bigint is an absolute value (integer without decimals).
+   * Since BigInt already represents integers, this always returns the instance.
+   *
+   * @returns This instance (always succeeds for bigints)
+   *
+   * @example
+   * ```typescript
+   * pick(123n).bigInt()?.absolute()?.valueOf(); // 123n
+   * ```
+   */
+  absolute(): undefined | BigIntPick {
     return this;
   }
 }
@@ -1503,6 +1542,26 @@ export class NumericPick<T extends number | string = number | string>
     if (num % 2 === 0) return undefined;
     return this;
   }
+
+  /**
+   * Validates that the numeric value is an absolute value (integer without decimals).
+   * For example, "123" passes but "123.42" does not.
+   *
+   * @returns This instance if it's an absolute value, or undefined if not
+   *
+   * @example
+   * ```typescript
+   * pick("123").numeric()?.absolute()?.valueOf(); // "123"
+   * pick("123.42").numeric()?.absolute(); // undefined
+   * pick(50).numeric()?.absolute()?.valueOf(); // 50
+   * pick(50.5).numeric()?.absolute(); // undefined
+   * ```
+   */
+  absolute(): undefined | NumericPick<T> {
+    const num = this.toNumber();
+    if (!Number.isInteger(num)) return undefined;
+    return this;
+  }
 }
 
 /**
@@ -1671,6 +1730,24 @@ export class NumberPick
   odd(): undefined | NumberPick {
     if (!Number.isInteger(this.value)) return undefined;
     if (this.value % 2 === 0) return undefined;
+    return this;
+  }
+
+  /**
+   * Validates that the number is an absolute value (integer without decimals).
+   * For example, 123 passes but 123.42 does not.
+   *
+   * @returns This instance if it's an absolute value, or undefined if not
+   *
+   * @example
+   * ```typescript
+   * pick(123).number()?.absolute()?.valueOf(); // 123
+   * pick(123.42).number()?.absolute(); // undefined
+   * pick(-50).number()?.absolute()?.valueOf(); // -50
+   * ```
+   */
+  absolute(): undefined | NumberPick {
+    if (!Number.isInteger(this.value)) return undefined;
     return this;
   }
 }
