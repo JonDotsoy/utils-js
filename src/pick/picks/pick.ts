@@ -32,7 +32,7 @@ export class Pick<T> {
    *
    * @param value - The value to encapsulate
    */
-  constructor(readonly value: T) { }
+  constructor(readonly value: T) {}
 
   /**
    * Accesses a property of the current object.
@@ -47,7 +47,7 @@ export class Pick<T> {
    * ```
    */
   property<K extends string | symbol | number>(
-    key: K
+    key: K,
   ): undefined | Pick<unknown> {
     if (!Utils.isRecord(this.value)) return undefined;
     if (!Utils.hasOwnProperty(this.value, key)) return undefined;
@@ -173,8 +173,9 @@ export class Pick<T> {
    * pick([1, 2, 3]).native()?.valueOf(); // [1, 2, 3]
    * ```
    */
-  native(): undefined |
-    Pick<string | number | boolean | Array<any> | Record<any, any>> {
+  native():
+    | undefined
+    | Pick<string | number | boolean | Array<any> | Record<any, any>> {
     if (Utils.isString(this.value)) return new Pick(this.value);
     if (Utils.isNumber(this.value)) return new Pick(this.value);
     if (Utils.isBoolean(this.value)) return new Pick(this.value);
@@ -184,8 +185,9 @@ export class Pick<T> {
   }
 
   /** @deprecated Use native() instead */
-  isNative(): undefined |
-    Pick<string | number | boolean | Array<any> | Record<any, any>> {
+  isNative():
+    | undefined
+    | Pick<string | number | boolean | Array<any> | Record<any, any>> {
     return this.native();
   }
 
@@ -286,11 +288,11 @@ export class Pick<T> {
    */
   find(
     filter: (value: T extends any[] ? T[number] : never) => boolean,
-    thisArg?: any
+    thisArg?: any,
   ) {
     if (!Utils.isArray(this.value)) return undefined;
     return new Pick<T extends any[] ? T[number] : unknown>(
-      this.value.find(filter, thisArg)
+      this.value.find(filter, thisArg),
     );
   }
 
@@ -316,7 +318,7 @@ export class Pick<T> {
    */
   filter(
     filter: (value: T extends any[] ? T[number] : never) => boolean,
-    thisArg?: any
+    thisArg?: any,
   ) {
     if (!Utils.isArray(this.value)) return undefined;
     return new Pick(this.value.filter(filter, thisArg));
@@ -338,8 +340,8 @@ export class Pick<T> {
    */
   every<R>(
     validator: (
-      value: Pick<T extends any[] ? T[number] : never>
-    ) => undefined | Pick<R>
+      value: Pick<T extends any[] ? T[number] : never>,
+    ) => undefined | Pick<R>,
   ): undefined | Pick<R[]> {
     if (!Utils.isArray(this.value)) return undefined;
 
@@ -383,11 +385,14 @@ export class Pick<T> {
    * ```
    */
   oneOf<Validators extends Array<(value: Pick<T>) => undefined | Pick<any>>>(
-    validators: Validators
-  ): undefined |
-    Pick<
-      Validators[number] extends (value: Pick<T>) => undefined | Pick<infer R> ? R : never
-    > {
+    validators: Validators,
+  ):
+    | undefined
+    | Pick<
+        Validators[number] extends (value: Pick<T>) => undefined | Pick<infer R>
+          ? R
+          : never
+      > {
     for (const validator of validators) {
       const result = validator(this);
       if (result !== undefined) {
@@ -435,15 +440,16 @@ export class Pick<T> {
    * pick("50").numeric()?.between(0, 100)?.valueOf(); // "50"
    * ```
    */
-  numeric(): undefined |
-    NumericPick<T extends string | number ? T : string | number> {
+  numeric():
+    | undefined
+    | NumericPick<T extends string | number ? T : string | number> {
     const result = this.oneOf([
       (v) => v.number(),
       (v) => v.string()?.numeric(),
     ]);
     if (result === undefined) return undefined;
     return new NumericPick<T extends string | number ? T : string | number>(
-      result.valueOf() as any
+      result.valueOf() as any,
     );
   }
 
@@ -459,8 +465,9 @@ export class Pick<T> {
    * pick("2024-01-01").date()?.valueOf(); // "2024-01-01"
    * ```
    */
-  date(): undefined |
-    DatePick<T extends Date | string | number ? T : Date | string | number> {
+  date():
+    | undefined
+    | DatePick<T extends Date | string | number ? T : Date | string | number> {
     if (this.value instanceof Date) {
       if (isNaN(this.value.getTime())) return undefined as any;
       return new DatePick(this.value) as any;
@@ -504,7 +511,7 @@ export class Pick<T> {
    * ```
    */
   instanceOf<C extends new (...args: any[]) => any>(
-    constructor: C
+    constructor: C,
   ): undefined | Pick<InstanceType<C>> {
     if (!(this.value instanceof constructor)) return undefined;
     return new Pick(this.value as InstanceType<C>);

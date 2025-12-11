@@ -1,15 +1,16 @@
 import type { ArithmeticMethods } from "../dtos/arithmetic-methods.js";
-import { Pick } from "./pick.js";
 import { memoize } from "../utils/memoize.js";
+import { CommonPick } from "./common-pick.js";
 
 /**
  * Specialized class for working with numeric values (number or numeric string).
- * Extends Pick<number | string> with arithmetic validation methods.
+ * Extends CommonPick with arithmetic validation methods.
  */
 
 export class NumericPick<T extends number | string = number | string>
-  extends Pick<T>
-  implements ArithmeticMethods<number, NumericPick<T>> {
+  extends CommonPick<T>
+  implements ArithmeticMethods<number, NumericPick<T>>
+{
   /**
    * Memoized function that converts the value to a number for comparison.
    * The conversion is cached to avoid repeated parsing of string values.

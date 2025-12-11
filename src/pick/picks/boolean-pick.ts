@@ -1,11 +1,11 @@
-import { Pick } from "./pick.js";
+import { CommonPick } from "./common-pick.js";
 
 /**
  * Specialized class for working with booleans.
- * Extends Pick<boolean> with specific methods for boolean validation.
+ * Extends CommonPick with specific methods for boolean validation.
  */
 
-export class BooleanPick extends Pick<boolean> {
+export class BooleanPick extends CommonPick<boolean> {
   /**
    * Validates that the value is true.
    *

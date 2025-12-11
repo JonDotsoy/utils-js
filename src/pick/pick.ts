@@ -3,6 +3,7 @@
 import { Pick } from "./picks/pick.js";
 import { Utils } from "./utils/utils.js";
 export { Pick } from "./picks/pick.js";
+export { CommonPick } from "./picks/common-pick.js";
 export { DatePick } from "./picks/date-pick.js";
 export { URLPick } from "./picks/url-pick.js";
 export { NumberPick } from "./picks/number-pick.js";

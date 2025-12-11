@@ -18,7 +18,7 @@
  * ```
  */
 export const memoize = <T>(cb: () => T) => {
-  let store: { current: T; } | null = null;
+  let store: { current: T } | null = null;
   return () => {
     if (store) return store.current;
     store = { current: cb() };

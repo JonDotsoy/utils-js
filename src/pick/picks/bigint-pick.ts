@@ -1,14 +1,15 @@
 import type { ArithmeticMethods } from "../dtos/arithmetic-methods.js";
-import { Pick } from "./pick.js";
+import { CommonPick } from "./common-pick.js";
 
 /**
  * Specialized class for working with bigints.
- * Extends Pick<bigint> with specific methods for bigint validation.
+ * Extends CommonPick with specific methods for bigint validation.
  */
 
 export class BigIntPick
-  extends Pick<bigint>
-  implements ArithmeticMethods<bigint, BigIntPick> {
+  extends CommonPick<bigint>
+  implements ArithmeticMethods<bigint, BigIntPick>
+{
   /**
    * Validates that the bigint is greater than the specified value.
    *

@@ -1,11 +1,11 @@
-import { Pick } from "./pick.js";
+import { CommonPick } from "./common-pick.js";
 
 /**
  * Specialized class for working with dates (Date).
- * Extends Pick<Date | number | string> with specific methods for date validation.
+ * Extends CommonPick with specific methods for date validation.
  */
 
-export class DatePick<T extends Date | number | string> extends Pick<T> {
+export class DatePick<T extends Date | number | string> extends CommonPick<T> {
   #valueDate?: Date;
 
   private getDate(): Date | undefined {
@@ -66,7 +66,7 @@ export class DatePick<T extends Date | number | string> extends Pick<T> {
    */
   between(
     min: Date | number | string,
-    max: Date | number | string
+    max: Date | number | string,
   ): undefined | DatePick<T> {
     return this.after(min)?.before(max);
   }

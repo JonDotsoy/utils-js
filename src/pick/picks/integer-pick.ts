@@ -1,14 +1,15 @@
 import type { ArithmeticMethods } from "../dtos/arithmetic-methods.js";
-import { Pick } from "./pick.js";
+import { CommonPick } from "./common-pick.js";
 
 /**
  * Specialized class for working with integers.
- * Extends NumberPick with specific validations for integer numbers.
+ * Extends CommonPick with specific validations for integer numbers.
  */
 
 export class IntegerPick
-  extends Pick<number>
-  implements ArithmeticMethods<number, IntegerPick> {
+  extends CommonPick<number>
+  implements ArithmeticMethods<number, IntegerPick>
+{
   /**
    * Validates that the integer is greater than the specified value.
    *

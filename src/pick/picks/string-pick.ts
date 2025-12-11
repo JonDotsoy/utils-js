@@ -1,12 +1,22 @@
 import { NumericPick } from "./numeric-pick.js";
-import { Pick } from "./pick.js";
+import { URLPick } from "./url-pick.js";
+import { CommonPick } from "./common-pick.js";
 
 /**
  * Specialized class for working with strings.
- * Extends Pick<string> with specific methods for string validation and manipulation.
+ * Extends CommonPick with specific methods for string validation and manipulation.
  */
 
-export class StringPick extends Pick<string> {
+export class StringPick extends CommonPick<string> {
+  /**
+   * Validates that the current value is a valid URL string and returns a URLPick.
+   *
+   * @returns A new URLPick instance with the URL, or undefined if it's not a valid URL
+   */
+  url(): undefined | URLPick<string> {
+    if (!URL.canParse(this.value)) return undefined;
+    return new URLPick<string>(this.value);
+  }
   /**
    * Validates that the string has a minimum length.
    *

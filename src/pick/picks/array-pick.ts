@@ -1,11 +1,28 @@
+// Import Pick class for creating Pick instances in first(), last(), at()
+// This is safe because Pick doesn't import ArrayPick directly
 import { Pick } from "./pick.js";
+import { CommonPick } from "./common-pick.js";
 
 /**
  * Specialized class for working with arrays.
- * Extends Pick<Array<T>> with specific methods for array validation and manipulation.
+ * Extends CommonPick with specific methods for array validation and manipulation.
  */
 
-export class ArrayPick<T = unknown> extends Pick<Array<T>> {
+export class ArrayPick<T = unknown> extends CommonPick<Array<T>> {
+  /**
+   * Filters array elements that meet the specified condition.
+   *
+   * @deprecated This method is deprecated because the name can be confusing.
+   * Although it doesn't mutate the original value, the name suggests a mutation operation.
+   * Use `pipe()` with native `filter()` instead: `.pipe(arr => arr.filter(...))`
+   *
+   * @param filter - Function that evaluates each element of the array
+   * @param thisArg - Optional value to use as `this` when executing the filter function
+   * @returns A new ArrayPick instance with the filtered array
+   */
+  filter(filter: (value: T) => boolean, thisArg?: any): ArrayPick<T> {
+    return new ArrayPick(this.value.filter(filter, thisArg));
+  }
   /**
    * Validates that the array has a minimum length.
    *

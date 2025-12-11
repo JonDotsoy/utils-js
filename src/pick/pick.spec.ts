@@ -1,7 +1,5 @@
 import { describe, it, expect, expectTypeOf } from "bun:test";
-import {
-  pick,
-} from "./pick.js";
+import { pick } from "./pick.js";
 import { DatePick } from "./picks/date-pick.js";
 import { NumberPick } from "./picks/number-pick.js";
 import { NumericPick } from "./picks/numeric-pick.js";
@@ -1447,45 +1445,6 @@ describe("date", () => {
       const maxTime = new Date("2024-12-31").getTime();
       const result = pick(date).date()?.between(minTime, maxTime);
       expect(result?.valueOf()).toEqual(date);
-    });
-  });
-
-  describe("DatePick.number", () => {
-    it("should convert Date to timestamp using number() method", () => {
-      const date = new Date("2024-01-01");
-      const result = pick(date).date()?.number();
-      expect(result?.valueOf()).toBeUndefined();
-      expectTypeOf(result).toEqualTypeOf<NumberPick | undefined>();
-    });
-
-    it("should convert to number after validating date is within range", () => {
-      const date = new Date("2024-06-15");
-      const result = pick(date)
-        .date()
-        ?.after(new Date(2020, 0, 1))
-        ?.before(new Date(2025, 11, 31))
-        ?.number();
-
-      expect(result?.valueOf()).toBeUndefined();
-      expectTypeOf(result).toEqualTypeOf<NumberPick | undefined>();
-    });
-
-    it("should return undefined when date fails after() validation before converting to number", () => {
-      const date = new Date("2019-12-31");
-      const result = pick(date)
-        .date()
-        ?.after(new Date(2020, 0, 1))
-        ?.number();
-
-      expect(result).toBeUndefined();
-    });
-
-    it("should allow chaining number validations after converting date to timestamp", () => {
-      const date = new Date("2024-06-15");
-      const timestamp = date.getTime();
-      const result = pick(date).date()?.number()?.gt(0);
-
-      expect(result?.valueOf()).toBeUndefined();
     });
   });
 

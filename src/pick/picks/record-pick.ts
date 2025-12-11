@@ -1,12 +1,12 @@
 import { ArrayPick } from "./array-pick.js";
-import { Pick } from "./pick.js";
+import { CommonPick } from "./common-pick.js";
 
 /**
  * Specialized class for working with objects (Records).
- * Extends Pick<Record<string, unknown>> with specific methods for object validation.
+ * Extends CommonPick with specific methods for object validation.
  */
 
-export class RecordPick extends Pick<Record<string, unknown>> {
+export class RecordPick extends CommonPick<Record<string, unknown>> {
   /**
    * Validates that the object has a specific key.
    *
