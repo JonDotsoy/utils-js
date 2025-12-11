@@ -1,17 +1,17 @@
 import { describe, it, expect, expectTypeOf } from "bun:test";
 import {
   pick,
-  type Pick,
-  IntegerPick,
-  BigIntPick,
-  BooleanPick,
-  ArrayPick,
-  RecordPick,
-  StringPick,
-  NumberPick,
-  NumericPick,
-  DatePick,
-} from "./pick";
+} from "./pick.js";
+import { DatePick } from "./picks/date-pick.js";
+import { NumberPick } from "./picks/number-pick.js";
+import { NumericPick } from "./picks/numeric-pick.js";
+import { StringPick } from "./picks/string-pick.js";
+import { RecordPick } from "./picks/record-pick.js";
+import { ArrayPick } from "./picks/array-pick.js";
+import { BooleanPick } from "./picks/boolean-pick.js";
+import { BigIntPick } from "./picks/bigint-pick.js";
+import { IntegerPick } from "./picks/integer-pick.js";
+import { type Pick } from "./picks/pick.js";
 
 // Reglas: Pick o cualquier clase que erede de Pick nunca deben modificar el valor
 // pick(new Date(...)).date().value instanceof Date
