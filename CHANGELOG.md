@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.4.1...utils-js-v1.5.0) (2025-12-11)
+
+
+### Features
+
+* **pick:** add absolute() method for integer validation ([3a1eacd](https://github.com/JonDotsoy/utils-js/commit/3a1eacd255549d59d84c3ab6ebc623bf49dc408b))
+
 ## [1.4.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.4.0...utils-js-v1.4.1) (2025-12-11)
 
 
