@@ -1,4 +1,5 @@
 import { CommonPick } from "./common-pick.js";
+import { memoize } from "../utils/memoize.js";
 
 /**
  * Specialized class for working with dates (Date).
@@ -6,24 +7,21 @@ import { CommonPick } from "./common-pick.js";
  */
 
 export class DatePick<T extends Date | number | string> extends CommonPick<T> {
-  #valueDate?: Date;
-
-  private getDate(): Date | undefined {
-    if (this.#valueDate !== undefined) {
-      return this.#valueDate;
-    }
-
+  /**
+   * Memoized function that converts the value to a Date for validation.
+   * The conversion is cached to avoid repeated parsing.
+   * @private
+   */
+  private toDate = memoize((): Date | undefined => {
     if (this.value instanceof Date) {
-      this.#valueDate = this.value;
-      return this.#valueDate;
+      return this.value;
     }
 
     const date = new Date(this.value);
-    if (isNaN(date.getTime())) return undefined;
+    if (Number.isNaN(date.getTime())) return undefined;
 
-    this.#valueDate = date;
-    return this.#valueDate;
-  }
+    return date;
+  });
 
   /**
    * Validates that the date is after a minimum date.
@@ -32,11 +30,11 @@ export class DatePick<T extends Date | number | string> extends CommonPick<T> {
    * @returns This instance if the date is after, or undefined if it doesn't meet the condition
    */
   after(min: Date | number | string): undefined | DatePick<T> {
-    const date = this.getDate();
+    const date = this.toDate();
     if (!date) return undefined;
 
     const minDate = new Date(min);
-    if (isNaN(minDate.getTime())) return undefined;
+    if (Number.isNaN(minDate.getTime())) return undefined;
     if (date.getTime() <= minDate.getTime()) return undefined;
     return this;
   }
@@ -48,11 +46,11 @@ export class DatePick<T extends Date | number | string> extends CommonPick<T> {
    * @returns This instance if the date is before, or undefined if it doesn't meet the condition
    */
   before(max: Date | number | string): undefined | DatePick<T> {
-    const date = this.getDate();
+    const date = this.toDate();
     if (!date) return undefined;
 
     const maxDate = new Date(max);
-    if (isNaN(maxDate.getTime())) return undefined;
+    if (Number.isNaN(maxDate.getTime())) return undefined;
     if (date.getTime() >= maxDate.getTime()) return undefined;
     return this;
   }
