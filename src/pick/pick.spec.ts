@@ -1772,6 +1772,84 @@ describe("url", () => {
     expect(result).toBeInstanceOf(URL);
     expect(result?.href).toBe("http://localhost/");
   });
+
+  describe("pattern", () => {
+    it("should validate URL with pathname pattern", () => {
+      const result = pick("http://localhost/foo")
+        .url()
+        ?.pattern({ pathname: "/foo" });
+      expect(result?.valueOf()).toBe("http://localhost/foo");
+    });
+
+    it("should return undefined when pathname does not match", () => {
+      const result = pick("http://localhost/bar")
+        .url()
+        ?.pattern({ pathname: "/foo" });
+      expect(result).toBeUndefined();
+    });
+
+    it("should validate URL object with pathname pattern", () => {
+      const url = new URL("http://localhost/foo");
+      const result = pick(url).url()?.pattern({ pathname: "/foo" });
+      expect(result?.valueOf()).toBe(url);
+    });
+
+    it("should validate with wildcard pathname pattern", () => {
+      expect(
+        pick("http://localhost/foo/bar")
+          .url()
+          ?.pattern({ pathname: "/foo/*" })
+          ?.valueOf(),
+      ).toBe("http://localhost/foo/bar");
+      expect(
+        pick("http://localhost/foo/baz")
+          .url()
+          ?.pattern({ pathname: "/foo/*" })
+          ?.valueOf(),
+      ).toBe("http://localhost/foo/baz");
+    });
+
+    it("should validate with hostname pattern", () => {
+      const result = pick("http://example.com/foo")
+        .url()
+        ?.pattern({ hostname: "example.com" });
+      expect(result?.valueOf()).toBe("http://example.com/foo");
+    });
+
+    it("should validate with protocol pattern", () => {
+      const result = pick("https://example.com")
+        .url()
+        ?.pattern({ protocol: "https" });
+      expect(result?.valueOf()).toBe("https://example.com");
+    });
+
+    it("should validate with multiple pattern properties", () => {
+      const result = pick("https://example.com/foo")
+        .url()
+        ?.pattern({
+          protocol: "https",
+          hostname: "example.com",
+          pathname: "/foo",
+        });
+      expect(result?.valueOf()).toBe("https://example.com/foo");
+    });
+
+    it("should return undefined when any pattern property does not match", () => {
+      const result = pick("http://example.com/foo")
+        .url()
+        ?.pattern({ protocol: "https", pathname: "/foo" });
+      expect(result).toBeUndefined();
+    });
+
+    it("should allow chaining after pattern validation", () => {
+      const result = pick("http://localhost/foo")
+        .url()
+        ?.pattern({ pathname: "/foo" })
+        ?.pipe((url) => (typeof url === "string" ? url : url.href))
+        .valueOf();
+      expect(result).toMatch(/\/foo/);
+    });
+  });
 });
 
 describe("numeric", () => {

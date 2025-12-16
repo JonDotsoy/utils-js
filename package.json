@@ -109,6 +109,7 @@
     "pipe"
   ],
   "dependencies": {
-    "@jondotsoy/shell": "1.2.0"
+    "@jondotsoy/shell": "1.2.0",
+    "urlpattern-polyfill": "10.1.0"
   }
 }
