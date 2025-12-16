@@ -1824,13 +1824,11 @@ describe("url", () => {
     });
 
     it("should validate with multiple pattern properties", () => {
-      const result = pick("https://example.com/foo")
-        .url()
-        ?.pattern({
-          protocol: "https",
-          hostname: "example.com",
-          pathname: "/foo",
-        });
+      const result = pick("https://example.com/foo").url()?.pattern({
+        protocol: "https",
+        hostname: "example.com",
+        pathname: "/foo",
+      });
       expect(result?.valueOf()).toBe("https://example.com/foo");
     });
 

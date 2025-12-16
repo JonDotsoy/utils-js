@@ -106,6 +106,46 @@ export class StringPick extends CommonPick<string> {
   }
 
   /**
+   * Validates that the string is entirely in uppercase.
+   * Returns undefined if the string contains any lowercase characters.
+   *
+   * @returns This instance if all characters are uppercase, or undefined if not
+   *
+   * @example
+   * ```typescript
+   * pick("HELLO").string()?.uppercase()?.valueOf(); // "HELLO"
+   * pick("Hello").string()?.uppercase(); // undefined
+   * pick("hello").string()?.uppercase(); // undefined
+   * pick("HELLO123").string()?.uppercase()?.valueOf(); // "HELLO123"
+   * pick("123").string()?.uppercase()?.valueOf(); // "123" (no letters to check)
+   * ```
+   */
+  uppercase(): undefined | StringPick {
+    if (this.value !== this.value.toUpperCase()) return undefined;
+    return this;
+  }
+
+  /**
+   * Validates that the string is entirely in lowercase.
+   * Returns undefined if the string contains any uppercase characters.
+   *
+   * @returns This instance if all characters are lowercase, or undefined if not
+   *
+   * @example
+   * ```typescript
+   * pick("hello").string()?.lowercase()?.valueOf(); // "hello"
+   * pick("Hello").string()?.lowercase(); // undefined
+   * pick("HELLO").string()?.lowercase(); // undefined
+   * pick("hello123").string()?.lowercase()?.valueOf(); // "hello123"
+   * pick("123").string()?.lowercase()?.valueOf(); // "123" (no letters to check)
+   * ```
+   */
+  lowercase(): undefined | StringPick {
+    if (this.value !== this.value.toLowerCase()) return undefined;
+    return this;
+  }
+
+  /**
    * Validates that the string is a valid email.
    *
    * @remarks
@@ -146,7 +186,20 @@ export class StringPick extends CommonPick<string> {
   /**
    * Transforms the string to uppercase.
    *
+   * @deprecated This method is deprecated because it transforms the value.
+   * Pick classes should not mutate or transform values.
+   * Use `pipe()` instead: `.pipe(s => s.toUpperCase())`
+   *
    * @returns A new StringPick instance with the string in uppercase
+   *
+   * @example
+   * ```typescript
+   * // Deprecated:
+   * pick("hello").string()?.toUpperCase().valueOf(); // "HELLO"
+   *
+   * // Recommended:
+   * pick("hello").string()?.pipe(s => s.toUpperCase()).valueOf(); // "HELLO"
+   * ```
    */
   toUpperCase(): StringPick {
     return new StringPick(this.value.toUpperCase());
@@ -155,7 +208,20 @@ export class StringPick extends CommonPick<string> {
   /**
    * Transforms the string to lowercase.
    *
+   * @deprecated This method is deprecated because it transforms the value.
+   * Pick classes should not mutate or transform values.
+   * Use `pipe()` instead: `.pipe(s => s.toLowerCase())`
+   *
    * @returns A new StringPick instance with the string in lowercase
+   *
+   * @example
+   * ```typescript
+   * // Deprecated:
+   * pick("HELLO").string()?.toLowerCase().valueOf(); // "hello"
+   *
+   * // Recommended:
+   * pick("HELLO").string()?.pipe(s => s.toLowerCase()).valueOf(); // "hello"
+   * ```
    */
   toLowerCase(): StringPick {
     return new StringPick(this.value.toLowerCase());
@@ -164,7 +230,20 @@ export class StringPick extends CommonPick<string> {
   /**
    * Removes whitespace from the beginning and end of the string.
    *
+   * @deprecated This method is deprecated because it transforms the value.
+   * Pick classes should not mutate or transform values.
+   * Use `pipe()` instead: `.pipe(s => s.trim())`
+   *
    * @returns A new StringPick instance with the trimmed string
+   *
+   * @example
+   * ```typescript
+   * // Deprecated:
+   * pick("  hello  ").string()?.trim().valueOf(); // "hello"
+   *
+   * // Recommended:
+   * pick("  hello  ").string()?.pipe(s => s.trim()).valueOf(); // "hello"
+   * ```
    */
   trim(): StringPick {
     return new StringPick(this.value.trim());
