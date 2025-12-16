@@ -25,7 +25,7 @@ export class CommonPick<T> {
    * @param transform - Function that transforms the current value
    * @returns A new Pick instance with the transformed value
    */
-  pipe<E>(transform: (value: T) => E): Pick<E> {
-    return new Pick(transform(this.value));
+  pipe<E>(transform: (value: T) => E): CommonPick<E> {
+    return new CommonPick(transform(this.value));
   }
 }

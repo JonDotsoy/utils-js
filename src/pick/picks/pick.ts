@@ -9,6 +9,7 @@ import { BooleanPick } from "./boolean-pick.js";
 import { BigIntPick } from "./bigint-pick.js";
 import { IntegerPick } from "./integer-pick.js";
 import { Utils } from "../utils/utils.js";
+import { CommonPick } from "./common-pick.js";
 
 /**
  * Utility class for safely navigating and validating data structures.
@@ -26,14 +27,7 @@ import { Utils } from "../utils/utils.js";
  *   ?.valueOf();
  * ```
  */
-export class Pick<T> {
-  /**
-   * Creates a new Pick instance with the provided value.
-   *
-   * @param value - The value to encapsulate
-   */
-  constructor(readonly value: T) {}
-
+export class Pick<T> extends CommonPick<T> {
   /**
    * Accesses a property of the current object.
    *
@@ -175,19 +169,21 @@ export class Pick<T> {
    */
   native():
     | undefined
-    | Pick<string | number | boolean | Array<any> | Record<any, any>> {
-    if (Utils.isString(this.value)) return new Pick(this.value);
-    if (Utils.isNumber(this.value)) return new Pick(this.value);
-    if (Utils.isBoolean(this.value)) return new Pick(this.value);
-    if (Utils.isArray(this.value)) return new Pick(this.value);
-    if (Utils.isRecord(this.value)) return new Pick(this.value);
+    | Pick<
+        T extends string | number | boolean | Array<any> | Record<any, any>
+          ? T
+          : string | number | boolean | Array<any> | Record<any, any>
+      > {
+    if (Utils.isString(this.value)) return new Pick(this.value) as any;
+    if (Utils.isNumber(this.value)) return new Pick(this.value) as any;
+    if (Utils.isBoolean(this.value)) return new Pick(this.value) as any;
+    if (Utils.isArray(this.value)) return new Pick(this.value) as any;
+    if (Utils.isRecord(this.value)) return new Pick(this.value) as any;
     return undefined;
   }
 
   /** @deprecated Use native() instead */
-  isNative():
-    | undefined
-    | Pick<string | number | boolean | Array<any> | Record<any, any>> {
+  isNative() {
     return this.native();
   }
 
@@ -208,7 +204,7 @@ export class Pick<T> {
   }
 
   /** @deprecated Use array() instead */
-  isArray(): undefined | ArrayPick<unknown> {
+  isArray() {
     return this.array();
   }
 
@@ -229,7 +225,7 @@ export class Pick<T> {
   }
 
   /** @deprecated Use record() instead */
-  isRecord(): undefined | RecordPick {
+  isRecord() {
     return this.record();
   }
 
@@ -255,23 +251,6 @@ export class Pick<T> {
   /** @deprecated Use enum() instead */
   isEnumOf<E extends string>(values: E[]) {
     return this.enum(values);
-  }
-
-  /**
-   * Applies a transformation function to the current value.
-   *
-   * @template E - The type of the resulting value
-   * @param transform - Function that transforms the current value
-   * @returns The result of applying the transformation function
-   *
-   * @example
-   * ```typescript
-   * pick("hello").pipe(s => s.toUpperCase()); // "HELLO"
-   * pick(5).pipe(n => n * 2); // 10
-   * ```
-   */
-  pipe<E>(transform: (value: T) => E): Pick<E> {
-    return new Pick(transform(this.value));
   }
 
   /**
@@ -534,9 +513,7 @@ export class Pick<T> {
     if (this.value instanceof URL) {
       return new URLPick<URL>(this.value) as any;
     }
-    if (!Utils.isString(this.value)) return undefined as any;
-    if (!URL.canParse(this.value)) return undefined as any;
-    return new URLPick<string>(this.value) as any;
+    return this.string()?.url() as any;
   }
 
   /**
