@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.5.0...utils-js-v1.6.0) (2025-12-16)
+
+
+### Features
+
+* **pick:** add URL pattern matching with URLPattern support ([de5386e](https://github.com/JonDotsoy/utils-js/commit/de5386e2d93003dd9b93ae962d33ae07f9788a3d))
+
 ## [1.5.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.4.1...utils-js-v1.5.0) (2025-12-11)
 
 
