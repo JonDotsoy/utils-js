@@ -245,7 +245,7 @@ const consumer = (async () => {
 })();
 
 // Shutdown after some time
-setTimeout(() => queue.close(), 30000);
+setTimeout(() => queue.close(), Temporal.Duration.from({ seconds: 30 }).total("milliseconds"));
 await consumer; // Wait for graceful completion
 ```
 
@@ -286,7 +286,7 @@ const controller = new AbortController();
     queue.ack(data);
   }
 })();
-setTimeout(() => controller.abort(), 10_000);
+setTimeout(() => controller.abort(), Temporal.Duration.from({ seconds: 10 }).total("milliseconds"));
 ```
 
 ### Message

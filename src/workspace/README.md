@@ -71,7 +71,7 @@ import { Workspace } from "./workspace.js";
 const workspace = new Workspace({
   workingDirectory: "/path/to/project",
   shell: "/bin/bash",
-  timeout: 5000, // 5 seconds
+  timeout: Temporal.Duration.from({ seconds: 5 }).total("milliseconds"),
 });
 
 // All commands in this workspace will timeout after 5 seconds
@@ -162,7 +162,7 @@ const workspace = new Workspace({
   workingDirectory: "/path/to/project",
   shell: "/bin/bash",
   env: { NODE_ENV: "development" },
-  timeout: 30000, // 30 seconds
+  timeout: Temporal.Duration.from({ seconds: 30 }).total("milliseconds"),
 });
 ```
 
@@ -192,7 +192,7 @@ Executes a shell command within the workspace context. Inherits all workspace de
 ```typescript
 const workspace = new Workspace({
   workingDirectory: "/project",
-  timeout: 5000,
+  timeout: Temporal.Duration.from({ seconds: 5 }).total("milliseconds"),
 });
 
 // All these inherit workspace defaults
@@ -224,7 +224,7 @@ Creates a temporary workspace in the system's temporary directory. The directory
 ```typescript
 const tmpWorkspace = Workspace.mktmp({
   shell: "/bin/bash",
-  timeout: 10000,
+  timeout: Temporal.Duration.from({ seconds: 10 }).total("milliseconds"),
 });
 
 const response = tmpWorkspace.run('echo "Working in temp: $(pwd)"');
@@ -303,7 +303,7 @@ const directResponse = shell("echo 'Direct command'");
 // Workspace-managed execution
 const workspace = new Workspace({
   workingDirectory: "/project",
-  timeout: 5000,
+  timeout: Temporal.Duration.from({ seconds: 5 }).total("milliseconds"),
 });
 
 const workspaceResponse = workspace.run("echo 'Workspace command'");
@@ -325,7 +325,7 @@ const response = shell("long-running-command", {
 });
 
 // Cancel the command after 3 seconds
-setTimeout(() => controller.abort(), 3000);
+setTimeout(() => controller.abort(), Temporal.Duration.from({ seconds: 3 }).total("milliseconds"));
 
 try {
   const output = await response.text();
@@ -345,7 +345,7 @@ import { Workspace } from "@jondotsoy/utils-js/workspace";
 // All commands automatically get 10-second timeout
 const workspace = new Workspace({
   workingDirectory: "/project",
-  timeout: 10000,
+  timeout: Temporal.Duration.from({ seconds: 10 }).total("milliseconds"),
 });
 
 const response = workspace.run("long-running-command");
@@ -435,7 +435,7 @@ console.log(await response.text()); // "/bin/zsh"
 // Create workspace with default timeout
 const workspace = new Workspace({
   workingDirectory: "/path/to/project",
-  timeout: 10000, // 10 seconds for all commands
+  timeout: Temporal.Duration.from({ seconds: 10 }).total("milliseconds"),
 });
 
 // This command will automatically timeout after 10 seconds
@@ -522,7 +522,7 @@ const workspace = new Workspace({
 import { shell, ShellRequest } from "@jondotsoy/shell";
 
 // Create a request with custom timeout
-const signal = AbortSignal.timeout(5000); // 5 seconds
+const signal = AbortSignal.timeout(Temporal.Duration.from({ seconds: 5 }).total("milliseconds"));
 const request = new ShellRequest("complex-command", {
   cwd: "/specific/directory",
   env: { NODE_ENV: "production" },
@@ -600,15 +600,15 @@ Commands can be configured with timeouts in several ways:
 
 ```typescript
 // Method 1: Workspace timeout
-const workspace = new Workspace({ timeout: 30000 }); // 30 seconds
+const workspace = new Workspace({ timeout: Temporal.Duration.from({ seconds: 30 }).total("milliseconds") });
 
 // Method 2: AbortSignal timeout
-const response = shell("command", { signal: AbortSignal.timeout(10000) });
+const response = shell("command", { signal: AbortSignal.timeout(Temporal.Duration.from({ seconds: 10 }).total("milliseconds")) });
 
 // Method 3: Manual control
 const controller = new AbortController();
 const response2 = shell("command", { signal: controller.signal });
-setTimeout(() => controller.abort(), 5000);
+setTimeout(() => controller.abort(), Temporal.Duration.from({ seconds: 5 }).total("milliseconds"));
 ```
 
 ### Error Handling Best Practices
@@ -668,7 +668,7 @@ const workspace2 = new Workspace({
   workingDirectory: "/project", // string | URL (required)
   shell: "/bin/bash", // string (optional)
   env: { NODE_ENV: "test" }, // Record<string, string> (optional)
-  timeout: 5000, // number (optional)
+  timeout: Temporal.Duration.from({ seconds: 5 }).total("milliseconds"), // number (optional)
 });
 ```
 
