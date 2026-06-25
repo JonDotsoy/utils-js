@@ -1,4 +1,5 @@
-import { describe, it, expect, expectTypeOf } from "vitest";
+import { describe, it, expect } from "vitest";
+import { expectTypeOf } from "expect-type";
 import { Weight } from "./weight.js";
 
 // ─── Weight.from(object) ──────────────────────────────────────────────────────
@@ -217,34 +218,51 @@ describe("error handling", () => {
 // ─── Type tests ───────────────────────────────────────────────────────────────
 
 describe("types", () => {
-  it("Weight.from(string) accepts `${number}oz`", () => {
-    const input: `${number}oz` = `${42}oz`;
-    expectTypeOf(Weight.from(input)).toEqualTypeOf<Weight>();
+  describe("Weight.from argument types", () => {
+    it("accepts `${number}oz` as first argument", () => {
+      expectTypeOf(Weight.from).toBeCallableWith(`${42}oz` as `${number}oz`);
+    });
+
+    it("accepts `${number}kg` as first argument", () => {
+      expectTypeOf(Weight.from).toBeCallableWith(`${1.5}kg` as `${number}kg`);
+    });
+
+    it("accepts `${number}lb` as first argument", () => {
+      expectTypeOf(Weight.from).toBeCallableWith(`${10}lb` as `${number}lb`);
+    });
+
+    it("accepts WeightInput object as first argument", () => {
+      expectTypeOf(Weight.from).toBeCallableWith({ kilograms: 12, grams: 345 });
+    });
+
+    it("accepts number + unit alias as arguments", () => {
+      expectTypeOf(Weight.from).toBeCallableWith(10, "oz");
+    });
+
+    it("first parameter accepts string", () => {
+      expectTypeOf(Weight.from).parameter(0).toMatchTypeOf<string>();
+    });
   });
 
-  it("Weight.from(string) accepts `${number}kg`", () => {
-    const input: `${number}kg` = `${1.5}kg`;
-    expectTypeOf(Weight.from(input)).toEqualTypeOf<Weight>();
-  });
+  describe(".total argument types", () => {
+    it("accepts unit alias string", () => {
+      expectTypeOf(Weight.from(1, "kg").total).toBeCallableWith("oz");
+    });
 
-  it("Weight.from(string) accepts `${number}lb`", () => {
-    const input: `${number}lb` = `${10}lb`;
-    expectTypeOf(Weight.from(input)).toEqualTypeOf<Weight>();
-  });
+    it("accepts { unit } object", () => {
+      expectTypeOf(Weight.from(1, "kg").total).toBeCallableWith({ unit: "oz" });
+    });
 
-  it("Weight.from(object) returns Weight", () => {
-    expectTypeOf(Weight.from({ kilograms: 12, grams: 345 })).toEqualTypeOf<Weight>();
-  });
+    it("first parameter accepts string unit", () => {
+      expectTypeOf(Weight.from(1, "kg").total).parameter(0).toMatchTypeOf<string>();
+    });
 
-  it("Weight.from(number, unit) returns Weight", () => {
-    expectTypeOf(Weight.from(10, "oz")).toEqualTypeOf<Weight>();
-  });
+    it("first parameter accepts { unit: string } object", () => {
+      expectTypeOf(Weight.from(1, "kg").total).parameter(0).toMatchTypeOf<{ unit: string }>();
+    });
 
-  it(".total(string) returns number", () => {
-    expectTypeOf(Weight.from(1, "kg").total("oz")).toEqualTypeOf<number>();
-  });
-
-  it(".total({ unit }) returns number", () => {
-    expectTypeOf(Weight.from(1, "kg").total({ unit: "oz" })).toEqualTypeOf<number>();
+    it("returns number", () => {
+      expectTypeOf(Weight.from(1, "kg").total).returns.toEqualTypeOf<number>();
+    });
   });
 });
