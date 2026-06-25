@@ -9,6 +9,7 @@ libs:
 conventions:
   testRunner: bun:test
   baseUnit: store values in a canonical base unit; convert on read via .total(unit)
+  temporalDuration: use Temporal.Duration.from({ ... }).total("seconds"|"milliseconds") for all time values; never raw arithmetic
   noConvenienceGetters: true
   noComments: unless the reason is non-obvious
   staticFactory: prefer static from() or parse() over direct new Constructor()
@@ -55,6 +56,20 @@ The implementation file exports one primary class or function. The spec file use
 ## Conventions
 
 **Base unit pattern** — store the canonical value in one unit internally (e.g. grams for `Weight`, millimeters for `Meter`, bytes for `Bytes`) and convert on read. Expose a single `.total(unit)` method; do not add convenience getters.
+
+**Temporal.Duration for time values** — whenever an API accepts or produces a value in seconds or milliseconds, express it with `Temporal.Duration` instead of raw arithmetic. This makes the intent explicit and avoids silent unit mistakes.
+
+```ts
+// preferred — semantic and unit-safe
+{ ttl: Temporal.Duration.from({ hours: 1 }).total("seconds") }
+{ timeoutMs: Temporal.Duration.from({ minutes: 30 }).total("milliseconds") }
+
+// avoid — opaque, error-prone
+{ ttl: 60 * 60 }
+{ timeoutMs: 30 * 60 * 1000 }
+```
+
+This applies to all options, parameters, and constants that represent a duration. When documenting an API that takes seconds or milliseconds, always show `Temporal.Duration` in the example, never a bare numeric expression.
 
 **Static factory over constructor** — prefer `ClassName.from()` or `ClassName.parse()` for public construction. Keep the constructor private or accept only the already-validated canonical value. Overloads on the static factory handle strings, numbers, and objects:
 ```ts

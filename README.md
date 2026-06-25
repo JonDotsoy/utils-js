@@ -984,13 +984,13 @@ const queue = new Queue({
 // Add message with TTL (expires in 1 hour)
 await queue.add(
   { task: "send-notification", userId: "123" },
-  { ttl: 60 * 60 }, // 3600 seconds = 1 hour
+  { ttl: Temporal.Duration.from({ hours: 1 }).total("seconds") },
 );
 
 // Add urgent task (expires in 5 minutes)
 await queue.add(
   { task: "urgent-cleanup", resource: "/tmp" },
-  { ttl: 5 * 60 }, // 300 seconds = 5 minutes
+  { ttl: Temporal.Duration.from({ minutes: 5 }).total("seconds") },
 );
 
 // Expired messages are automatically filtered out and cleaned up
@@ -1011,7 +1011,7 @@ const controller = new AbortController();
 })();
 
 // Stop processing after 10 seconds
-setTimeout(() => controller.abort(), 10_000);
+setTimeout(() => controller.abort(), Temporal.Duration.from({ seconds: 10 }).total("milliseconds"));
 ```
 
 **With TTL (Time-to-Live) message expiration:**
@@ -1024,7 +1024,7 @@ const queue = new Queue();
 // Add a message that expires in 5 minutes
 const message = new Message(
   { task: "send-notification", userId: "123" },
-  { ttl: 5 * 60 }, // TTL in seconds
+  { ttl: Temporal.Duration.from({ minutes: 5 }).total("seconds") },
 );
 await queue.add(message);
 
@@ -1050,7 +1050,7 @@ const consumer = (async () => {
 })();
 
 // Graceful shutdown - completes current messages before stopping
-setTimeout(() => queue.close(), 30_000);
+setTimeout(() => queue.close(), Temporal.Duration.from({ seconds: 30 }).total("milliseconds"));
 await consumer;
 
 // Or use Disposable pattern for automatic cleanup
@@ -1231,14 +1231,14 @@ console.log(output); // "Hello World"
 
 // Command with timeout
 const timedResponse = shell("long-running-command", {
-  signal: AbortSignal.timeout(5000), // 5 seconds
+  signal: AbortSignal.timeout(Temporal.Duration.from({ seconds: 5 }).total("milliseconds")),
 });
 
 // Create a workspace with default settings
 const workspace = new Workspace({
   workingDirectory: "/path/to/project",
   shell: "/bin/bash",
-  timeout: 30000, // 30 seconds default timeout for all commands
+  timeout: Temporal.Duration.from({ seconds: 30 }).total("milliseconds"),
 });
 
 // Execute commands in the workspace context
