@@ -1,5 +1,7 @@
 # Agent Instructions
 
+> For detailed design rules, library structure, and maintenance guidelines see [DESIGN.md](./DESIGN.md).
+
 ## Project
 
 TypeScript utility library published as `@jondotsoy/utils-js`. Each utility lives in its own directory under `src/` and is exported as a separate package entry point.
