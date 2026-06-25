@@ -16,6 +16,7 @@ Some utilities for JS. Will be util to reduce common logic in your code.
 - [Workspace](#workspace)
 - [Weight](#weight)
 - [Length](#length)
+- [Temperature](#temperature)
 
 ## Visit
 
@@ -1432,6 +1433,54 @@ Length.from("5km").total("mi"); // 3.11 mi
 
 // Object unit argument
 Length.from({ inches: 12 }).total({ unit: "ft" }); // 1 ft
+```
+
+## Temperature
+
+A utility class for converting between temperature scales. Stores values internally in Kelvin and converts on read via `.total(unit)`.
+
+> Unlike weight or length, temperature scales are not related by a simple ratio — they involve offsets. The object form accepts exactly one unit key.
+
+**Syntax:**
+
+```ts
+Temperature.from({ celsius: 100 }).total("fahrenheit")
+Temperature.from(32, "fahrenheit").total("celsius")
+Temperature.from("100°C").total({ unit: "kelvin" })
+```
+
+**Supported scales:**
+
+| Scale | Aliases |
+|---|---|
+| Kelvin | `kelvin`, `K`, `k` |
+| Celsius | `celsius`, `centigrade`, `C`, `c`, `°C` |
+| Fahrenheit | `fahrenheit`, `F`, `f`, `°F` |
+| Rankine | `rankine`, `Ra`, `R`, `r`, `°R` |
+| Delisle | `delisle`, `De`, `de`, `°De` |
+| Newton | `newton`, `N`, `n`, `°N` |
+| Réaumur | `reaumur`, `Re`, `re`, `°Re` |
+| Rømer | `romer`, `Ro`, `ro`, `°Ro` |
+
+**Examples:**
+
+```ts
+import { Temperature } from "@jondotsoy/utils-js/temperature";
+
+// Object form
+Temperature.from({ celsius: 100 }).total("fahrenheit"); // 212
+Temperature.from({ fahrenheit: 32 }).total("celsius");  // 0
+
+// Number + unit
+Temperature.from(0, "celsius").total("kelvin");         // 273.15
+Temperature.from(373.15, "kelvin").total("celsius");    // 100
+
+// String parsing
+Temperature.from("100°C").total("fahrenheit");          // 212
+Temperature.from("32F").total("celsius");               // 0
+
+// Object unit argument
+Temperature.from(100, "celsius").total({ unit: "reaumur" }); // 80
 ```
 
 ## License
