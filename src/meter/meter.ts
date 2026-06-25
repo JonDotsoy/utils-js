@@ -1,3 +1,6 @@
+/**
+ * @deprecated Use `Length` from `./length` instead. It covers all metric units plus Imperial and Nautical.
+ */
 // SI
 enum MeterUnit {
   Kilometer = "km",
@@ -117,6 +120,7 @@ const toLocale = (local?: Intl.LocalesArgument): Intl.Locale => {
   return new Intl.Locale("es-CL");
 };
 
+/** @deprecated Use `Length` from `./length` instead. */
 export class MeterFormat {
   locale: Intl.Locale;
   options: MeterFormatOptions;
@@ -239,6 +243,7 @@ const UNIT_TO_MILLIMETER: Record<string, number> = {
   picometer: 0.000000001,
 };
 
+/** @deprecated Use `Length` from `./length` instead. */
 export class Meter {
   constructor(readonly millimeter: number) {}
 
