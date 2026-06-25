@@ -88,6 +88,10 @@
       "import": "./libs/esm/temperature/temperature.js",
       "types": "./libs/types/temperature/temperature.d.ts"
     },
+    "./volume": {
+      "import": "./libs/esm/volume/volume.js",
+      "types": "./libs/types/volume/volume.d.ts"
+    },
     "./weight": {
       "import": "./libs/esm/weight/weight.js",
       "types": "./libs/types/weight/weight.d.ts"

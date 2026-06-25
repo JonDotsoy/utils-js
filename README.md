@@ -17,6 +17,7 @@ Some utilities for JS. Will be util to reduce common logic in your code.
 - [Weight](#weight)
 - [Length](#length)
 - [Temperature](#temperature)
+- [Volume](#volume)
 
 ## Visit
 
@@ -1481,6 +1482,48 @@ Temperature.from("32F").total("celsius");               // 0
 
 // Object unit argument
 Temperature.from(100, "celsius").total({ unit: "reaumur" }); // 80
+```
+
+## Volume
+
+A utility class for converting between volume units. Stores values internally in milliliters and converts on read via `.total(unit)`.
+
+**Syntax:**
+
+```ts
+Volume.from({ liters: 1, milliliters: 500 }).total("floz")
+Volume.from(8, "floz").total("ml")
+Volume.from("1.5l").total({ unit: "cup" })
+```
+
+**Supported units:**
+
+| Category | Units | Short aliases |
+|---|---|---|
+| Metric | milliliter, centiliter, deciliter, liter, cubic-meter | ml, cl, dl, l, m³ |
+| Cubic | cubic-centimeter, cubic-inch, cubic-foot | cc/cm³, in³, ft³ |
+| US customary | us-teaspoon, us-tablespoon, us-fluid-ounce, us-cup, us-pint, us-quart, us-gallon | tsp, tbsp, floz, cup, pt, qt, gal |
+| Imperial | imperial-fluid-ounce, imperial-pint, imperial-quart, imperial-gallon | imp-fl-oz, imp-pt, imp-qt, imp-gal |
+
+**Examples:**
+
+```ts
+import { Volume } from "@jondotsoy/utils-js/volume";
+
+// Object form — combine multiple units
+Volume.from({ liters: 1, milliliters: 500 }).total("floz"); // 50.72 fl oz
+
+// Number + unit
+Volume.from(8, "floz").total("ml");    // 236.59 ml
+Volume.from(1, "gal").total("l");      // 3.785 l
+Volume.from(5, "cc").total("ml");      // 5 ml
+
+// String parsing
+Volume.from("250ml").total("cup");     // 1.057 cups
+Volume.from("1 gal").total("l");       // 3.785 l
+
+// Object unit argument
+Volume.from({ cups: 2 }).total({ unit: "ml" }); // 473.18 ml
 ```
 
 ## License
