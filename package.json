@@ -80,6 +80,10 @@
       "import": "./libs/esm/pick/pick.js",
       "types": "./libs/types/pick/pick.d.ts"
     },
+    "./circumference": {
+      "import": "./libs/esm/circumference/circumference.js",
+      "types": "./libs/types/circumference/circumference.d.ts"
+    },
     "./length": {
       "import": "./libs/esm/length/length.js",
       "types": "./libs/types/length/length.d.ts"
