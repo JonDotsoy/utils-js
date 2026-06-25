@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, expectTypeOf } from "vitest";
 import { Weight } from "./weight.js";
 
 // ─── Weight.from(object) ──────────────────────────────────────────────────────
@@ -211,5 +211,40 @@ describe("error handling", () => {
 
   it("throws on unparseable string", () => {
     expect(() => Weight.from("not-a-weight")).toThrow();
+  });
+});
+
+// ─── Type tests ───────────────────────────────────────────────────────────────
+
+describe("types", () => {
+  it("Weight.from(string) accepts `${number}oz`", () => {
+    const input: `${number}oz` = `${42}oz`;
+    expectTypeOf(Weight.from(input)).toEqualTypeOf<Weight>();
+  });
+
+  it("Weight.from(string) accepts `${number}kg`", () => {
+    const input: `${number}kg` = `${1.5}kg`;
+    expectTypeOf(Weight.from(input)).toEqualTypeOf<Weight>();
+  });
+
+  it("Weight.from(string) accepts `${number}lb`", () => {
+    const input: `${number}lb` = `${10}lb`;
+    expectTypeOf(Weight.from(input)).toEqualTypeOf<Weight>();
+  });
+
+  it("Weight.from(object) returns Weight", () => {
+    expectTypeOf(Weight.from({ kilograms: 12, grams: 345 })).toEqualTypeOf<Weight>();
+  });
+
+  it("Weight.from(number, unit) returns Weight", () => {
+    expectTypeOf(Weight.from(10, "oz")).toEqualTypeOf<Weight>();
+  });
+
+  it(".total(string) returns number", () => {
+    expectTypeOf(Weight.from(1, "kg").total("oz")).toEqualTypeOf<number>();
+  });
+
+  it(".total({ unit }) returns number", () => {
+    expectTypeOf(Weight.from(1, "kg").total({ unit: "oz" })).toEqualTypeOf<number>();
   });
 });
