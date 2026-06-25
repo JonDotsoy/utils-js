@@ -136,8 +136,9 @@ export class Weight {
   }
 
   /** Total value expressed in the requested unit */
-  total(unit: WeightUnitAlias): number {
-    return fromGrams(this.#grams, unit);
+  total(unit: WeightUnitAlias | { unit: WeightUnitAlias }): number {
+    const u = typeof unit === "string" ? unit : unit.unit;
+    return fromGrams(this.#grams, u);
   }
 
   /** Raw grams value */

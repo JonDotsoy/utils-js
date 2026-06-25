@@ -132,6 +132,28 @@ describe(".total(unit)", () => {
   });
 });
 
+// ─── .total({ unit }) ────────────────────────────────────────────────────────
+
+describe(".total({ unit })", () => {
+  it("main example with object form", () => {
+    const result = Weight.from({ kilograms: 12, grams: 345 }).total({ unit: "oz" });
+    expect(result).toBeCloseTo(12_345 / 28.349523125, 4);
+  });
+
+  it("to grams via object", () => {
+    expect(Weight.from(1, "kg").total({ unit: "grams" })).toBeCloseTo(1_000, 6);
+  });
+
+  it("to oz via object", () => {
+    expect(Weight.from(453.59237, "gram").total({ unit: "oz" })).toBeCloseTo(16, 3);
+  });
+
+  it("string and object form return the same value", () => {
+    const w = Weight.from({ kilograms: 5 });
+    expect(w.total("lb")).toBeCloseTo(w.total({ unit: "lb" }), 10);
+  });
+});
+
 // ─── Unit aliases ─────────────────────────────────────────────────────────────
 
 describe("unit aliases", () => {
