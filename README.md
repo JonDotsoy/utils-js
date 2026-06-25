@@ -20,6 +20,8 @@ Some utilities for JS. Will be util to reduce common logic in your code.
   - [Temperature](#temperature)
   - [Volume](#volume)
   - [Circumference](#circumference)
+  - [Bytes](#bytes)
+  - [DataSize](#datasize)
 
 ## Visit
 
@@ -691,6 +693,8 @@ await cleanupTasks.cleanup();
 ```
 
 ## Bytes
+
+> **Deprecated.** Use [`DataSize`](#datasize) from `@jondotsoy/utils-js/data-size` instead. `DataSize` follows the `.total(unit)` convention, supports both SI decimal (KB = 1 000 B) and IEC binary (KiB = 1 024 B) prefixes, and includes bit units.
 
 A utility class for converting and formatting byte values in different units (byte, kilobyte, megabyte, gigabyte, terabyte, petabyte). Supports aliases and plural forms for units, as well as parsing from strings.
 
@@ -1380,6 +1384,8 @@ Each class stores its value in a canonical base unit and converts on read via `.
 | [`Temperature`](#temperature) | `@jondotsoy/utils-js/temperature` | Kelvin | Temperature | Celsius, Fahrenheit, Rankine, Delisle, Newton, Réaumur, Rømer |
 | [`Volume`](#volume) | `@jondotsoy/utils-js/volume` | milliliter | Volume | Metric, US customary, Imperial, Cubic |
 | [`Circumference`](#circumference) | `@jondotsoy/utils-js/circumference` | millimeter | Circle circumference | Same units as Length plus `fromRadius()`, `fromDiameter()`, `.radius()`, `.diameter()` |
+| ~~[`Bytes`](#bytes)~~ _(deprecated)_ | `@jondotsoy/utils-js/bytes` | byte | Digital storage | Superseded by `DataSize` |
+| [`DataSize`](#datasize) | `@jondotsoy/utils-js/data-size` | byte | Data size | SI decimal (KB–YB), IEC binary (KiB–EiB), bits & kilobits–petabits; `.total(unit)` pattern |
 
 ## Weight
 
@@ -1594,6 +1600,55 @@ Circumference.from({ meters: 1 }).total({ unit: "cm" }); // 100
 | `.diameter(unit)` | Returns the diameter implied by this circumference |
 
 Supported units are identical to [`Length`](#length): full metric scale (pm → km), Imperial (thou, in, ft, yd, mi), and Nautical (nmi).
+
+## DataSize
+
+A utility class for converting between data size units. Stores values internally in bytes and converts on read via `.total(unit)`. Supports both SI decimal prefixes (KB = 1 000 B) and IEC binary prefixes (KiB = 1 024 B), plus bit-based units.
+
+**Syntax:**
+
+```ts
+DataSize.from({ megabytes: 1, bytes: 500 }).total("bytes")
+DataSize.from(1, "GB").total("MB")
+DataSize.from("512KiB").total("MiB")
+DataSize.from(8, "bit").total("bytes")
+```
+
+**Examples:**
+
+```ts
+import { DataSize } from "@jondotsoy/utils-js/data-size";
+
+// SI decimal
+DataSize.from(1, "GB").total("MB");          // 1000
+DataSize.from(1_000_000, "bytes").total("MB"); // 1
+
+// IEC binary
+DataSize.from(1, "GiB").total("MiB");        // 1024
+DataSize.from(1, "GiB").total("bytes");      // 1073741824
+
+// Cross-system
+DataSize.from(1, "MB").total("KiB");         // 976.5625
+
+// Bits
+DataSize.from(8, "bit").total("bytes");      // 1
+
+// String parsing
+DataSize.from("1.5GB").total("MB");          // 1500
+
+// Object form
+DataSize.from({ megabytes: 1, bytes: 500 }).total("KB"); // 1000.5
+```
+
+**Supported units:**
+
+| Category | Units |
+|---|---|
+| SI decimal | `byte`/`B`, `KB`, `MB`, `GB`, `TB`, `PB`, `EB`, `ZB`, `YB` |
+| IEC binary | `KiB`, `MiB`, `GiB`, `TiB`, `PiB`, `EiB` |
+| Bits | `bit`, `kbit`, `mbit`, `gbit`, `tbit`, `pbit` |
+
+All units accept singular, plural, and short-form aliases (e.g. `megabyte`, `megabytes`, `MB`).
 
 ## License
 

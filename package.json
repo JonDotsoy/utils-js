@@ -99,6 +99,10 @@
     "./weight": {
       "import": "./libs/esm/weight/weight.js",
       "types": "./libs/types/weight/weight.d.ts"
+    },
+    "./data-size": {
+      "import": "./libs/esm/data-size/data-size.js",
+      "types": "./libs/types/data-size/data-size.d.ts"
     }
   },
   "devDependencies": {
