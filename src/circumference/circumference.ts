@@ -1,4 +1,16 @@
-// Base unit: millimeters
+/**
+ * Circle circumference utility. Base unit: millimeter (mm).
+ *
+ * Stores circumference as millimeters and derives radius / diameter on read:
+ *   C = 2πr  →  r = C / (2π),  d = C / π
+ * Length conversion factors are identical to the Length lib (see length.ts for sources).
+ * π is taken from Math.PI (IEEE 754 double-precision approximation, ~15 significant digits).
+ *
+ * @see https://en.wikipedia.org/wiki/Circumference
+ * @see https://en.wikipedia.org/wiki/Pi
+ * @see https://www.nist.gov/pml/special-publication-811
+ * @see https://en.wikipedia.org/wiki/Conversion_of_units#Length
+ */
 
 const MM_PER_UNIT: Record<string, number> = {
   // Metric

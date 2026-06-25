@@ -1,4 +1,24 @@
-// Base unit: milliliters
+/**
+ * Volume conversion utility. Base unit: milliliter (mL).
+ *
+ * 1 mL = 1 cm³ exactly (by SI definition).
+ * Metric / cubic factors are exact SI relationships:
+ *   1 L = 1000 mL, 1 m³ = 1 000 000 mL, 1 in³ = 16.387064 mL (exact, from 1 in = 25.4 mm).
+ * US customary factors are defined by NIST (based on the 1959 international yard/pound agreement):
+ *   1 US gal = 231 in³ exactly → 3785.411784 mL
+ *   1 US fl oz = 1/128 gal → 29.5735295625 mL
+ *   1 US cup = 8 fl oz → 236.5882365 mL
+ *   1 tbsp = 1/2 fl oz → 14.78676478125 mL
+ *   1 tsp = 1/6 fl oz → 4.92892159375 mL
+ * Imperial factors are defined by the UK Weights and Measures Act:
+ *   1 imp gal = 4546.09 mL (exactly 10 lb of water at 62 °F, per the 1824 Act).
+ *   1 imp fl oz = 1/160 imp gal → 28.4130625 mL
+ *
+ * @see https://www.nist.gov/pml/special-publication-811
+ * @see https://en.wikipedia.org/wiki/Conversion_of_units#Volume
+ * @see https://en.wikipedia.org/wiki/United_States_customary_units
+ * @see https://en.wikipedia.org/wiki/Imperial_units
+ */
 
 const ML_PER_UNIT: Record<string, number> = {
   // Metric

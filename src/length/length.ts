@@ -1,4 +1,17 @@
-// Base unit: millimeters
+/**
+ * Length / distance conversion utility. Base unit: millimeter (mm).
+ *
+ * Metric factors follow SI prefix definitions (BIPM): 1 m = 1000 mm, 1 km = 1 000 000 mm, etc.
+ * Imperial / US customary factors derive from the international inch agreement of 1959,
+ * which set 1 in = 25.4 mm exactly, making all derived values exact:
+ *   1 thou (mil) = 0.0254 mm, 1 ft = 304.8 mm, 1 yd = 914.4 mm, 1 mi = 1 609 344 mm.
+ * Nautical mile: 1 nmi = 1852 m = 1 852 000 mm (exact, defined by BIPM 1929, adopted internationally 1954).
+ *
+ * @see https://www.nist.gov/pml/special-publication-811
+ * @see https://en.wikipedia.org/wiki/Conversion_of_units#Length
+ * @see https://en.wikipedia.org/wiki/International_yard_and_pound
+ * @see https://en.wikipedia.org/wiki/Nautical_mile
+ */
 
 const MM_PER_UNIT: Record<string, number> = {
   // Metric

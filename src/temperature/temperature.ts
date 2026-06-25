@@ -1,4 +1,27 @@
-// Base unit: Kelvin
+/**
+ * Temperature conversion utility. Base unit: Kelvin (K).
+ *
+ * Kelvin is the SI base unit for thermodynamic temperature (BIPM 2019 redefinition).
+ * Conversion formulas (all offsets in °C / K, ratios are exact fractions):
+ *   Celsius:     K = °C + 273.15             (ITS-90, BIPM)
+ *   Fahrenheit:  K = (°F + 459.67) × 5/9    (exact, derives from 1 °F = 5/9 K)
+ *   Rankine:     K = °Ra × 5/9              (°Ra = 0 at absolute zero, same size as °F)
+ *   Delisle:     K = 373.15 − °De × 2/3    (invented 1732, boiling point = 0 °De)
+ *   Newton:      K = °N × 100/33 + 273.15  (invented 1700 by Isaac Newton)
+ *   Réaumur:     K = °Ré × 5/4 + 273.15   (freezing = 0, boiling = 80 °Ré)
+ *   Rømer:       K = (°Rø − 7.5) × 40/21 + 273.15  (freezing = 7.5 °Rø, boiling = 60 °Rø)
+ *
+ * Unlike additive units (weight, length), temperature scales cannot be combined in object form.
+ *
+ * @see https://www.bipm.org/en/measurement-units/kelvin
+ * @see https://en.wikipedia.org/wiki/Conversion_of_units_of_temperature
+ * @see https://en.wikipedia.org/wiki/Kelvin
+ * @see https://en.wikipedia.org/wiki/Rankine_scale
+ * @see https://en.wikipedia.org/wiki/Delisle_scale
+ * @see https://en.wikipedia.org/wiki/Newton_scale
+ * @see https://en.wikipedia.org/wiki/R%C3%A9aumur_scale
+ * @see https://en.wikipedia.org/wiki/R%C3%B8mer_scale
+ */
 
 type Converter = {
   toKelvin: (value: number) => number;

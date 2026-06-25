@@ -1,4 +1,20 @@
-// Base unit: grams
+/**
+ * Weight / mass conversion utility. Base unit: gram (g).
+ *
+ * Metric factors follow SI prefix definitions (BIPM).
+ * Imperial / avoirdupois factors are based on the international pound agreement of 1959,
+ * which set 1 lb = 453.59237 g exactly, making all derived factors exact:
+ *   1 grain = 64.79891 mg, 1 oz = 28.349523125 g, 1 stone = 6350.29318 g,
+ *   1 short ton = 907184.74 g, 1 long ton = 1016046.9088 g.
+ * Troy weight: 1 troy ounce = 31.1034768 g exactly (12 troy oz = 1 troy lb).
+ * Carat: 1 ct = 0.2 g exactly (metric carat, adopted 1907).
+ *
+ * @see https://www.nist.gov/pml/special-publication-811
+ * @see https://en.wikipedia.org/wiki/Conversion_of_units#Mass
+ * @see https://en.wikipedia.org/wiki/Avoirdupois_system
+ * @see https://en.wikipedia.org/wiki/Troy_weight
+ * @see https://en.wikipedia.org/wiki/Carat_(mass)
+ */
 
 // Conversion factors: how many grams per unit
 const GRAMS_PER_UNIT: Record<string, number> = {
