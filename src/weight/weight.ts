@@ -140,23 +140,6 @@ export class Weight {
     return fromGrams(this.#grams, unit);
   }
 
-  // --- convenience getters ---
-  get micrograms() { return this.total("microgram"); }
-  get milligrams()  { return this.total("milligram"); }
-  get grams()       { return this.total("gram"); }
-  get kilograms()   { return this.total("kilogram"); }
-  get tonnes()      { return this.total("tonne"); }
-  get grains()      { return this.total("grain"); }
-  get drams()       { return this.total("dram"); }
-  get ounces()      { return this.total("ounce"); }
-  get pounds()      { return this.total("pound"); }
-  get stones()      { return this.total("stone"); }
-  get shortTons()   { return this.total("short-ton"); }
-  get longTons()    { return this.total("long-ton"); }
-  get troyOunces()  { return this.total("troy-ounce"); }
-  get troyPounds()  { return this.total("troy-pound"); }
-  get carats()      { return this.total("carat"); }
-
   /** Raw grams value */
   valueOf() {
     return this.#grams;

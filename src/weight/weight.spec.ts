@@ -6,24 +6,24 @@ import { Weight } from "./weight.js";
 describe("Weight.from(object)", () => {
   it("combines kilograms and grams", () => {
     const w = Weight.from({ kilograms: 12, grams: 345 });
-    expect(w.grams).toBeCloseTo(12_345, 6);
+    expect(w.total("grams")).toBeCloseTo(12_345, 6);
   });
 
   it("single unit: 1 kg", () => {
-    expect(Weight.from({ kilogram: 1 }).grams).toBeCloseTo(1_000, 6);
+    expect(Weight.from({ kilogram: 1 }).total("grams")).toBeCloseTo(1_000, 6);
   });
 
   it("single unit: 1 lb", () => {
-    expect(Weight.from({ pound: 1 }).grams).toBeCloseTo(453.59237, 4);
+    expect(Weight.from({ pound: 1 }).total("grams")).toBeCloseTo(453.59237, 4);
   });
 
   it("mixed metric and imperial", () => {
     const w = Weight.from({ kilograms: 1, ounces: 1 });
-    expect(w.grams).toBeCloseTo(1_000 + 28.349523125, 4);
+    expect(w.total("grams")).toBeCloseTo(1_000 + 28.349523125, 4);
   });
 
   it("supports plural aliases", () => {
-    expect(Weight.from({ milligrams: 500 }).grams).toBeCloseTo(0.5, 6);
+    expect(Weight.from({ milligrams: 500 }).total("grams")).toBeCloseTo(0.5, 6);
   });
 });
 
@@ -31,19 +31,19 @@ describe("Weight.from(object)", () => {
 
 describe("Weight.from(number, unit)", () => {
   it("default unit is gram", () => {
-    expect(Weight.from(100).grams).toBe(100);
+    expect(Weight.from(100).total("grams")).toBe(100);
   });
 
   it("from kilograms", () => {
-    expect(Weight.from(1, "kg").grams).toBe(1_000);
+    expect(Weight.from(1, "kg").total("grams")).toBe(1_000);
   });
 
   it("from pounds", () => {
-    expect(Weight.from(1, "lb").grams).toBeCloseTo(453.59237, 4);
+    expect(Weight.from(1, "lb").total("grams")).toBeCloseTo(453.59237, 4);
   });
 
   it("from ounces", () => {
-    expect(Weight.from(16, "oz").grams).toBeCloseTo(16 * 28.349523125, 4);
+    expect(Weight.from(16, "oz").total("grams")).toBeCloseTo(16 * 28.349523125, 4);
   });
 });
 
@@ -51,19 +51,19 @@ describe("Weight.from(number, unit)", () => {
 
 describe("Weight.from(string)", () => {
   it("parses '12.345 kg'", () => {
-    expect(Weight.from("12.345 kg").grams).toBeCloseTo(12_345, 4);
+    expect(Weight.from("12.345 kg").total("grams")).toBeCloseTo(12_345, 4);
   });
 
   it("parses '500mg'", () => {
-    expect(Weight.from("500mg").grams).toBeCloseTo(0.5, 6);
+    expect(Weight.from("500mg").total("grams")).toBeCloseTo(0.5, 6);
   });
 
   it("parses '2.5lb'", () => {
-    expect(Weight.from("2.5lb").grams).toBeCloseTo(2.5 * 453.59237, 4);
+    expect(Weight.from("2.5lb").total("grams")).toBeCloseTo(2.5 * 453.59237, 4);
   });
 
   it("parses '16oz'", () => {
-    expect(Weight.from("16oz").grams).toBeCloseTo(16 * 28.349523125, 4);
+    expect(Weight.from("16oz").total("grams")).toBeCloseTo(16 * 28.349523125, 4);
   });
 
   it("throws on invalid string", () => {
@@ -132,59 +132,43 @@ describe(".total(unit)", () => {
   });
 });
 
-// ─── Convenience getters ─────────────────────────────────────────────────────
-
-describe("convenience getters", () => {
-  const w = Weight.from(1, "kg");
-
-  it(".grams", () => expect(w.grams).toBeCloseTo(1_000, 6));
-  it(".milligrams", () => expect(w.milligrams).toBeCloseTo(1_000_000, 0));
-  it(".micrograms", () => expect(w.micrograms).toBeCloseTo(1_000_000_000, 0));
-  it(".kilograms", () => expect(w.kilograms).toBeCloseTo(1, 6));
-  it(".ounces", () => expect(w.ounces).toBeCloseTo(1_000 / 28.349523125, 4));
-  it(".pounds", () => expect(w.pounds).toBeCloseTo(1_000 / 453.59237, 4));
-  it(".stones", () => expect(w.stones).toBeCloseTo(1_000 / 6_350.29318, 4));
-  it(".troyOunces", () => expect(w.troyOunces).toBeCloseTo(1_000 / 31.1034768, 4));
-  it(".carats", () => expect(w.carats).toBeCloseTo(5_000, 4));
-});
-
 // ─── Unit aliases ─────────────────────────────────────────────────────────────
 
 describe("unit aliases", () => {
   it("oz and ounce resolve the same", () => {
-    expect(Weight.from(1, "oz").grams).toBeCloseTo(Weight.from(1, "ounce").grams, 10);
+    expect(Weight.from(1, "oz").total("grams")).toBeCloseTo(Weight.from(1, "ounce").total("grams"), 10);
   });
 
   it("lb and pound resolve the same", () => {
-    expect(Weight.from(1, "lb").grams).toBeCloseTo(Weight.from(1, "pound").grams, 10);
+    expect(Weight.from(1, "lb").total("grams")).toBeCloseTo(Weight.from(1, "pound").total("grams"), 10);
   });
 
   it("kg and kilogram resolve the same", () => {
-    expect(Weight.from(1, "kg").grams).toBeCloseTo(Weight.from(1, "kilogram").grams, 10);
+    expect(Weight.from(1, "kg").total("grams")).toBeCloseTo(Weight.from(1, "kilogram").total("grams"), 10);
   });
 
   it("mg and milligram resolve the same", () => {
-    expect(Weight.from(1, "mg").grams).toBeCloseTo(Weight.from(1, "milligram").grams, 10);
+    expect(Weight.from(1, "mg").total("grams")).toBeCloseTo(Weight.from(1, "milligram").total("grams"), 10);
   });
 
   it("t and tonne resolve the same", () => {
-    expect(Weight.from(1, "t").grams).toBeCloseTo(Weight.from(1, "tonne").grams, 10);
+    expect(Weight.from(1, "t").total("grams")).toBeCloseTo(Weight.from(1, "tonne").total("grams"), 10);
   });
 
   it("ozt and troy-ounce resolve the same", () => {
-    expect(Weight.from(1, "ozt").grams).toBeCloseTo(Weight.from(1, "troy-ounce").grams, 10);
+    expect(Weight.from(1, "ozt").total("grams")).toBeCloseTo(Weight.from(1, "troy-ounce").total("grams"), 10);
   });
 
   it("ct and carat resolve the same", () => {
-    expect(Weight.from(1, "ct").grams).toBeCloseTo(Weight.from(1, "carat").grams, 10);
+    expect(Weight.from(1, "ct").total("grams")).toBeCloseTo(Weight.from(1, "carat").total("grams"), 10);
   });
 
   it("gr and grain resolve the same", () => {
-    expect(Weight.from(1, "gr").grams).toBeCloseTo(Weight.from(1, "grain").grams, 10);
+    expect(Weight.from(1, "gr").total("grams")).toBeCloseTo(Weight.from(1, "grain").total("grams"), 10);
   });
 
   it("st and stone resolve the same", () => {
-    expect(Weight.from(1, "st").grams).toBeCloseTo(Weight.from(1, "stone").grams, 10);
+    expect(Weight.from(1, "st").total("grams")).toBeCloseTo(Weight.from(1, "stone").total("grams"), 10);
   });
 });
 
