@@ -11,6 +11,9 @@ conventions:
   baseUnit: store values in a canonical base unit; convert on read via .total(unit)
   noConvenienceGetters: true
   noComments: unless the reason is non-obvious
+  staticFactory: prefer static from() or parse() over direct new Constructor()
+  errorHandling: throw at input boundaries; return undefined inside fluent chains
+  helpersOutsideClass: define pure utility functions at module scope, not as class members
 index:
   file: README.md
   rule: add each new lib to the top-level list and include a ## section with syntax + example
@@ -51,7 +54,22 @@ The implementation file exports one primary class or function. The spec file use
 
 ## Conventions
 
-**Base unit pattern** — store the canonical value in one unit internally (e.g. grams, millimeters) and convert on read. Expose a single `.total(unit)` method; do not add convenience getters.
+**Base unit pattern** — store the canonical value in one unit internally (e.g. grams for `Weight`, millimeters for `Meter`, bytes for `Bytes`) and convert on read. Expose a single `.total(unit)` method; do not add convenience getters.
+
+**Static factory over constructor** — prefer `ClassName.from()` or `ClassName.parse()` for public construction. Keep the constructor private or accept only the already-validated canonical value. Overloads on the static factory handle strings, numbers, and objects:
+```ts
+Weight.from({ kilograms: 1, grams: 500 })
+Weight.from(1500, "gram")
+Weight.from("1.5kg")
+```
+
+**Conversion lookup table** — unit aliases and their conversion factors live in module-level `Record<string, number>` constants. A `resolveAlias()` helper normalises user input (case-insensitive, plurals, short codes) to canonical keys before looking up factors. Do not inline conversion math in method bodies.
+
+**String parsing** — use a single regex to extract value + unit from user-supplied strings. Validate the numeric part with `isNaN`, then resolve the unit via the alias map. Throw a descriptive `Error` on mismatch.
+
+**Helper functions outside the class** — pure utilities (`toGrams`, `parseUnit`, `resolveAlias`, `createValidatorPrimitiveType`) belong at module scope. Only behaviour intrinsic to the class instance belongs inside the class.
+
+**Error handling** — throw `Error` at input boundaries (`from()`, `parse()`, constructors that accept raw user input). Inside fluent or chaining APIs (e.g. `pick`) return `undefined` instead of throwing so callers can use optional-chaining (`?.`) to short-circuit safely.
 
 **Test runner** — always `bun:test`. Import from `"bun:test"`:
 ```ts
@@ -63,6 +81,12 @@ For type assertions use `Parameters<>` and `ReturnType<>` utilities when `.param
 **No comments** — only add a comment when the reason is non-obvious (a hidden constraint, a subtle invariant, a workaround).
 
 **Overloads** — public overloads are fine; keep the implementation signature private (not exported).
+
+**Locale-aware formatting** — libs that format human-readable output implement `toLocaleString(locale?, options?)` wrapping `Intl.NumberFormat`. Do not hard-code number formatting.
+
+**Disposable resources** — libs that own async resources implement `Symbol.asyncDispose` (and optionally `Symbol.dispose`) so callers can use the `await using` syntax. See `CleanupTasks` and `Queue` as reference.
+
+**Namespace pattern** — when a function or class needs related helpers that are not instance methods, attach them as static properties or via a TypeScript `namespace` block (see `MeterFormatOptions`, `get.string`, `visit.getParent`).
 
 ## Maintaining the README
 
