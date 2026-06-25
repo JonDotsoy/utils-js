@@ -14,10 +14,12 @@ Some utilities for JS. Will be util to reduce common logic in your code.
 - [Meter](#meter)
 - [Queue](#queue)
 - [Workspace](#workspace)
-- [Weight](#weight)
-- [Length](#length)
-- [Temperature](#temperature)
-- [Volume](#volume)
+- [Unit Conversion Family](#unit-conversion-family)
+  - [Weight](#weight)
+  - [Length](#length)
+  - [Temperature](#temperature)
+  - [Volume](#volume)
+  - [Circumference](#circumference)
 
 ## Visit
 
@@ -1359,6 +1361,26 @@ const devWorkspace = new Workspace({
 const buildResult = devWorkspace.run("npm run build");
 ```
 
+## Unit Conversion Family
+
+A family of measurement utility classes that share a consistent API pattern:
+
+```ts
+ClassName.from({ unit1: value, unit2: value }).total("targetUnit")
+ClassName.from(value, "unit").total("targetUnit")
+ClassName.from("valueUnit").total("targetUnit")
+```
+
+Each class stores its value in a canonical base unit and converts on read via `.total(unit)`. All classes support string parsing, object input (combine multiple units), and a `{ unit }` object form for `.total()`.
+
+| Class | Import | Base unit | Measures | Highlights |
+|---|---|---|---|---|
+| [`Weight`](#weight) | `@jondotsoy/utils-js/weight` | gram | Mass | Metric, Imperial, Troy, Gemology |
+| [`Length`](#length) | `@jondotsoy/utils-js/length` | millimeter | Linear distance | Metric, Imperial, Nautical |
+| [`Temperature`](#temperature) | `@jondotsoy/utils-js/temperature` | Kelvin | Temperature | Celsius, Fahrenheit, Rankine, Delisle, Newton, Réaumur, Rømer |
+| [`Volume`](#volume) | `@jondotsoy/utils-js/volume` | milliliter | Volume | Metric, US customary, Imperial, Cubic |
+| [`Circumference`](#circumference) | `@jondotsoy/utils-js/circumference` | millimeter | Circle circumference | Same units as Length plus `fromRadius()`, `fromDiameter()`, `.radius()`, `.diameter()` |
+
 ## Weight
 
 A utility class for converting between weight units. Stores values internally in grams and converts on read via `.total(unit)`.
@@ -1525,6 +1547,53 @@ Volume.from("1 gal").total("l");       // 3.785 l
 // Object unit argument
 Volume.from({ cups: 2 }).total({ unit: "ml" }); // 473.18 ml
 ```
+
+## Circumference
+
+A utility class for working with circle circumferences. Shares all length units with [`Length`](#length) and adds geometric factory methods and reverse conversions. Stores values internally in millimeters.
+
+**Syntax:**
+
+```ts
+Circumference.from({ meters: 1, centimeters: 50 }).total("mm")
+Circumference.from(314, "mm").total("cm")
+Circumference.fromRadius(5, "cm").total("mm")
+Circumference.fromDiameter(10, "cm").radius("cm")
+```
+
+**Examples:**
+
+```ts
+import { Circumference } from "@jondotsoy/utils-js/circumference";
+
+// From a known circumference
+Circumference.from(314, "mm").total("cm");         // 31.4 cm
+
+// From radius
+Circumference.fromRadius(1, "m").total("mm");      // 6283.18 mm  (2π × 1000)
+
+// From diameter
+Circumference.fromDiameter(10, "cm").total("mm"); // 314.16 mm  (π × 100)
+
+// Reverse — get radius or diameter from any circumference
+const c = Circumference.fromRadius(7, "cm");
+c.radius("cm");    // 7
+c.diameter("cm");  // 14
+
+// Object form + object unit argument
+Circumference.from({ meters: 1 }).total({ unit: "cm" }); // 100
+```
+
+**Geometric methods:**
+
+| Method | Description |
+|---|---|
+| `Circumference.fromRadius(value, unit)` | Creates a circumference from a circle's radius |
+| `Circumference.fromDiameter(value, unit)` | Creates a circumference from a circle's diameter |
+| `.radius(unit)` | Returns the radius implied by this circumference |
+| `.diameter(unit)` | Returns the diameter implied by this circumference |
+
+Supported units are identical to [`Length`](#length): full metric scale (pm → km), Imperial (thou, in, ft, yd, mi), and Nautical (nmi).
 
 ## License
 
