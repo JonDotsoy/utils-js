@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.7.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.6.0...utils-js-v1.7.0) (2026-06-25)
+
+
+### Features
+
+* **data-size:** add DataSize class for byte/bit conversion ([b535611](https://github.com/JonDotsoy/utils-js/commit/b5356112167f63b727be12fcf184ee2e04386ee6))
+* **units:** add unit conversion family — Weight, Length, Temperature, Volume, Circumference ([#75](https://github.com/JonDotsoy/utils-js/issues/75)) ([0cee8ce](https://github.com/JonDotsoy/utils-js/commit/0cee8cecf0d73715a0cdcf3f88e49856ffe2c83c))
+
 ## [1.6.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.5.0...utils-js-v1.6.0) (2025-12-16)
 
 
