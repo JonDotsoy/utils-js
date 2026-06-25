@@ -95,6 +95,105 @@ For type assertions use `Parameters<>` and `ReturnType<>` utilities when `.param
 
 **Namespace pattern** — when a function or class needs related helpers that are not instance methods, attach them as static properties or via a TypeScript `namespace` block (see `MeterFormatOptions`, `get.string`, `visit.getParent`).
 
+## Unit Conversion Family pattern
+
+All measurement libs (Weight, Length, Temperature, Volume, Circumference, Bytes, DataSize, …) follow a single design contract. When adding a new one, implement every point below exactly.
+
+### API contract
+
+```ts
+// Object form — each key is a unit alias; values are summed after conversion to base unit
+Family.from({ unit1: value, unit2: value }).total("targetUnit")
+
+// Number + unit
+Family.from(value, "unit").total("targetUnit")
+
+// String parsing
+Family.from("valueUnit").total("targetUnit")
+
+// Object unit argument (alternative to string)
+Family.from(value, "unit").total({ unit: "targetUnit" })
+```
+
+**Rules:**
+
+1. `Family.from(…)` always returns a `Family` instance — every overload must end up calling `new Family(canonicalValue)`.
+2. The object form accepts any number of unit keys; each pair is converted to the base unit and summed.
+3. `.total(unit | { unit })` converts the internal base value to the requested unit and returns a `number`.
+4. No convenience getters (`.grams`, `.millimeters`, etc.) — only `.total()`.
+
+### Locale-aware formatting
+
+Every family exposes:
+
+```ts
+toLocaleString(locales?: Intl.LocalesArgument, options?: FamilyFormatOptions): string
+```
+
+**`FamilyFormatOptions` type** — omits `style` and `unit` from `Intl.NumberFormatOptions`, then re-adds `unit` typed as the family's Intl-compatible unit union:
+
+```ts
+export type FamilyIntlUnit = "byte" | "kilobyte" | "megabyte" | …;  // only units Intl.NumberFormat accepts
+
+export type FamilyFormatOptions = Omit<Intl.NumberFormatOptions, "style" | "unit"> & {
+  unit?: FamilyIntlUnit;
+};
+```
+
+`style` is omitted because the implementation always injects `style: "unit"` — callers never set it directly.
+
+**`inferUnit` function** — a module-level pure function that picks the most human-readable `FamilyIntlUnit` for a given base value. Define it outside the class:
+
+```ts
+const inferUnit = (baseValue: number): FamilyIntlUnit => {
+  const abs = Math.abs(baseValue);
+  if (abs >= THRESHOLD_LARGE) return "large-unit";
+  if (abs >= THRESHOLD_MEDIUM) return "medium-unit";
+  return "small-unit";
+};
+```
+
+**Implementation rules:**
+
+1. When `options.unit` is omitted, call `inferUnit(this.#base)` to pick the best unit automatically.
+2. Always inject `style: "unit"` — never expose it as a caller option.
+3. Call `.total(unit)` to get the numeric value in the chosen unit before passing it to `.format()`.
+
+Reference implementation:
+
+```ts
+toLocaleString(locales?: Intl.LocalesArgument, options?: FamilyFormatOptions): string {
+  const unit = options?.unit ?? inferUnit(this.#base);
+  const resolved = { style: "unit" as const, ...options, unit };
+  return new Intl.NumberFormat(locales as string, resolved).format(this.total(unit));
+}
+```
+
+### Module-level structure
+
+```
+BASE_PER_UNIT   — Record<canonical, factor>   (base-unit conversion table)
+UNIT_ALIASES    — Record<alias, canonical>     (normalises user input)
+resolveAlias()  — throws on unknown alias
+toBase()        — value × factor
+fromBase()      — base ÷ factor
+inferUnit()     — picks best FamilyIntlUnit for a base value
+```
+
+The class body contains only: `readonly #base`, constructor, `static from()` overloads, `.total()`, `.valueOf()`, `.toLocaleString()`.
+
+### Checklist for a new family
+
+- [ ] `UNIT_ALIASES` covers short codes, plurals, and long names (case-insensitive where applicable).
+- [ ] `Family.from(obj)` sums contributions from multiple keys.
+- [ ] `Family.from(n, unit)` defaults unit to the base unit when omitted.
+- [ ] `Family.from(string)` uses a single regex: `/^\s*(-?\d*\.?\d+(?:[eE][+-]?\d+)?)\s*([a-zA-Zµ³]+[0-9]*)?\s*$/`.
+- [ ] `.total()` accepts both `"unit"` and `{ unit: "unit" }`.
+- [ ] Export `FamilyIntlUnit` and `FamilyFormatOptions` types.
+- [ ] `inferUnit()` defined at module scope; covers every order of magnitude the family supports.
+- [ ] `.toLocaleString()` infers unit when omitted; always injects `style: "unit"`; delegates value to `.total(unit)`.
+- [ ] Tests cover: object multi-unit sum, number+unit, string parsing, `.total()` string and object forms, `.toLocaleString()` with each `FamilyIntlUnit` value, and auto-inference at every threshold.
+
 ## Maintaining the README
 
 Every lib must appear in the top-level list and have its own `##` section. The section must include:

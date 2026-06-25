@@ -27,6 +27,13 @@ bun scripts/update-package.json.ts --write  # sync exports in package.json
    }
    ```
 
+## Rules
+
+- **After every change to `DESIGN.md`** run:
+  ```bash
+  bunx @google/design.md lint DESIGN.md
+  ```
+
 ## Conventions
 
 - **Test runner**: `bun:test` (`import { describe, it, expect, expectTypeOf } from "bun:test"`).
