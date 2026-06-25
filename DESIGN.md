@@ -71,9 +71,16 @@ Weight.from("1.5kg")
 
 **Error handling** — throw `Error` at input boundaries (`from()`, `parse()`, constructors that accept raw user input). Inside fluent or chaining APIs (e.g. `pick`) return `undefined` instead of throwing so callers can use optional-chaining (`?.`) to short-circuit safely.
 
-**Test runner** — always `bun:test`. Import from `"bun:test"`:
+**Test runner** — always `bun:test`. Use `test.describe()` for grouping and `test()` for individual cases. Do not use `describe` or `it` as standalone imports.
+
 ```ts
-import { describe, it, expect, expectTypeOf } from "bun:test";
+import { test, expect, expectTypeOf } from "bun:test";
+
+test.describe("Weight.from", () => {
+  test("combines kilograms and grams", () => {
+    expect(Weight.from({ kilograms: 1, grams: 500 }).total("grams")).toBe(1500);
+  });
+});
 ```
 
 For type assertions use `Parameters<>` and `ReturnType<>` utilities when `.parameter()` is needed, since `bun:test`'s `expectTypeOf` does not support that method.
