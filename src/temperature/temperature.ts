@@ -63,7 +63,7 @@ const CONVERTERS: Record<string, Converter> = {
   },
 };
 
-const UNIT_ALIASES: Record<string, string> = {
+export const UNIT_ALIASES: Record<string, string> = {
   // Kelvin
   kelvin: "kelvin",
   k: "kelvin",
@@ -104,6 +104,14 @@ type TemperatureUnitAlias = keyof typeof UNIT_ALIASES;
 
 export type TemperatureInput = Partial<Record<TemperatureUnitAlias, number>>;
 
+export type TemperatureIntlUnit = "celsius" | "fahrenheit";
+
+export type TemperatureFormatOptions = Omit<Intl.NumberFormatOptions, "style" | "unit"> & {
+  unit?: TemperatureIntlUnit;
+};
+
+const inferUnit = (_kelvin: number): TemperatureIntlUnit => "celsius";
+
 const resolveAlias = (unit: string): string => {
   const canonical = UNIT_ALIASES[unit.toLowerCase()];
   if (!canonical) throw new Error(`Unknown temperature unit: "${unit}"`);
@@ -140,11 +148,14 @@ export class Temperature {
     return this.#kelvin;
   }
 
-  toLocaleString(locale?: Intl.LocalesArgument, options?: Intl.NumberFormatOptions) {
-    return new Intl.NumberFormat(locale as string, options).format(this.#kelvin);
+  toLocaleString(locale?: Intl.LocalesArgument, options?: TemperatureFormatOptions) {
+    const unit = options?.unit ?? inferUnit(this.#kelvin);
+    const resolved = { style: "unit" as const, ...options, unit };
+    return new Intl.NumberFormat(locale as string, resolved).format(this.total(unit));
   }
 
   static from(input: TemperatureInput): Temperature;
+  /** @deprecated Pass an object instead: `Temperature.from({ celsius: value })` */
   static from(value: number, unit: TemperatureUnitAlias): Temperature;
   static from(value: string): Temperature;
   static from(

@@ -162,6 +162,30 @@ describe("unit aliases", () => {
   });
 });
 
+// ─── toLocaleString ───────────────────────────────────────────────────────────
+
+describe("toLocaleString", () => {
+  it("infers celsius by default", () => {
+    expect(Temperature.from(293.15, "kelvin").toLocaleString("en-US")).toBe("20°C");
+  });
+
+  it("unit: celsius", () => {
+    expect(Temperature.from(100, "celsius").toLocaleString("en-US", { unit: "celsius" })).toBe("100°C");
+  });
+
+  it("unit: fahrenheit", () => {
+    expect(Temperature.from(32, "fahrenheit").toLocaleString("en-US", { unit: "fahrenheit" })).toBe("32°F");
+  });
+
+  it("respects unitDisplay: long", () => {
+    expect(Temperature.from(0, "celsius").toLocaleString("en-US", { unit: "celsius", unitDisplay: "long" })).toBe("0 degrees Celsius");
+  });
+
+  it("respects maximumFractionDigits", () => {
+    expect(Temperature.from(98.6, "fahrenheit").toLocaleString("en-US", { unit: "fahrenheit", maximumFractionDigits: 0 })).toBe("99°F");
+  });
+});
+
 // ─── valueOf ──────────────────────────────────────────────────────────────────
 
 describe("valueOf", () => {

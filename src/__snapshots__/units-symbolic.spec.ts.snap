@@ -1,0 +1,679 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "microgram" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "micrograms" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "µg" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "mcg" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "milligram" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "milligrams" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "mg" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "gram" 1`] = `"1 g"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "grams" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "g" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "kilogram" 1`] = `"1 kg"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "kilograms" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "kg" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "tonne" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "tonnes" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "t" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "metric-ton" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "metric-tons" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "metricton" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "metrictons" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "grain" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "grains" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "gr" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "dram" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "drams" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "dr" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "ounce" 1`] = `"1 oz"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "ounces" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "oz" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "pound" 1`] = `"1 lb"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "pounds" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "lb" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "lbs" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "stone" 1`] = `"1 st"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "stones" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "st" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "short-ton" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "short-tons" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "shortton" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "shorttons" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "ton" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "tons" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "long-ton" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "long-tons" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "longton" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "longtons" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "troy-ounce" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "troy-ounces" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "troyounce" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "troyounces" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "ozt" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "troy-pound" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "troy-pounds" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "troypound" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "troypounds" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "lbt" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "carat" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "carats" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "ct" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Weight — toLocaleString all unit aliases toLocaleString unit: "CD" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "picometer" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "picometers" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "pm" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "nanometer" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "nanometers" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "nm" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "micrometer" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "micrometers" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "µm" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "um" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "millimeter" 1`] = `"1 mm"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "millimeters" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "mm" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "centimeter" 1`] = `"1 cm"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "centimeters" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "cm" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "decimeter" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "decimeters" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "dm" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "meter" 1`] = `"1 m"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "meters" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "m" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "decameter" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "decameters" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "dam" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "hectometer" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "hectometers" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "hm" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "kilometer" 1`] = `"1 km"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "kilometers" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "km" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "thou" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "mil" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "th" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "inch" 1`] = `"1 in"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "inches" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "in" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "foot" 1`] = `"1 ft"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "feet" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "ft" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "yard" 1`] = `"1 yd"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "yards" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "yd" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "mile" 1`] = `"1 mi"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "miles" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "mi" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "nautical-mile" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "nautical-miles" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "nauticalmile" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "nauticalmiles" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "nmi" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Length — toLocaleString all unit aliases toLocaleString unit: "nm2" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "kelvin" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "k" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "celsius" 1`] = `"300°C"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "centigrade" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "c" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "°c" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "fahrenheit" 1`] = `"300°F"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "f" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "°f" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "rankine" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "ra" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "r" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "°r" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "°ra" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "delisle" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "de" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "°de" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "newton" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "n" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "°n" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "reaumur" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "re" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "°re" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "romer" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "ro" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Temperature — toLocaleString all unit aliases toLocaleString unit: "°ro" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "milliliter" 1`] = `"1 mL"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "milliliters" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "ml" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "centiliter" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "centiliters" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "cl" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "deciliter" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "deciliters" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "dl" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "liter" 1`] = `"1 L"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "liters" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "litre" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "litres" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "l" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "cubic-meter" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "cubic-meters" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "cubicmeter" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "m3" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "m³" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "cubic-centimeter" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "cubic-centimeters" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "cubiccentimeter" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "cc" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "cm3" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "cm³" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "cubic-inch" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "cubic-inches" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "cubicinch" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "in3" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "in³" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "cubic-foot" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "cubic-feet" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "cubicfoot" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "ft3" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "ft³" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "us-teaspoon" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "us-teaspoons" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "teaspoon" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "teaspoons" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "tsp" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "us-tablespoon" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "us-tablespoons" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "tablespoon" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "tablespoons" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "tbsp" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "tbs" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "us-fluid-ounce" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "us-fluid-ounces" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "fluid-ounce" 1`] = `"1 fl oz"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "fluid-ounces" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "fluid ounce" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "floz" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "fl-oz" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "fl oz" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "us-cup" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "us-cups" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "cup" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "cups" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "us-pint" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "us-pints" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "pt" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "us-quart" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "us-quarts" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "qt" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "us-gallon" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "us-gallons" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "gallon" 1`] = `"1 gal"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "gallons" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "gal" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "imperial-fluid-ounce" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "imperial-fluid-ounces" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "imp-fl-oz" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "imperial-pint" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "imperial-pints" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "imp-pt" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "imperial-quart" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "imperial-quarts" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "imp-qt" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "imperial-gallon" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "imperial-gallons" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Volume — toLocaleString all unit aliases toLocaleString unit: "imp-gal" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "picometer" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "picometers" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "pm" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "nanometer" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "nanometers" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "nm" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "micrometer" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "micrometers" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "µm" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "um" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "millimeter" 1`] = `"1 mm"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "millimeters" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "mm" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "centimeter" 1`] = `"1 cm"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "centimeters" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "cm" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "decimeter" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "decimeters" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "dm" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "meter" 1`] = `"1 m"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "meters" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "m" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "decameter" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "decameters" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "dam" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "hectometer" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "hectometers" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "hm" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "kilometer" 1`] = `"1 km"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "kilometers" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "km" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "thou" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "mil" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "th" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "inch" 1`] = `"1 in"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "inches" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "in" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "foot" 1`] = `"1 ft"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "feet" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "ft" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "yard" 1`] = `"1 yd"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "yards" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "yd" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "mile" 1`] = `"1 mi"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "miles" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "mi" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "nautical-mile" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "nautical-miles" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "nauticalmile" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "nauticalmiles" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`Circumference — toLocaleString all unit aliases toLocaleString unit: "nmi" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "bit" 1`] = `"1 bit"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "bits" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "b" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "kilobit" 1`] = `"1 kb"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "kilobits" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "kbit" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "kb_bit" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "megabit" 1`] = `"1 Mb"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "megabits" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "mbit" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "mb_bit" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "gigabit" 1`] = `"1 Gb"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "gigabits" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "gbit" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "gb_bit" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "terabit" 1`] = `"1 Tb"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "terabits" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "tbit" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "tb_bit" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "petabit" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "petabits" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "pbit" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "pb_bit" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "byte" 1`] = `"1 byte"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "bytes" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "B" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "kilobyte" 1`] = `"1 kB"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "kilobytes" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "KB" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "kB" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "megabyte" 1`] = `"1 MB"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "megabytes" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "MB" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "gigabyte" 1`] = `"1 GB"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "gigabytes" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "GB" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "terabyte" 1`] = `"1 TB"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "terabytes" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "TB" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "petabyte" 1`] = `"1 PB"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "petabytes" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "PB" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "exabyte" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "exabytes" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "EB" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "zettabyte" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "zettabytes" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "ZB" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "yottabyte" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "yottabytes" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "YB" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "kibibyte" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "kibibytes" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "KiB" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "mebibyte" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "mebibytes" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "MiB" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "gibibyte" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "gibibytes" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "GiB" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "tebibyte" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "tebibytes" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "TiB" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "pebibyte" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "pebibytes" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "PiB" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "exbibyte" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "exbibytes" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;
+
+exports[`DataSize — toLocaleString all unit aliases toLocaleString unit: "EiB" 1`] = `"ERROR: unit is not a well-formed unit identifier"`;

@@ -34,7 +34,7 @@ const MM_PER_UNIT: Record<string, number> = {
   "nautical-mile": 1_852_000,
 };
 
-const UNIT_ALIASES: Record<string, string> = {
+export const UNIT_ALIASES: Record<string, string> = {
   // picometer
   picometer: "picometer",
   picometers: "picometer",
@@ -108,6 +108,28 @@ type CircumferenceUnitAlias = keyof typeof UNIT_ALIASES;
 
 export type CircumferenceInput = Partial<Record<CircumferenceUnitAlias, number>>;
 
+export type CircumferenceIntlUnit =
+  | "millimeter"
+  | "centimeter"
+  | "meter"
+  | "kilometer"
+  | "inch"
+  | "foot"
+  | "yard"
+  | "mile";
+
+export type CircumferenceFormatOptions = Omit<Intl.NumberFormatOptions, "style" | "unit"> & {
+  unit?: CircumferenceIntlUnit;
+};
+
+const inferUnit = (mm: number): CircumferenceIntlUnit => {
+  const abs = Math.abs(mm);
+  if (abs >= 1_000_000) return "kilometer";
+  if (abs >= 1_000) return "meter";
+  if (abs >= 10) return "centimeter";
+  return "millimeter";
+};
+
 const resolveAlias = (unit: string): string => {
   const canonical = UNIT_ALIASES[unit] ?? UNIT_ALIASES[unit.toLowerCase()];
   if (!canonical) throw new Error(`Unknown circumference unit: "${unit}"`);
@@ -152,11 +174,14 @@ export class Circumference {
     return this.#mm;
   }
 
-  toLocaleString(locale?: Intl.LocalesArgument, options?: Intl.NumberFormatOptions) {
-    return new Intl.NumberFormat(locale as string, options).format(this.#mm);
+  toLocaleString(locale?: Intl.LocalesArgument, options?: CircumferenceFormatOptions) {
+    const unit = options?.unit ?? inferUnit(this.#mm);
+    const resolved = { style: "unit" as const, ...options, unit };
+    return new Intl.NumberFormat(locale as string, resolved).format(this.total(unit));
   }
 
   static from(input: CircumferenceInput): Circumference;
+  /** @deprecated Pass an object instead: `Circumference.from({ millimeters: value })` */
   static from(value: number, unit?: CircumferenceUnitAlias): Circumference;
   static from(value: string): Circumference;
   static from(

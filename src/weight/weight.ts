@@ -42,7 +42,7 @@ const GRAMS_PER_UNIT: Record<string, number> = {
 };
 
 // All accepted aliases → canonical key in GRAMS_PER_UNIT
-const UNIT_ALIASES: Record<string, string> = {
+export const UNIT_ALIASES: Record<string, string> = {
   // microgram
   microgram: "microgram",
   micrograms: "microgram",
@@ -124,6 +124,17 @@ type WeightUnitAlias = keyof typeof UNIT_ALIASES;
 
 export type WeightInput = Partial<Record<WeightUnitAlias, number>>;
 
+export type WeightIntlUnit = "gram" | "kilogram" | "ounce" | "pound" | "stone";
+
+export type WeightFormatOptions = Omit<Intl.NumberFormatOptions, "style" | "unit"> & {
+  unit?: WeightIntlUnit;
+};
+
+const inferUnit = (grams: number): WeightIntlUnit => {
+  if (Math.abs(grams) >= 1_000) return "kilogram";
+  return "gram";
+};
+
 const resolveAlias = (unit: string): string => {
   const canonical = UNIT_ALIASES[unit.toLowerCase()] ?? UNIT_ALIASES[unit];
   if (!canonical) throw new Error(`Unknown weight unit: "${unit}"`);
@@ -162,8 +173,10 @@ export class Weight {
     return this.#grams;
   }
 
-  toLocaleString(locale?: Intl.LocalesArgument, options?: Intl.NumberFormatOptions) {
-    return new Intl.NumberFormat(locale as string, options).format(this.#grams);
+  toLocaleString(locale?: Intl.LocalesArgument, options?: WeightFormatOptions) {
+    const unit = options?.unit ?? inferUnit(this.#grams);
+    const resolved = { style: "unit" as const, ...options, unit };
+    return new Intl.NumberFormat(locale as string, resolved).format(this.total(unit));
   }
 
   /**
@@ -173,6 +186,7 @@ export class Weight {
    *      Weight.from("12.345 kg")
    */
   static from(input: WeightInput): Weight;
+  /** @deprecated Pass an object instead: `Weight.from({ grams: value })` */
   static from(value: number, unit?: WeightUnitAlias): Weight;
   static from(value: string): Weight;
   static from(

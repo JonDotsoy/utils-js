@@ -207,6 +207,42 @@ describe("unit aliases", () => {
   });
 });
 
+// ─── toLocaleString ───────────────────────────────────────────────────────────
+
+describe("toLocaleString", () => {
+  it("infers milliliter for 500 mL", () => {
+    expect(Volume.from(500, "ml").toLocaleString("en-US")).toBe("500 mL");
+  });
+
+  it("infers liter for 2 000 mL", () => {
+    expect(Volume.from(2_000, "ml").toLocaleString("en-US")).toBe("2 L");
+  });
+
+  it("unit: milliliter", () => {
+    expect(Volume.from(1, "ml").toLocaleString("en-US", { unit: "milliliter" })).toBe("1 mL");
+  });
+
+  it("unit: liter", () => {
+    expect(Volume.from(1, "liter").toLocaleString("en-US", { unit: "liter" })).toBe("1 L");
+  });
+
+  it("unit: fluid-ounce", () => {
+    expect(Volume.from(1, "floz").toLocaleString("en-US", { unit: "fluid-ounce" })).toBe("1 fl oz");
+  });
+
+  it("unit: gallon", () => {
+    expect(Volume.from(1, "gal").toLocaleString("en-US", { unit: "gallon" })).toBe("1 gal");
+  });
+
+  it("respects unitDisplay: long", () => {
+    expect(Volume.from(1, "liter").toLocaleString("en-US", { unit: "liter", unitDisplay: "long" })).toBe("1 liter");
+  });
+
+  it("respects maximumFractionDigits", () => {
+    expect(Volume.from(1_500, "ml").toLocaleString("en-US", { maximumFractionDigits: 1 })).toBe("1.5 L");
+  });
+});
+
 // ─── valueOf ─────────────────────────────────────────────────────────────────
 
 describe("valueOf", () => {

@@ -46,7 +46,7 @@ const ML_PER_UNIT: Record<string, number> = {
   "imperial-gallon": 4_546.09,
 };
 
-const UNIT_ALIASES: Record<string, string> = {
+export const UNIT_ALIASES: Record<string, string> = {
   // milliliter
   milliliter: "milliliter",
   milliliters: "milliliter",
@@ -108,6 +108,7 @@ const UNIT_ALIASES: Record<string, string> = {
   "us-fluid-ounces": "us-fluid-ounce",
   "fluid-ounce": "us-fluid-ounce",
   "fluid-ounces": "us-fluid-ounce",
+  "fluid ounce": "us-fluid-ounce",
   floz: "us-fluid-ounce",
   "fl-oz": "us-fluid-ounce",
   "fl oz": "us-fluid-ounce",
@@ -127,6 +128,8 @@ const UNIT_ALIASES: Record<string, string> = {
   // US gallon
   "us-gallon": "us-gallon",
   "us-gallons": "us-gallon",
+  gallon: "us-gallon",
+  gallons: "us-gallon",
   gal: "us-gallon",
   // Imperial fluid ounce
   "imperial-fluid-ounce": "imperial-fluid-ounce",
@@ -149,6 +152,17 @@ const UNIT_ALIASES: Record<string, string> = {
 type VolumeUnitAlias = keyof typeof UNIT_ALIASES;
 
 export type VolumeInput = Partial<Record<VolumeUnitAlias, number>>;
+
+export type VolumeIntlUnit = "milliliter" | "liter" | "fluid-ounce" | "gallon";
+
+export type VolumeFormatOptions = Omit<Intl.NumberFormatOptions, "style" | "unit"> & {
+  unit?: VolumeIntlUnit;
+};
+
+const inferUnit = (ml: number): VolumeIntlUnit => {
+  if (Math.abs(ml) >= 1_000) return "liter";
+  return "milliliter";
+};
 
 const resolveAlias = (unit: string): string => {
   const canonical = UNIT_ALIASES[unit] ?? UNIT_ALIASES[unit.toLowerCase()];
@@ -186,11 +200,14 @@ export class Volume {
     return this.#ml;
   }
 
-  toLocaleString(locale?: Intl.LocalesArgument, options?: Intl.NumberFormatOptions) {
-    return new Intl.NumberFormat(locale as string, options).format(this.#ml);
+  toLocaleString(locale?: Intl.LocalesArgument, options?: VolumeFormatOptions) {
+    const unit = options?.unit ?? inferUnit(this.#ml);
+    const resolved = { style: "unit" as const, ...options, unit };
+    return new Intl.NumberFormat(locale as string, resolved).format(this.total(unit));
   }
 
   static from(input: VolumeInput): Volume;
+  /** @deprecated Pass an object instead: `Volume.from({ milliliters: value })` */
   static from(value: number, unit?: VolumeUnitAlias): Volume;
   static from(value: string): Volume;
   static from(

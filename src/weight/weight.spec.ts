@@ -194,6 +194,46 @@ describe("unit aliases", () => {
   });
 });
 
+// ─── toLocaleString ───────────────────────────────────────────────────────────
+
+describe("toLocaleString", () => {
+  it("infers gram for 500 g", () => {
+    expect(Weight.from(500, "gram").toLocaleString("en-US")).toBe("500 g");
+  });
+
+  it("infers kilogram for 1 500 g", () => {
+    expect(Weight.from(1_500, "gram").toLocaleString("en-US")).toBe("1.5 kg");
+  });
+
+  it("unit: gram", () => {
+    expect(Weight.from(1, "gram").toLocaleString("en-US", { unit: "gram" })).toBe("1 g");
+  });
+
+  it("unit: kilogram", () => {
+    expect(Weight.from(1, "kilogram").toLocaleString("en-US", { unit: "kilogram" })).toBe("1 kg");
+  });
+
+  it("unit: ounce", () => {
+    expect(Weight.from(1, "ounce").toLocaleString("en-US", { unit: "ounce" })).toBe("1 oz");
+  });
+
+  it("unit: pound", () => {
+    expect(Weight.from(1, "pound").toLocaleString("en-US", { unit: "pound" })).toBe("1 lb");
+  });
+
+  it("unit: stone", () => {
+    expect(Weight.from(1, "stone").toLocaleString("en-US", { unit: "stone" })).toBe("1 st");
+  });
+
+  it("respects unitDisplay: long", () => {
+    expect(Weight.from(2, "kilogram").toLocaleString("en-US", { unit: "kilogram", unitDisplay: "long" })).toBe("2 kilograms");
+  });
+
+  it("respects maximumFractionDigits", () => {
+    expect(Weight.from(1_234, "gram").toLocaleString("en-US", { maximumFractionDigits: 1 })).toBe("1.2 kg");
+  });
+});
+
 // ─── valueOf ─────────────────────────────────────────────────────────────────
 
 describe("valueOf", () => {

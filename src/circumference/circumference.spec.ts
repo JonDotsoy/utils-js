@@ -185,6 +185,66 @@ describe("unit aliases", () => {
   });
 });
 
+// ─── toLocaleString ───────────────────────────────────────────────────────────
+
+describe("toLocaleString", () => {
+  it("infers millimeter for 5 mm", () => {
+    expect(Circumference.from(5, "mm").toLocaleString("en-US")).toBe("5 mm");
+  });
+
+  it("infers centimeter for 50 mm", () => {
+    expect(Circumference.from(50, "mm").toLocaleString("en-US")).toBe("5 cm");
+  });
+
+  it("infers meter for 2 000 mm", () => {
+    expect(Circumference.from(2_000, "mm").toLocaleString("en-US")).toBe("2 m");
+  });
+
+  it("infers kilometer for 5 000 000 mm", () => {
+    expect(Circumference.from(5_000_000, "mm").toLocaleString("en-US")).toBe("5 km");
+  });
+
+  it("unit: millimeter", () => {
+    expect(Circumference.from(1, "mm").toLocaleString("en-US", { unit: "millimeter" })).toBe("1 mm");
+  });
+
+  it("unit: centimeter", () => {
+    expect(Circumference.from(1, "cm").toLocaleString("en-US", { unit: "centimeter" })).toBe("1 cm");
+  });
+
+  it("unit: meter", () => {
+    expect(Circumference.from(1, "m").toLocaleString("en-US", { unit: "meter" })).toBe("1 m");
+  });
+
+  it("unit: kilometer", () => {
+    expect(Circumference.from(1, "km").toLocaleString("en-US", { unit: "kilometer" })).toBe("1 km");
+  });
+
+  it("unit: inch", () => {
+    expect(Circumference.from(1, "inch").toLocaleString("en-US", { unit: "inch" })).toBe("1 in");
+  });
+
+  it("unit: foot", () => {
+    expect(Circumference.from(1, "foot").toLocaleString("en-US", { unit: "foot" })).toBe("1 ft");
+  });
+
+  it("unit: yard", () => {
+    expect(Circumference.from(1, "yard").toLocaleString("en-US", { unit: "yard" })).toBe("1 yd");
+  });
+
+  it("unit: mile", () => {
+    expect(Circumference.from(1, "mile").toLocaleString("en-US", { unit: "mile" })).toBe("1 mi");
+  });
+
+  it("respects unitDisplay: long", () => {
+    expect(Circumference.from(1, "km").toLocaleString("en-US", { unit: "kilometer", unitDisplay: "long" })).toBe("1 kilometer");
+  });
+
+  it("respects maximumFractionDigits", () => {
+    expect(Circumference.from(1_234, "mm").toLocaleString("en-US", { maximumFractionDigits: 2 })).toBe("1.23 m");
+  });
+});
+
 // ─── valueOf ─────────────────────────────────────────────────────────────────
 
 describe("valueOf", () => {
