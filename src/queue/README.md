@@ -39,14 +39,14 @@ const queue = new Queue({ store: new MemoryStore() });
 // Create a message with TTL directly (expires in 5 minutes)
 const message = new Message(
   { task: "send-notification", userId: "123" },
-  { ttl: 5 * 60 }, // TTL in seconds: 5 minutes
+  { ttl: Temporal.Duration.from({ minutes: 5 }).total("seconds") },
 );
 await queue.add(message);
 
 // Or create a message with TTL for urgent tasks (expires in 2 minutes)
 const urgentMessage = new Message(
   { task: "urgent-cleanup", priority: "high" },
-  { ttl: 2 * 60 }, // TTL in seconds: 2 minutes
+  { ttl: Temporal.Duration.from({ minutes: 2 }).total("seconds") },
 );
 ```
 
@@ -71,20 +71,20 @@ const urgentMessage = new Message(
 // For time-sensitive notifications (expire in 1 hour)
 const notification = new Message(
   { type: "user-notification", content: "Your session expires soon" },
-  { ttl: 60 * 60 }, // 3600 seconds = 1 hour
+  { ttl: Temporal.Duration.from({ hours: 1 }).total("seconds") },
 );
 
 // For cleanup tasks (expire in 24 hours)
 const cleanupTask = new Message(
   { type: "cleanup", resource: "/tmp/uploads" },
-  { ttl: 24 * 60 * 60 }, // 86400 seconds = 24 hours
+  { ttl: Temporal.Duration.from({ hours: 24 }).total("seconds") },
 );
 
 // For testing with quick expiration (expires in 0.5 seconds)
 MemoryStore.defaultPerformance.cleanupIntervalMilliseconds = 100;
 const testMessage = new Message(
   { test: true },
-  { ttl: 0.5 }, // 0.5 seconds for quick testing
+  { ttl: Temporal.Duration.from({ milliseconds: 500 }).total("seconds") },
 );
 ```
 
@@ -324,7 +324,7 @@ const msg1 = new Message({ task: "send-email" });
 // Message with TTL (expires in 1 hour)
 const msg2 = new Message(
   { task: "temporary-cleanup" },
-  { ttl: 60 * 60 }, // 3600 seconds = 1 hour
+  { ttl: Temporal.Duration.from({ hours: 1 }).total("seconds") },
 );
 
 // Message with custom metadata (useful for reconstruction from storage)
@@ -333,7 +333,7 @@ const msg3 = new Message(
   {
     id: "custom-id",
     createdAt: Date.now() - 1000,
-    ttl: 30 * 60, // 30 minutes
+    ttl: Temporal.Duration.from({ minutes: 30 }).total("seconds"),
   },
 );
 
@@ -343,7 +343,7 @@ const storedData = {
   data: { task: "cleanup" },
   createdAt: 1693737600000,
   acknowledgedAt: null,
-  ttl: 60 * 60, // 1 hour duration in seconds
+  ttl: Temporal.Duration.from({ hours: 1 }).total("seconds"),
 };
 const message = Message.from(storedData);
 ```
@@ -447,7 +447,7 @@ await queue.add({ type: "report", userId: 123 });
 // Add task with TTL (expires in 1 hour)
 await queue.add(
   { type: "notification", message: "Session expires soon" },
-  { ttl: 60 * 60 }, // 3600 seconds = 1 hour
+  { ttl: Temporal.Duration.from({ hours: 1 }).total("seconds") },
 );
 
 // Manual cleanup of expired messages (returns count removed)
