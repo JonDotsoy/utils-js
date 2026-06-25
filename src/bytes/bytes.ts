@@ -61,6 +61,11 @@ const unitToBytes = (unit: keyof typeof AliasBytesUnit): number => {
   return bytesByUnit[unitType];
 };
 
+/**
+ * @deprecated Use {@link DataSize} from `@jondotsoy/utils-js/data-size` instead.
+ * `DataSize` follows the `.total(unit)` convention, supports both SI decimal
+ * (KB = 1 000 B) and IEC binary (KiB = 1 024 B) prefixes, and includes bit units.
+ */
 export class Bytes {
   #bytes: number;
 
