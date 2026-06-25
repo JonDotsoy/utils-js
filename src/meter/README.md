@@ -1,5 +1,19 @@
 # Meter
 
+> **Deprecated.** Use [`Length`](../length/) instead — it covers all SI metric units plus Imperial (`inch`, `foot`, `yard`, `mile`) and Nautical (`nautical-mile`). `Meter` and `MeterFormat` are still functional but will be removed in a future major version.
+>
+> **Migration:**
+>
+> ```ts
+> // Before
+> import { Meter } from "@jondotsoy/utils-js/meter";
+> Meter.parse("2.5 km").toLocaleString("en", { unit: "meter" });
+>
+> // After
+> import { Length } from "@jondotsoy/utils-js/length";
+> Length.from("2.5km").total("meter"); // 2500
+> ```
+
 A library for parsing, converting, and formatting International System (SI) length units.
 
 ## Features

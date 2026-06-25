@@ -11,7 +11,7 @@ Some utilities for JS. Will be util to reduce common logic in your code.
 - [CleanupTasks](#cleanuptasks)
 - [Bytes](#bytes)
 - [BytesFormat](#bytesformat)
-- [Meter](#meter)
+- [Meter](#meter) _(deprecated — use [Length](#length))_
 - [Queue](#queue)
 - [Workspace](#workspace)
 - [Unit Conversion Family](#unit-conversion-family)
@@ -846,124 +846,21 @@ new BytesFormat("de-DE").format(123456789); // '117,74 MB'
 
 ## Meter
 
-A library for parsing, converting, and formatting International System (SI) length units with localization support.
+> **Deprecated.** Use [`Length`](#length) instead — it covers all SI metric units plus Imperial and Nautical.
 
-**Import:**
+`Meter` and `MeterFormat` are still functional but will be removed in a future major version.
+
+**Migration:**
 
 ```ts
+// Before
 import { Meter } from "@jondotsoy/utils-js/meter";
-import { MeterFormat } from "@jondotsoy/utils-js/meter";
+Meter.parse("2.5 km").toLocaleString("en", { unit: "meter", unitDisplay: "long" });
+
+// After
+import { Length } from "@jondotsoy/utils-js/length";
+Length.from("2.5km").total("meter"); // 2500
 ```
-
-### Features
-
-- Parse strings with units (e.g., "2.5 km", "100 cm")
-- Automatic conversion between units
-- Localized formatting using `Intl.NumberFormat`
-- Support for multiple languages with automatic pluralization
-- Short and long unit forms
-
-### Supported Units
-
-| Unit       | Short | Long       | Factor         |
-| ---------- | ----- | ---------- | -------------- |
-| Kilometer  | km    | kilometer  | 1,000,000 mm   |
-| Hectometer | hm    | hectometer | 100,000 mm     |
-| Decameter  | dam   | decameter  | 10,000 mm      |
-| Meter      | m     | meter      | 1,000 mm       |
-| Decimeter  | dm    | decimeter  | 100 mm         |
-| Centimeter | cm    | centimeter | 10 mm          |
-| Millimeter | mm    | millimeter | 1 mm           |
-| Micrometer | µm    | micrometer | 0.001 mm       |
-| Nanometer  | nm    | nanometer  | 0.000001 mm    |
-| Picometer  | pm    | picometer  | 0.000000001 mm |
-
-### Basic Usage
-
-**Parsing values:**
-
-```ts
-// Parse from string with unit
-const distance1 = Meter.parse("2.5 km");
-console.log(distance1.millimeter); // 2500000
-
-// Parse from number (assumes millimeters)
-const distance2 = Meter.parse(1000);
-console.log(distance2.millimeter); // 1000
-
-// Different unit formats
-Meter.parse("1cm"); // 10 mm
-Meter.parse("12 km"); // 12000000 mm
-Meter.parse("2.5 meter"); // 2500 mm
-```
-
-**Formatting values:**
-
-```ts
-// Simple format
-Meter.parse("2m").toLocaleString(); // "2 m"
-
-// Long format (full names)
-Meter.parse("2m").toLocaleString(undefined, { unitDisplay: "long" });
-// "2 meters"
-
-// Different locales
-Meter.parse("2500mm").toLocaleString("en", { unitDisplay: "long" });
-// "2.5 meters"
-
-Meter.parse("5000mm").toLocaleString("ja-JP", { unitDisplay: "long" });
-// "5メートル"
-```
-
-**Conversion between units:**
-
-```ts
-const distance = Meter.parse("2500 m");
-const result = distance.toLocaleString("en", {
-  unit: "kilometer",
-  unitDisplay: "long",
-});
-console.log(result); // "2.5 kilometers"
-```
-
-### MeterFormat
-
-Creates a reusable formatter for consistent formatting:
-
-```ts
-const formatter = new MeterFormat("es-CL", { unitDisplay: "long" });
-
-formatter.format("1km"); // "1 kilometer"
-formatter.format("3 cm"); // "3 centimeters"
-formatter.format(2500); // "2.5 meters"
-```
-
-**Options:**
-
-- `locale`: Locale to use (e.g., 'es-CL', 'en', 'ja-JP')
-- `unitDisplay`: 'short' | 'long' - Unit format
-- `unit`: Fixed unit to use (e.g., 'kilometer', 'meter')
-- `unitAllow`: Array of allowed units for automatic selection
-
-**Examples:**
-
-```ts
-// Fixed unit
-Meter.parse("2500m").toLocaleString("es-CL", {
-  unit: "kilometer",
-  unitDisplay: "long",
-});
-// "2.5 kilometers"
-
-// Restrict allowed units
-const formatter = new MeterFormat("es-CL", {
-  unitAllow: ["km", "m", "cm"],
-  unitDisplay: "long",
-});
-formatter.format("5000mm"); // "5 meters" (doesn't use millimeters)
-```
-
-For complete API documentation and more examples, see [src/meter/README.md](src/meter/README.md).
 
 ## Queue
 
