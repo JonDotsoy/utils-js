@@ -14,6 +14,8 @@ Some utilities for JS. Will be util to reduce common logic in your code.
 - [Meter](#meter)
 - [Queue](#queue)
 - [Workspace](#workspace)
+- [Weight](#weight)
+- [Length](#length)
 
 ## Visit
 
@@ -1353,6 +1355,83 @@ const devWorkspace = new Workspace({
 });
 
 const buildResult = devWorkspace.run("npm run build");
+```
+
+## Weight
+
+A utility class for converting between weight units. Stores values internally in grams and converts on read via `.total(unit)`.
+
+**Syntax:**
+
+```ts
+Weight.from({ kilograms: 12, grams: 345 }).total("oz")
+Weight.from(1, "lb").total("grams")
+Weight.from("2.5kg").total({ unit: "oz" })
+```
+
+**Supported units:**
+
+| Category | Units | Short aliases |
+|---|---|---|
+| Metric | microgram, milligram, gram, kilogram, tonne | µg/mcg, mg, g, kg, t |
+| Imperial | grain, dram, ounce, pound, stone, short-ton, long-ton | gr, dr, oz, lb/lbs, st, ton |
+| Troy | troy-ounce, troy-pound | ozt, lbt |
+| Gemology | carat | ct |
+
+**Examples:**
+
+```ts
+import { Weight } from "@jondotsoy/utils-js/weight";
+
+// Object form — combine multiple units
+Weight.from({ kilograms: 12, grams: 345 }).total("oz"); // 435.58 oz
+
+// Number + unit
+Weight.from(1, "lb").total("grams"); // 453.59
+
+// String parsing
+Weight.from("2.5kg").total("oz"); // 88.18
+
+// Object unit argument
+Weight.from({ pounds: 10 }).total({ unit: "kg" }); // 4.54
+```
+
+## Length
+
+A utility class for converting between length units. Stores values internally in millimeters and converts on read via `.total(unit)`.
+
+**Syntax:**
+
+```ts
+Length.from({ meters: 1, centimeters: 50 }).total("in")
+Length.from(6, "ft").total("mm")
+Length.from("1.5km").total({ unit: "mi" })
+```
+
+**Supported units:**
+
+| Category | Units | Short aliases |
+|---|---|---|
+| Metric | picometer, nanometer, micrometer, millimeter, centimeter, decimeter, meter, decameter, hectometer, kilometer | pm, nm, µm/um, mm, cm, dm, m, dam, hm, km |
+| Imperial | thou, inch, foot, yard, mile | th/mil, in, ft/feet, yd, mi |
+| Nautical | nautical-mile | nmi |
+
+**Examples:**
+
+```ts
+import { Length } from "@jondotsoy/utils-js/length";
+
+// Object form — combine multiple units
+Length.from({ meters: 1, centimeters: 50 }).total("in"); // 59.06 in
+
+// Number + unit
+Length.from(6, "ft").total("mm"); // 1828.8 mm
+
+// String parsing
+Length.from("5km").total("mi"); // 3.11 mi
+
+// Object unit argument
+Length.from({ inches: 12 }).total({ unit: "ft" }); // 1 ft
 ```
 
 ## License
