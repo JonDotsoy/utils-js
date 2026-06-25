@@ -79,6 +79,10 @@
     "./pick": {
       "import": "./libs/esm/pick/pick.js",
       "types": "./libs/types/pick/pick.d.ts"
+    },
+    "./weight": {
+      "import": "./libs/esm/weight/weight.js",
+      "types": "./libs/types/weight/weight.d.ts"
     }
   },
   "devDependencies": {
