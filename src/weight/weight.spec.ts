@@ -1,5 +1,4 @@
-import { describe, it, expect } from "vitest";
-import { expectTypeOf } from "expect-type";
+import { describe, it, expect, expectTypeOf } from "bun:test";
 import { Weight } from "./weight.js";
 
 // ─── Weight.from(object) ──────────────────────────────────────────────────────
@@ -240,7 +239,7 @@ describe("types", () => {
     });
 
     it("first parameter accepts string", () => {
-      expectTypeOf(Weight.from).parameter(0).toMatchTypeOf<string>();
+      expectTypeOf<Parameters<typeof Weight.from>[0]>().toMatchTypeOf<string>();
     });
   });
 
@@ -254,15 +253,15 @@ describe("types", () => {
     });
 
     it("first parameter accepts string unit", () => {
-      expectTypeOf(Weight.from(1, "kg").total).parameter(0).toMatchTypeOf<string>();
+      expectTypeOf<Parameters<Weight["total"]>[0]>().toMatchTypeOf<string>();
     });
 
     it("first parameter accepts { unit: string } object", () => {
-      expectTypeOf(Weight.from(1, "kg").total).parameter(0).toMatchTypeOf<{ unit: string }>();
+      expectTypeOf<Parameters<Weight["total"]>[0]>().toMatchTypeOf<{ unit: string }>();
     });
 
     it("returns number", () => {
-      expectTypeOf(Weight.from(1, "kg").total).returns.toEqualTypeOf<number>();
+      expectTypeOf<ReturnType<Weight["total"]>>().toEqualTypeOf<number>();
     });
   });
 });
