@@ -6,6 +6,7 @@ Some utilities for JS. Will be util to reduce common logic in your code.
 - [get](#get)
 - [set](#set)
 - [pick](#pick)
+- [argv](#argv)
 - [pipe](#pipe)
 - [result](#result)
 - [CleanupTasks](#cleanuptasks)
@@ -476,6 +477,63 @@ pick.utils.includes(array, value); // boolean
 ```
 
 For complete API documentation and more examples, see [src/pick/README.md](src/pick/README.md).
+
+## Argv
+
+> Inspired by [Bun.$](https://bun.sh/docs/runtime/shell)'s tagged-template
+> interpolation and escaping semantics.
+
+A tagged template function that tokenizes a shell-style command string into
+an argument array. Interpolated values are always inserted as literal
+tokens (never re-parsed or split on whitespace), and interpolated arrays
+are spread into multiple tokens — this makes it safe to build argument
+lists from dynamic values without risking command injection or accidental
+re-tokenization.
+
+**Import:**
+
+```ts
+import { argv } from "@jondotsoy/utils-js/argv";
+```
+
+**Syntax:**
+
+```ts
+argv`command arg1 arg2`;
+argv`command ${value}`;
+argv`command ${arrayOfValues}`;
+argv.escape(value);
+```
+
+**Basic Examples:**
+
+```ts
+argv`foo tar`; // => ["foo", "tar"]
+argv`foo "tar"`; // => ["foo", "tar"]
+argv`foo "tar biz"`; // => ["foo", "tar biz"]
+
+// Interpolated strings are kept as a single token, spaces and all
+argv`foo ${"tar biz"}`; // => ["foo", "tar biz"]
+
+// Interpolated arrays are spread into multiple tokens
+argv`foo ${["tar biz", "bliz"]}`; // => ["foo", "tar biz", "bliz"]
+
+// Mixing static tokens and interpolations
+argv`run --name ${"foo bar"} --tags ${["a", "b"]} -x`;
+// => ["run", "--name", "foo bar", "--tags", "a", "b", "-x"]
+```
+
+**`argv.escape`:**
+
+Quotes and escapes a value so it can be safely embedded in a raw
+command-line string built outside of `argv`'s own interpolation — e.g.
+writing a generated command to a script file or logging a reconstructed
+command line.
+
+```ts
+argv.escape("tar biz"); // => '"tar biz"'
+argv.escape('say "hi"'); // => '"say \\"hi\\""'
+```
 
 ## Pipe
 
