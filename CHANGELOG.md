@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.1](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.8.0...utils-js-v1.8.1) (2026-08-11)
+
+
+### Bug Fixes
+
+* **pick:** resolve pre-existing tsc type errors blocking the build ([#81](https://github.com/JonDotsoy/utils-js/issues/81)) ([2413f9a](https://github.com/JonDotsoy/utils-js/commit/2413f9a58cf398b537a7e8a464fe929854b1f0e7))
+
 ## [1.8.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.7.0...utils-js-v1.8.0) (2026-08-11)
 
 
