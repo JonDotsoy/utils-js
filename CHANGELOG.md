@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.7.0...utils-js-v1.8.0) (2026-08-11)
+
+
+### Features
+
+* **argv:** add argv tagged-template lib for shell-style tokenization ([#79](https://github.com/JonDotsoy/utils-js/issues/79)) ([6a24f9d](https://github.com/JonDotsoy/utils-js/commit/6a24f9df16827e3c348a06ace930dd7504f8ad87))
+
 ## [1.7.0](https://github.com/JonDotsoy/utils-js/compare/utils-js-v1.6.0...utils-js-v1.7.0) (2026-06-25)
 
 
