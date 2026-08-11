@@ -242,14 +242,15 @@ export class Pick<T> extends CommonPick<T> {
    * pick("yellow").enum(["red", "green", "blue"]); // undefined
    * ```
    */
-  enum<E extends string>(values: E[]) {
+  enum<E>(values: readonly E[]) {
     if (!Utils.isString(this.value)) return undefined;
-    if (!Utils.includes(values, this.value)) return undefined;
-    return new Pick<E>(this.value);
+    if (!Utils.includes(values as unknown as string[], this.value))
+      return undefined;
+    return new Pick<E>(this.value as E);
   }
 
   /** @deprecated Use enum() instead */
-  isEnumOf<E extends string>(values: E[]) {
+  isEnumOf<E>(values: readonly E[]) {
     return this.enum(values);
   }
 
@@ -422,10 +423,7 @@ export class Pick<T> extends CommonPick<T> {
   numeric():
     | undefined
     | NumericPick<T extends string | number ? T : string | number> {
-    const result = this.oneOf([
-      (v) => v.number(),
-      (v) => v.string()?.numeric(),
-    ]);
+    const result = this.number() ?? this.string()?.numeric();
     if (result === undefined) return undefined;
     return new NumericPick<T extends string | number ? T : string | number>(
       result.valueOf() as any,
